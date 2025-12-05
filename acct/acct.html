@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principles of Accounting | Joshua Dean</title>
+    <!-- Reusing the shared CSS for consistent retro theme -->
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        /* Specific styles for this page's content */
+        .equation-box {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 2rem;
+            border: 2px dashed var(--border);
+            margin: 2rem 0;
+            background-color: var(--bg);
+        }
+        .equation-highlight {
+            color: var(--accent);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- HEADER (Consistent Nav) -->
+        <header>
+            <div class="nav-flex">
+                <a href="index.html" class="logo">JD.</a>
+                <button class="menu-toggle" aria-label="Toggle Navigation">☰</button>
+                <nav>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="classes.html">Classes</a></li>
+                        <li><a href="projects.html">Projects</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                        <li><button id="theme-toggle">🌙</button></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <h1 class="retro-font">Principles of Accounting</h1>
+                <p>ACCT 201 • Fall Semester</p>
+                <div style="margin: 1.5rem 0; width: 50px; height: 2px; background: var(--accent); margin-inline: auto;"></div>
+                <p>An introduction to the language of business.</p>
+            </section>
+
+            <!-- Course Overview -->
+            <section style="margin-top: 3rem;">
+                <div class="card">
+                    <h2>Course Overview</h2>
+                    <p>This course introduces the fundamental concepts and standards underlying financial accounting systems. It focuses on the construction and interpretation of the four main financial statements: the Income Statement, Statement of Retained Earnings, Balance Sheet, and Statement of Cash Flows.</p>
+                    <br>
+                    <p>We explore how business transactions are recorded, classified, and summarized to provide stakeholders with relevant economic information.</p>
+                </div>
+            </section>
+
+            <!-- Key Concept: The Accounting Equation -->
+            <section>
+                <div class="equation-box">
+                    <span class="equation-highlight">Assets</span> = Liabilities + Equity
+                </div>
+            </section>
+
+            <!-- Core Topics List -->
+            <section class="card-grid">
+                <div class="card">
+                    <h3>The Accounting Cycle</h3>
+                    <p>Understanding the steps from analyzing transactions and journalizing to posting to the ledger and preparing trial balances.</p>
+                </div>
+                <div class="card">
+                    <h3>Financial Statements</h3>
+                    <p>Deep dive into preparing balance sheets and income statements compliant with GAAP (Generally Accepted Accounting Principles).</p>
+                </div>
+                <div class="card">
+                    <h3>Internal Controls</h3>
+                    <p>Methods and procedures used to safeguard assets, ensure accurate financial reporting, and encourage compliance with laws.</p>
+                </div>
+            </section>
+
+            <!-- Back Link -->
+            <div style="margin-top: 3rem; text-align: center;">
+                <a href="classes.html">&larr; Back to All Classes</a>
+            </div>
+        </main>
+
+        <!-- FOOTER -->
+        <footer>
+            <p>&copy; 2025 Joshua Dean.</p>
+        </footer>
+    </div>
+
+    <!-- Reusing the shared JS for theme toggle & mobile nav -->
+    <script src="./main.js"></script>
+</body>
+</html>
