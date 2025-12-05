@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact | Joshua Dean</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="nav-flex">
+                <a href="index.html" class="logo">JD.</a>
+                <button class="menu-toggle" aria-label="Toggle Navigation">☰</button>
+                <nav>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="classes.html">Classes</a></li>
+                        <li><a href="projects.html">Projects</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                        <li><button id="theme-toggle">🌙</button></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <h1 style="margin-top: 2rem;">Get In Touch</h1>
+            <p>Email: <a href="mailto:174070@donga.ac.kr">174070@donga.ac.kr</a></p>
+            <br>
+            <div class="card">
+                <form id="contact-form">
+                    <label for="email">Your Email</label>
+                    <input type="email" id="email" name="email" placeholder="example@gmail.com" required>
+                    
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" rows="5" placeholder="Write your message here..." required></textarea>
+                    
+                    <button type="submit">Send Message</button>
+                </form>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Joshua Dean.</p>
+        </footer>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

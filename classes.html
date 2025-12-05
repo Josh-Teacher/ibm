@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classes | Joshua Dean</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="nav-flex">
+                <a href="index.html" class="logo">JD.</a>
+                <button class="menu-toggle" aria-label="Toggle Navigation">☰</button>
+                <nav>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="classes.html">Classes</a></li>
+                        <li><a href="projects.html">Projects</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                        <li><button id="theme-toggle">🌙</button></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <h1 style="margin-top: 2rem;">My Coursework</h1>
+
+            <div class="accordion-item">
+                <button class="accordion-header" aria-expanded="false" aria-controls="acc-1">
+                    Data Analysis
+                    <span class="icon">+</span>
+                </button>
+                <div id="acc-1" class="accordion-content">
+                    <ul>
+                        <li><strong>Project A:</strong> <a href="https://docs.google.com" target="_blank" rel="noopener noreferrer">Analysis of Lorem Ipsum Trends</a></li>
+                        <li><strong>Assignment 2:</strong> Python script for data cleaning.</li>
+                        <li><strong>Activities:</strong> Participated in the Hackathon.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button class="accordion-header" aria-expanded="false" aria-controls="acc-2">
+                    Accounting
+                    <span class="icon">+</span>
+                </button>
+                <div id="acc-2" class="accordion-content">
+                    <ul>
+                        <li><strong>Spreadsheet:</strong> <a href="https://example.com" target="_blank" rel="noopener noreferrer">Q3 Balance Sheet Model</a></li>
+                        <li><strong>Essay:</strong> Ethics in Modern Finance (Lorem ipsum draft).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button class="accordion-header" aria-expanded="false" aria-controls="acc-3">
+                    Digital Literacy
+                    <span class="icon">+</span>
+                </button>
+                <div id="acc-3" class="accordion-content">
+                    <ul>
+                        <li><strong>Blog Post:</strong> <a href="#">Understanding Internet Safety</a></li>
+                        <li><strong>Presentation:</strong> Lorem ipsum dolor sit amet presentation slides.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Joshua Dean.</p>
+        </footer>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
