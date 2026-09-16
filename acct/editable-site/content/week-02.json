@@ -1,0 +1,365 @@
+{
+  "_comment": "Edit this lecture here. _comment fields are ignored; JSON does not accept // comments. Keep IDs stable for saved links.",
+  "id": "week-02",
+  "week": 2,
+  "title": "Accounts and transaction analysis",
+  "goal": "Identify the accounts affected by an event and explain its debit, credit, and equation effects.",
+  "sources": [
+    "openstax",
+    "kimmel"
+  ],
+  "slides": [
+    {
+      "id": "w02-01",
+      "title": "Which events change the accounting records?",
+      "type": "opener",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Event",
+            "Record now?"
+          ],
+          "rows": [
+            [
+              "Complete services on credit",
+              "Yes"
+            ],
+            [
+              "Plan to buy a van next month",
+              "No entry for a plan alone"
+            ],
+            [
+              "Receive an inventory supplier invoice",
+              "Yes"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Look for a measurable event affecting the business.",
+      "notes": "Fuller accounting can require measurement entries after market changes. Do not dismiss all valuation events as non-economic."
+    },
+    {
+      "id": "w02-02",
+      "title": "Assets equal liabilities plus shareholders’ equity",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "equation",
+          "text": "Assets = Liabilities + Shareholders’ equity"
+        },
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Assets",
+              "text": "Resources controlled by the business."
+            },
+            {
+              "heading": "Claims",
+              "text": "Liabilities are obligations; equity is the owners’ residual interest."
+            }
+          ]
+        }
+      ],
+      "takeaway": "Every recorded transaction preserves this equality."
+    },
+    {
+      "id": "w02-03",
+      "title": "A chart of accounts gives each item a consistent home",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Accounts",
+            "Type"
+          ],
+          "rows": [
+            [
+              "Cash · Accounts Receivable · Inventory",
+              "Assets"
+            ],
+            [
+              "Accounts Payable · Notes Payable",
+              "Liabilities"
+            ],
+            [
+              "Common Stock · Retained Earnings",
+              "Equity"
+            ],
+            [
+              "Service Revenue · Sales Revenue",
+              "Revenue"
+            ],
+            [
+              "Salaries Expense · Rent Expense",
+              "Expenses"
+            ],
+            [
+              "Dividends",
+              "Owner distributions"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Use consistent account names.",
+      "notes": "Revenues and expenses explain retained earnings through net income. Dividends are not expenses."
+    },
+    {
+      "id": "w02-04",
+      "title": "Two accounts can change within the same category",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Equipment",
+              "text": "Asset increases $2,000."
+            },
+            {
+              "heading": "Cash",
+              "text": "Asset decreases $2,000."
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "text": "Total assets: +$2,000 − $2,000 = $0 change"
+        }
+      ],
+      "lead": "Buy equipment for $2,000 cash.",
+      "takeaway": "At least two accounts change; two categories need not change."
+    },
+    {
+      "id": "w02-05",
+      "title": "Debit means left; credit means right",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "taccounts",
+          "accounts": [
+            {
+              "name": "An account",
+              "debits": [
+                "Left side"
+              ],
+              "credits": [
+                "Right side"
+              ],
+              "balance": "The account type determines increase or decrease."
+            }
+          ]
+        }
+      ],
+      "takeaway": "Debit and credit name sides, not good and bad.",
+      "notes": "Do not define debit as cash in or credit as cash out."
+    },
+    {
+      "id": "w02-06",
+      "title": "Account type determines the normal balance",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Account type",
+            "Increase",
+            "Normal balance"
+          ],
+          "rows": [
+            [
+              "Assets",
+              "Debit",
+              "Debit"
+            ],
+            [
+              "Expenses",
+              "Debit",
+              "Debit"
+            ],
+            [
+              "Dividends",
+              "Debit",
+              "Debit"
+            ],
+            [
+              "Liabilities",
+              "Credit",
+              "Credit"
+            ],
+            [
+              "Common Stock · Retained Earnings",
+              "Credit",
+              "Credit"
+            ],
+            [
+              "Revenue",
+              "Credit",
+              "Credit"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "A decrease goes on the opposite side.",
+      "notes": "Normal means usual, not guaranteed. A retained earnings deficit has a debit balance."
+    },
+    {
+      "id": "w02-07",
+      "title": "Worked example: owners invest cash for shares",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Account",
+            "Debit ($)",
+            "Credit ($)"
+          ],
+          "rows": [
+            [
+              "Cash",
+              "10,000",
+              ""
+            ],
+            [
+              "Common Stock",
+              "",
+              "10,000"
+            ]
+          ]
+        },
+        {
+          "type": "equation",
+          "text": "Assets +$10,000 = Equity +$10,000"
+        }
+      ],
+      "lead": "June 1 · T01 · Issue company shares for $10,000 cash.",
+      "takeaway": "Owner contributions are not revenue.",
+      "notes": "A company share issue differs from shareholders trading existing shares with each other.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w02-08",
+      "title": "Try it: equipment, a note, and current wages",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Event",
+            "Your task"
+          ],
+          "rows": [
+            [
+              "Buy a $14,000 van; pay $2,000 cash and sign a note",
+              "Name the accounts and directions"
+            ],
+            [
+              "Pay $1,000 current June salaries",
+              "Name the accounts and directions"
+            ]
+          ]
+        }
+      ],
+      "notes": "If salaries had already been recorded as payable, payment would reduce Salaries Payable. Here they are current wages not previously recorded.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "table",
+            "columns": [
+              "Account",
+              "Change"
+            ],
+            "rows": [
+              [
+                "Vehicle",
+                "Increase $14,000"
+              ],
+              [
+                "Cash — van payment",
+                "Decrease $2,000"
+              ],
+              [
+                "Notes Payable",
+                "Increase $12,000"
+              ],
+              [
+                "Salaries Expense",
+                "Increase $1,000"
+              ],
+              [
+                "Cash — wages",
+                "Decrease $1,000"
+              ]
+            ]
+          }
+        ]
+      },
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w02-09",
+      "title": "Check accounts, direction, amounts, and balance",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "sequence",
+          "items": [
+            {
+              "heading": "Identify",
+              "text": "Name each account."
+            },
+            {
+              "heading": "Classify",
+              "text": "Find its type."
+            },
+            {
+              "heading": "Analyze",
+              "text": "Choose increase or decrease."
+            },
+            {
+              "heading": "Record",
+              "text": "Choose debit or credit; check equality."
+            }
+          ]
+        }
+      ],
+      "lead": "Exit check: does collecting a receivable create revenue again?",
+      "answer": {
+        "blocks": [
+          {
+            "type": "table",
+            "columns": [
+              "Account",
+              "Debit ($)",
+              "Credit ($)"
+            ],
+            "rows": [
+              [
+                "Cash",
+                "1,500",
+                ""
+              ],
+              [
+                "Accounts Receivable",
+                "",
+                "1,500"
+              ]
+            ]
+          },
+          {
+            "type": "text",
+            "text": "No new revenue: one asset replaces another."
+          }
+        ]
+      }
+    }
+  ],
+  "$schema": "../content-schema.json"
+}

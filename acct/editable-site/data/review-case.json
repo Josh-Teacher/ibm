@@ -1,0 +1,49 @@
+{
+  "company": "Harbor Services Co. — fictional",
+  "currency": "USD",
+  "period": "June",
+  "opening_balances": {
+    "Cash": 4000,
+    "Equipment": 6000,
+    "Notes Payable": -3000,
+    "Common Stock": -5000,
+    "Retained Earnings": -2000
+  },
+  "transactions": [
+    {
+      "id": "R1",
+      "description": "Provide $2,000 services on account."
+    },
+    {
+      "id": "R2",
+      "description": "Pay $300 for current June utilities."
+    },
+    {
+      "id": "R3",
+      "description": "Repay $500 note principal. No interest is due in this mini-case."
+    },
+    {
+      "id": "R4",
+      "description": "Collect $1,200 toward the service receivable."
+    },
+    {
+      "id": "R5",
+      "description": "Declare and pay a $200 dividend."
+    },
+    {
+      "id": "R6",
+      "description": "Buy $800 inventory for cash. It all remains unsold."
+    }
+  ],
+  "checks": {
+    "net_income": 1700,
+    "retained_earnings": 3500,
+    "cash": 3400,
+    "assets": 11000,
+    "liabilities": 2500,
+    "equity": 8500,
+    "operating_cash": 100,
+    "investing_cash": 0,
+    "financing_cash": -700
+  }
+}

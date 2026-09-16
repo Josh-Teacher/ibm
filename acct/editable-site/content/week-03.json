@@ -1,0 +1,311 @@
+{
+  "_comment": "Edit this lecture here. _comment fields are ignored; JSON does not accept // comments. Keep IDs stable for saved links.",
+  "id": "week-03",
+  "week": 3,
+  "title": "Profit cash and equity",
+  "goal": "Distinguish earning revenue, receiving cash, incurring an expense, and distributing profit.",
+  "sources": [
+    "openstax",
+    "kimmel"
+  ],
+  "slides": [
+    {
+      "id": "w03-01",
+      "title": "Can a profitable business run short of cash?",
+      "type": "opener",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Service earned",
+              "text": "$2,500 of services are completed."
+            },
+            {
+              "heading": "Cash collected",
+              "text": "$0 has arrived from the customer."
+            }
+          ]
+        }
+      ],
+      "takeaway": "Revenue and cash can arrive at different times.",
+      "notes": "This is one transaction, not the full company profit.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w03-02",
+      "title": "Revenue is recognized when earned",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Service event",
+            "Revenue now?"
+          ],
+          "rows": [
+            [
+              "Complete service and receive cash",
+              "Yes"
+            ],
+            [
+              "Complete service and invoice customer",
+              "Yes"
+            ],
+            [
+              "Receive advance for next month’s service",
+              "Not yet"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "For these simple services, completion establishes earning.",
+      "notes": "This is an introductory simplification, not the full model for complex contracts."
+    },
+    {
+      "id": "w03-03",
+      "title": "Expenses are recognized when incurred",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "June utilities used",
+              "text": "An unpaid $200 invoice creates Utilities Expense and Accounts Payable."
+            },
+            {
+              "heading": "Future insurance paid",
+              "text": "A $600 payment for July coverage creates Prepaid Insurance."
+            }
+          ]
+        }
+      ],
+      "takeaway": "A payment is not automatically this period’s expense.",
+      "notes": "The utilities invoice is an ordinary source transaction, not a required period-end adjusting entry.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w03-04",
+      "title": "A credit sale and its collection are separate events",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Event",
+            "Debit",
+            "Credit"
+          ],
+          "rows": [
+            [
+              "Earn services $2,500",
+              "Accounts Receivable",
+              "Service Revenue"
+            ],
+            [
+              "Collect $1,500",
+              "Cash",
+              "Accounts Receivable"
+            ]
+          ]
+        },
+        {
+          "type": "equation",
+          "text": "Receivable remaining = $2,500 − $1,500 = $1,000"
+        }
+      ],
+      "takeaway": "Do not record the collection as revenue again.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w03-05",
+      "title": "Cash received early can create a liability",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Account",
+            "Debit ($)",
+            "Credit ($)"
+          ],
+          "rows": [
+            [
+              "Cash",
+              "900",
+              ""
+            ],
+            [
+              "Unearned Revenue",
+              "",
+              "900"
+            ]
+          ]
+        }
+      ],
+      "lead": "Receive $900 for services to be performed in July.",
+      "takeaway": "The business owes a service, so it has a liability.",
+      "notes": "The service is still unperformed at June 30. Do not invent an extra June entry.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w03-06",
+      "title": "Contributions and dividends are separate from profit",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Event",
+            "Cash effect",
+            "Profit effect"
+          ],
+          "rows": [
+            [
+              "Issue shares for $10,000",
+              "Increase $10,000",
+              "None"
+            ],
+            [
+              "Borrow $12,000 cash",
+              "Increase $12,000",
+              "None"
+            ],
+            [
+              "Declare and pay $400 dividend",
+              "Decrease $400",
+              "None"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Contributions and distributions are separate from profit.",
+      "notes": "The borrowing row is a separate cash example, not the case’s vendor-financed van. Firms raise funds for operations and investment as well as shortages."
+    },
+    {
+      "id": "w03-07",
+      "title": "The retained earnings balance connects past and current results",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "equation",
+          "text": "Ending retained earnings = Beginning retained earnings + Net income − Dividends"
+        },
+        {
+          "type": "text",
+          "text": "Retained earnings is accumulated profit after distributions, not a separate reserve of cash."
+        }
+      ],
+      "takeaway": "Do not add profit again after using ending retained earnings.",
+      "notes": "A net loss reduces retained earnings; a negative balance is an accumulated deficit."
+    },
+    {
+      "id": "w03-08",
+      "title": "Operating, investing, and financing explain business activity",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Operating",
+              "text": "Provide services, sell inventory, and pay operating costs."
+            },
+            {
+              "heading": "Investing",
+              "text": "Acquire or sell long-term productive assets."
+            },
+            {
+              "heading": "Financing",
+              "text": "Raise capital or borrow; pay dividends or repay principal."
+            }
+          ]
+        }
+      ],
+      "takeaway": "Week 11 applies these categories to cash movements.",
+      "notes": "Inventory payments are operating; not every asset purchase is investing."
+    },
+    {
+      "id": "w03-09",
+      "title": "Try it: identify the effects on profit and cash",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Event",
+            "Profit?",
+            "Cash?"
+          ],
+          "rows": [
+            [
+              "Earn $600 services on account",
+              "?",
+              "?"
+            ],
+            [
+              "Collect that $600 receivable",
+              "?",
+              "?"
+            ],
+            [
+              "Receive $300 customer advance",
+              "?",
+              "?"
+            ],
+            [
+              "Pay $200 current rent",
+              "?",
+              "?"
+            ]
+          ]
+        }
+      ],
+      "notes": "Separate practice set. Ask for the other account on each cash movement.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "table",
+            "columns": [
+              "Event",
+              "Profit effect ($)",
+              "Cash effect ($)"
+            ],
+            "rows": [
+              [
+                "Credit service",
+                "+600",
+                "0"
+              ],
+              [
+                "Collection",
+                "0",
+                "+600"
+              ],
+              [
+                "Advance",
+                "0",
+                "+300"
+              ],
+              [
+                "Current rent",
+                "−200",
+                "−200"
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "$schema": "../content-schema.json"
+}

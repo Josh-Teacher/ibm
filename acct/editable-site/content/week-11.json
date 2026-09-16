@@ -1,0 +1,420 @@
+{
+  "_comment": "Edit this lecture here. _comment fields are ignored; JSON does not accept // comments. Keep IDs stable for saved links.",
+  "id": "week-11",
+  "week": 11,
+  "title": "Explain the change in cash",
+  "goal": "Classify actual cash movements and reconcile a direct-method cash flow statement to the balance sheet.",
+  "sources": [
+    "openstax",
+    "kimmel"
+  ],
+  "slides": [
+    {
+      "id": "w11-01",
+      "title": "Why did cash change when profit was different?",
+      "type": "opener",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "June net income",
+              "text": "$3,440"
+            },
+            {
+              "heading": "June cash increase",
+              "text": "$8,840"
+            }
+          ]
+        }
+      ],
+      "takeaway": "Profit and cash answer different questions.",
+      "notes": "Summit Trail begins with no cash. Prepare Cash_Flow_Statement from actual cash movements.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w11-02",
+      "title": "Identify cash movements before choosing a category",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Event",
+            "Cash flow now?"
+          ],
+          "rows": [
+            [
+              "Services provided on account",
+              "No"
+            ],
+            [
+              "Collection of receivable",
+              "Yes"
+            ],
+            [
+              "Inventory bought on account",
+              "No"
+            ],
+            [
+              "Payment to inventory supplier",
+              "Yes"
+            ],
+            [
+              "Van financed with a note",
+              "Only the cash down payment"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Start with Cash, then read the event’s purpose.",
+      "notes": "The case has no cash equivalents or exchange-rate effects. In fuller reporting, transfers within cash and cash equivalents are excluded.",
+      "sources": [
+        "case",
+        "ias7"
+      ]
+    },
+    {
+      "id": "w11-03",
+      "title": "Operating cash flows come from day-to-day business",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Operating cash activity",
+            "Amount ($)"
+          ],
+          "rows": [
+            [
+              "Customer receipts, including advance",
+              "7,200"
+            ],
+            [
+              "Inventory suppliers",
+              "(3,000)"
+            ],
+            [
+              "Salaries",
+              "(1,000)"
+            ],
+            [
+              "Rent",
+              "(800)"
+            ],
+            [
+              "Interest",
+              "(60)"
+            ],
+            [
+              "Insurance",
+              "(600)"
+            ],
+            {
+              "cells": [
+                "Net operating cash",
+                "1,740"
+              ],
+              "kind": "total"
+            }
+          ]
+        }
+      ],
+      "takeaway": "Cash receipts and payments differ from revenue and expenses.",
+      "notes": "Receipts: $1,800 + $3,000 + $1,500 + $900 = $7,200. Inventory payments: $2,400 + $600. Utilities $200 is unpaid. Course convention: interest paid is operating, dividends paid financing, following US GAAP. Other frameworks can differ.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w11-04",
+      "title": "Investing cash flows include long-term asset purchases",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Account",
+            "Debit ($)",
+            "Credit ($)"
+          ],
+          "rows": [
+            [
+              "Vehicle",
+              "14,000",
+              ""
+            ],
+            [
+              "Cash",
+              "",
+              "2,000"
+            ],
+            [
+              "Notes Payable",
+              "",
+              "12,000"
+            ]
+          ]
+        },
+        {
+          "type": "equation",
+          "text": "Investing cash outflow = $2,000"
+        }
+      ],
+      "takeaway": "Only the cash paid enters the cash flow total.",
+      "notes": "Inventory payments are operating, even though Inventory is an asset.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w11-05",
+      "title": "Financing cash flows include capital and loan principal",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Financing cash activity",
+            "Amount ($)"
+          ],
+          "rows": [
+            [
+              "Share issue",
+              "10,000"
+            ],
+            [
+              "Note principal repayment",
+              "(500)"
+            ],
+            [
+              "Dividends paid",
+              "(400)"
+            ],
+            {
+              "cells": [
+                "Net financing cash",
+                "9,100"
+              ],
+              "kind": "total"
+            }
+          ]
+        }
+      ],
+      "takeaway": "Split the $560 loan payment: $500 financing and $60 operating.",
+      "notes": "There was no $12,000 cash loan receipt in the van transaction.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w11-06",
+      "title": "Separate cash and noncash parts of the van purchase",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Cash flow statement",
+              "text": "Investing cash outflow: $2,000."
+            },
+            {
+              "heading": "Separate noncash disclosure",
+              "text": "Vehicle acquired by issuing a note: $12,000."
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "text": "Vehicle cost = $2,000 cash + $12,000 noncash"
+        }
+      ],
+      "takeaway": "Do not invent cash borrowing and cash payment for the note portion.",
+      "notes": "Noncash investing and financing transactions are excluded from cash totals and disclosed separately.",
+      "sources": [
+        "case",
+        "ias7"
+      ]
+    },
+    {
+      "id": "w11-07",
+      "title": "Build the direct-method cash flow statement",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "splitTables",
+          "tables": [
+            {
+              "type": "table",
+              "columns": [
+                "Operating activities ($)",
+                "Amount"
+              ],
+              "rows": [
+                [
+                  "Customer receipts, including advance",
+                  "7,200"
+                ],
+                [
+                  "Inventory suppliers",
+                  "(3,000)"
+                ],
+                [
+                  "Salaries",
+                  "(1,000)"
+                ],
+                [
+                  "Rent",
+                  "(800)"
+                ],
+                [
+                  "Interest",
+                  "(60)"
+                ],
+                [
+                  "Insurance",
+                  "(600)"
+                ],
+                {
+                  "cells": [
+                    "Net operating cash",
+                    "1,740"
+                  ],
+                  "kind": "total"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "columns": [
+                "Investing and financing ($)",
+                "Amount"
+              ],
+              "rows": [
+                [
+                  "Vehicle cash payment",
+                  "(2,000)"
+                ],
+                {
+                  "cells": [
+                    "Net investing cash",
+                    "(2,000)"
+                  ],
+                  "kind": "total"
+                },
+                [
+                  "Share issue",
+                  "10,000"
+                ],
+                [
+                  "Note principal repayment",
+                  "(500)"
+                ],
+                [
+                  "Dividends",
+                  "(400)"
+                ],
+                {
+                  "cells": [
+                    "Net financing cash",
+                    "9,100"
+                  ],
+                  "kind": "total"
+                },
+                {
+                  "cells": [
+                    "Net cash increase",
+                    "8,840"
+                  ],
+                  "kind": "total"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "lead": "Summit Trail Co. · For the month ended June 30 · USD",
+      "takeaway": "Supplemental disclosure: $12,000 note-financed vehicle acquisition.",
+      "notes": "Direct method shows operating receipts and payments explicitly. The indirect method begins with profit and reconciles to operating cash; it is context only. The next slide completes beginning-to-ending cash reconciliation.",
+      "sources": [
+        "case",
+        "ias7"
+      ]
+    },
+    {
+      "id": "w11-08",
+      "title": "Reconcile beginning cash to ending cash",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "equation",
+          "text": "$1,740 − $2,000 + $9,100 = $8,840"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Cash reconciliation",
+            "Amount ($)"
+          ],
+          "rows": [
+            [
+              "Beginning cash",
+              "0"
+            ],
+            [
+              "Net increase",
+              "8,840"
+            ],
+            {
+              "cells": [
+                "Ending cash",
+                "8,840"
+              ],
+              "kind": "total"
+            }
+          ]
+        }
+      ],
+      "takeaway": "Ending cash matches the ledger and balance sheet.",
+      "notes": "Investigate omitted or duplicated cash lines, wrong signs, or noncash amounts in cash totals. Do not plug an unexplained difference.",
+      "sources": [
+        "case",
+        "ias7"
+      ]
+    },
+    {
+      "id": "w11-09",
+      "title": "Try it: explain what drove the change in cash",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "Does the $8,840 cash increase, by itself, establish strong operating performance?"
+        }
+      ],
+      "takeaway": "Explain the cash sources and the obligations that remain.",
+      "notes": "Borrowing or asset sales can raise cash; investment can reduce cash while supporting growth. The sign of net cash alone cannot establish health.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "bullets",
+            "items": [
+              "Operations generated $1,740.",
+              "Net financing supplied $9,100, mainly from the share issue.",
+              "The van down payment used $2,000.",
+              "The note still has $11,500 principal outstanding."
+            ]
+          }
+        ]
+      },
+      "sources": [
+        "case",
+        "secguide"
+      ]
+    }
+  ],
+  "$schema": "../content-schema.json"
+}

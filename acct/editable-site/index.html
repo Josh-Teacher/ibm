@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#10283d">
+  <meta name="description" content="Fifteen practical accounting lectures with worked examples, answer reveals, and financial statement analysis.">
+  <title>Accounting · 15 lectures</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%2310283d'/%3E%3Cpath d='M8 11h16M8 21h16' stroke='%23e7c64b' stroke-width='4'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#controls">Skip to presentation controls</a>
+  <div class="presentation" id="presentation">
+    <main id="stage" class="stage" aria-label="Lecture presentation">
+      <div class="slide-frame"><article class="slide" id="slide" tabindex="-1"><header><p class="eyebrow">Accounting · 15 lectures</p><h1>What can the accounts tell a business owner?</h1></header><div class="slide-body"><p>How much did we earn? Can we pay our bills? What do we own and owe?</p></div></article></div>
+    </main>
+    <nav class="controls" id="controls" tabindex="-1" aria-label="Presentation controls">
+      <div class="progress-track" aria-hidden="true"><span id="progress"></span></div>
+      <div class="controls-group"><button id="lectures-button" aria-haspopup="dialog" title="Choose a lecture (L)">Lectures</button><button id="slides-button" aria-haspopup="dialog" title="Choose a slide (I)">Slides</button></div>
+      <div class="controls-group navigation"><button id="previous-button" aria-label="Previous slide" title="Previous slide (←)">←</button><output id="slide-counter" aria-label="Current slide">01 / 09</output><button id="next-button" class="primary" aria-label="Next slide" title="Next slide (→)">→</button></div>
+      <div class="controls-group view-controls"><button id="smaller-button" aria-label="Decrease slide text size" title="Decrease text size (−)">A−</button><output id="size-value" aria-label="Text size">100%</output><button id="larger-button" aria-label="Increase slide text size" title="Increase text size (+)">A+</button><button id="fit-button" title="Restore 100% text size">Fit</button><button id="fullscreen-button" aria-label="Enter full screen" title="Full screen (F)">⛶</button><button id="notes-button" aria-haspopup="dialog" title="Notes and sources (N)">Notes</button></div>
+    </nav>
+  </div>
+  <dialog id="lecture-dialog" aria-labelledby="lecture-title"><div class="dialog-header"><h2 id="lecture-title">Choose a lecture</h2><button data-close aria-label="Close lecture list">×</button></div><ol id="lecture-list" class="index-list"></ol></dialog>
+  <dialog id="slide-dialog" aria-labelledby="slide-list-title"><div class="dialog-header"><h2 id="slide-list-title">Choose a slide</h2><button data-close aria-label="Close slide list">×</button></div><ol id="slide-list" class="index-list"></ol></dialog>
+  <dialog id="notes-dialog" aria-labelledby="notes-title"><div class="dialog-header"><h2 id="notes-title">Instructor notes & sources</h2><button data-close aria-label="Close notes">×</button></div><div id="notes-content"></div><div class="notes-actions"><button id="print-button">Print lecture with answers</button><a id="case-handout" href="case-handout.html" target="_blank" rel="noopener">Teaching case handout</a><a id="download-lecture" download>Download this lecture</a></div><p class="keyboard-help">← → navigate · R reveal · L lectures · I slides · N notes · F full screen · + − text size</p></dialog>
+  <div class="sr-only" id="announcer" aria-live="polite" aria-atomic="true"></div><div id="print-content"></div>
+  <noscript><p class="noscript">Enable JavaScript to navigate these presentations.</p></noscript>
+  <!-- Teaching text is stored separately in course.json and content/week-XX.json. -->
+  <script src="app.js"></script>
+</body>
+</html>

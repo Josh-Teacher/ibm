@@ -1,0 +1,356 @@
+{
+  "company": "Summit Trail Co.",
+  "currency": "USD",
+  "period": "June",
+  "assumptions": [
+    "New corporation; all beginning balances are zero.",
+    "Perpetual inventory with supplied costs of goods sold.",
+    "The note requires $500 monthly principal payments. At June 30, $6,000 is due in the next 12 months.",
+    "Prepaid insurance and customer services begin in July.",
+    "No adjusting or closing entries; depreciation and other period-end estimates are outside this simplified exercise.",
+    "Interest paid is operating; dividends and loan principal paid are financing."
+  ],
+  "transactions": [
+    {
+      "id": "T01",
+      "date": "June 1",
+      "description": "Issue common shares for $10,000 cash.",
+      "entries": [
+        {
+          "account": "Cash",
+          "debit": 10000,
+          "credit": 0
+        },
+        {
+          "account": "Common Stock",
+          "debit": 0,
+          "credit": 10000
+        }
+      ],
+      "cashflow": "financing"
+    },
+    {
+      "id": "T02",
+      "date": "June 2",
+      "description": "Buy a $14,000 van: pay $2,000 cash and sign a $12,000 note. Monthly principal repayments are $500.",
+      "entries": [
+        {
+          "account": "Vehicle",
+          "debit": 14000,
+          "credit": 0
+        },
+        {
+          "account": "Cash",
+          "debit": 0,
+          "credit": 2000
+        },
+        {
+          "account": "Notes Payable",
+          "debit": 0,
+          "credit": 12000
+        }
+      ],
+      "cashflow": "investing"
+    },
+    {
+      "id": "T03",
+      "date": "June 3",
+      "description": "Buy inventory for $2,400 cash.",
+      "entries": [
+        {
+          "account": "Inventory",
+          "debit": 2400,
+          "credit": 0
+        },
+        {
+          "account": "Cash",
+          "debit": 0,
+          "credit": 2400
+        }
+      ],
+      "cashflow": "operating"
+    },
+    {
+      "id": "T04",
+      "date": "June 5",
+      "description": "Buy inventory on account for $1,600.",
+      "entries": [
+        {
+          "account": "Inventory",
+          "debit": 1600,
+          "credit": 0
+        },
+        {
+          "account": "Accounts Payable",
+          "debit": 0,
+          "credit": 1600
+        }
+      ],
+      "cashflow": null
+    },
+    {
+      "id": "T05",
+      "date": "June 7",
+      "description": "Provide services for $1,800 cash.",
+      "entries": [
+        {
+          "account": "Cash",
+          "debit": 1800,
+          "credit": 0
+        },
+        {
+          "account": "Service Revenue",
+          "debit": 0,
+          "credit": 1800
+        }
+      ],
+      "cashflow": "operating"
+    },
+    {
+      "id": "T06",
+      "date": "June 10",
+      "description": "Provide services on account for $2,500.",
+      "entries": [
+        {
+          "account": "Accounts Receivable",
+          "debit": 2500,
+          "credit": 0
+        },
+        {
+          "account": "Service Revenue",
+          "debit": 0,
+          "credit": 2500
+        }
+      ],
+      "cashflow": null
+    },
+    {
+      "id": "T07",
+      "date": "June 12",
+      "description": "Sell merchandise for $3,000 cash. Its cost is $1,800.",
+      "entries": [
+        {
+          "account": "Cash",
+          "debit": 3000,
+          "credit": 0
+        },
+        {
+          "account": "Sales Revenue",
+          "debit": 0,
+          "credit": 3000
+        },
+        {
+          "account": "Cost of Goods Sold",
+          "debit": 1800,
+          "credit": 0
+        },
+        {
+          "account": "Inventory",
+          "debit": 0,
+          "credit": 1800
+        }
+      ],
+      "cashflow": "operating"
+    },
+    {
+      "id": "T08",
+      "date": "June 15",
+      "description": "Pay current June salaries of $1,000.",
+      "entries": [
+        {
+          "account": "Salaries Expense",
+          "debit": 1000,
+          "credit": 0
+        },
+        {
+          "account": "Cash",
+          "debit": 0,
+          "credit": 1000
+        }
+      ],
+      "cashflow": "operating"
+    },
+    {
+      "id": "T09",
+      "date": "June 18",
+      "description": "Collect $1,500 of the June 10 receivable.",
+      "entries": [
+        {
+          "account": "Cash",
+          "debit": 1500,
+          "credit": 0
+        },
+        {
+          "account": "Accounts Receivable",
+          "debit": 0,
+          "credit": 1500
+        }
+      ],
+      "cashflow": "operating"
+    },
+    {
+      "id": "T10",
+      "date": "June 20",
+      "description": "Pay the inventory supplier $600.",
+      "entries": [
+        {
+          "account": "Accounts Payable",
+          "debit": 600,
+          "credit": 0
+        },
+        {
+          "account": "Cash",
+          "debit": 0,
+          "credit": 600
+        }
+      ],
+      "cashflow": "operating"
+    },
+    {
+      "id": "T11",
+      "date": "June 22",
+      "description": "Pay $800 rent for June.",
+      "entries": [
+        {
+          "account": "Rent Expense",
+          "debit": 800,
+          "credit": 0
+        },
+        {
+          "account": "Cash",
+          "debit": 0,
+          "credit": 800
+        }
+      ],
+      "cashflow": "operating"
+    },
+    {
+      "id": "T12",
+      "date": "June 25",
+      "description": "Pay $500 note principal and $60 interest in one cash payment.",
+      "entries": [
+        {
+          "account": "Notes Payable",
+          "debit": 500,
+          "credit": 0
+        },
+        {
+          "account": "Interest Expense",
+          "debit": 60,
+          "credit": 0
+        },
+        {
+          "account": "Cash",
+          "debit": 0,
+          "credit": 560
+        }
+      ],
+      "cashflow": "split"
+    },
+    {
+      "id": "T13",
+      "date": "June 28",
+      "description": "Declare and pay a $400 dividend.",
+      "entries": [
+        {
+          "account": "Dividends",
+          "debit": 400,
+          "credit": 0
+        },
+        {
+          "account": "Cash",
+          "debit": 0,
+          "credit": 400
+        }
+      ],
+      "cashflow": "financing"
+    },
+    {
+      "id": "T14",
+      "date": "June 29",
+      "description": "Receive a $900 customer advance for July services.",
+      "entries": [
+        {
+          "account": "Cash",
+          "debit": 900,
+          "credit": 0
+        },
+        {
+          "account": "Unearned Revenue",
+          "debit": 0,
+          "credit": 900
+        }
+      ],
+      "cashflow": "operating"
+    },
+    {
+      "id": "T15",
+      "date": "June 30",
+      "description": "Receive an unpaid $200 invoice for June utilities.",
+      "entries": [
+        {
+          "account": "Utilities Expense",
+          "debit": 200,
+          "credit": 0
+        },
+        {
+          "account": "Accounts Payable",
+          "debit": 0,
+          "credit": 200
+        }
+      ],
+      "cashflow": null
+    },
+    {
+      "id": "T16",
+      "date": "June 30",
+      "description": "Pay $600 for insurance coverage beginning July 1.",
+      "entries": [
+        {
+          "account": "Prepaid Insurance",
+          "debit": 600,
+          "credit": 0
+        },
+        {
+          "account": "Cash",
+          "debit": 0,
+          "credit": 600
+        }
+      ],
+      "cashflow": "operating"
+    }
+  ],
+  "ending_balances": {
+    "Cash": 8840,
+    "Common Stock": -10000,
+    "Vehicle": 14000,
+    "Notes Payable": -11500,
+    "Inventory": 2200,
+    "Accounts Payable": -1200,
+    "Service Revenue": -4300,
+    "Accounts Receivable": 1000,
+    "Sales Revenue": -3000,
+    "Cost of Goods Sold": 1800,
+    "Salaries Expense": 1000,
+    "Rent Expense": 800,
+    "Interest Expense": 60,
+    "Dividends": 400,
+    "Unearned Revenue": -900,
+    "Utilities Expense": 200,
+    "Prepaid Insurance": 600
+  },
+  "check_totals": {
+    "trial_balance_each_side": 30900,
+    "assets": 26640,
+    "liabilities": 13600,
+    "equity": 13040,
+    "revenue": 7300,
+    "expenses": 3860,
+    "net_income": 3440,
+    "ending_retained_earnings": 3040,
+    "operating_cash": 1740,
+    "investing_cash": -2000,
+    "financing_cash": 9100,
+    "ending_cash": 8840
+  }
+}

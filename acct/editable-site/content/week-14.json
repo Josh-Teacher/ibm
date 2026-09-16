@@ -1,0 +1,290 @@
+{
+  "_comment": "Edit this lecture here. _comment fields are ignored; JSON does not accept // comments. Keep IDs stable for saved links.",
+  "id": "week-14",
+  "week": 14,
+  "title": "Read reports and evaluate claims",
+  "goal": "Distinguish financial evidence, interpretation, and an ethical claim when explaining a business’s position.",
+  "sources": [
+    "openstax",
+    "kimmel"
+  ],
+  "slides": [
+    {
+      "id": "w14-01",
+      "title": "A useful report connects evidence to a decision",
+      "type": "opener",
+      "blocks": [
+        {
+          "type": "sequence",
+          "items": [
+            {
+              "heading": "Evidence",
+              "text": "State a figure and its source."
+            },
+            {
+              "heading": "Interpretation",
+              "text": "Explain what it suggests."
+            },
+            {
+              "heading": "Decision",
+              "text": "Recommend an action with a limitation."
+            }
+          ]
+        }
+      ],
+      "takeaway": "Make the reasoning traceable to the accounts.",
+      "notes": "Financial performance and ethical conduct are related, but one does not establish the other."
+    },
+    {
+      "id": "w14-02",
+      "title": "Locate statements, notes, and management commentary",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Apple 2025 Form 10-K",
+            "Where to look"
+          ],
+          "rows": [
+            [
+              "Management discussion",
+              "Part II, Item 7"
+            ],
+            [
+              "Income / balance sheet",
+              "Printed pages 29 / 31"
+            ],
+            [
+              "Shareholders’ equity / cash flows",
+              "Printed pages 32 / 33"
+            ],
+            [
+              "Notes to statements",
+              "Begin on printed page 34"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Open the filing link in Notes.",
+      "notes": "Fixed-year reading: fiscal year ended September 27, 2025. Published reports may use a broader equity statement than the course retained earnings statement. Ask students to locate the unit label.",
+      "sources": [
+        "apple"
+      ]
+    },
+    {
+      "id": "w14-03",
+      "title": "Check the company, reporting period, units, and framework",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Before using a figure",
+            "Question"
+          ],
+          "rows": [
+            [
+              "Entity",
+              "One company, group, or segment?"
+            ],
+            [
+              "Period",
+              "Which fiscal year or reporting date?"
+            ],
+            [
+              "Units",
+              "Dollars, thousands, millions, or percent?"
+            ],
+            [
+              "Framework",
+              "Which standards and policies apply?"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Copy the context along with the number.",
+      "notes": "Apple’s operations statement uses millions except separately specified share and per-share measures. Do not compare a consolidated annual figure to a monthly teaching case without qualification.",
+      "sources": [
+        "apple",
+        "secguide"
+      ]
+    },
+    {
+      "id": "w14-04",
+      "title": "Why standards matter in the US and Korea",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Body or framework",
+            "Introductory role"
+          ],
+          "rows": [
+            [
+              "FASB · US GAAP",
+              "US private-sector accounting standards"
+            ],
+            [
+              "SEC",
+              "US public-company reporting oversight"
+            ],
+            [
+              "IASB · IFRS",
+              "International accounting standard setting"
+            ],
+            [
+              "K-IFRS",
+              "IFRS-based standards endorsed for Korea"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Check the entity’s framework; country alone is not enough.",
+      "notes": [
+        "US domestic issuers generally use US GAAP. Foreign private issuers using IFRS as issued by the IASB can omit US GAAP reconciliation, while other filing requirements remain. This is not a blanket exemption for all foreign companies.",
+        "Korean requirements have defined scope, including listed companies with the KONEX exception and specified other entities. Use the IFRS jurisdiction profile for detailed scope and endorsement context.",
+        "Optional dated discussion: the FSC’s February 2024 Corporate Value-up announcement discusses several possible drivers of the Korea discount. Avoid claiming one cause from a broad country comparison.",
+        "Instructor update: IFRS 18 applies to annual periods beginning on or after January 1, 2027; earlier application is permitted. Recheck reporting and cash-flow classification requirements when updating real-company examples."
+      ],
+      "sources": [
+        "foreign",
+        "korea",
+        "valueup",
+        "ifrs18"
+      ]
+    },
+    {
+      "id": "w14-05",
+      "title": "Build a claim from a figure and its source",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Apple total net sales",
+            "USD millions"
+          ],
+          "rows": [
+            [
+              "Fiscal 2024",
+              "391,035"
+            ],
+            [
+              "Fiscal 2025",
+              "416,161"
+            ]
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Calculated growth from these figures: about 6.4%."
+        }
+      ],
+      "takeaway": "This establishes sales growth, not its cause.",
+      "notes": "Source: 2025 Form 10-K, operations statement, printed page 29. Calculation: (416,161 − 391,035) / 391,035 × 100. The calculation and interpretation are ours.",
+      "sources": [
+        "apple"
+      ]
+    },
+    {
+      "id": "w14-06",
+      "title": "Separate warning signs from proof of wrongdoing",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Observation",
+              "text": "Two supplier payments have the same amount and similar references."
+            },
+            {
+              "heading": "Unproven claim",
+              "text": "An employee stole the money."
+            }
+          ]
+        }
+      ],
+      "takeaway": "A suspicious pattern is a reason to investigate, not a conclusion.",
+      "notes": "Fictional scenario, unrelated to Apple. Preserve original records. Distinguish duplicate data rows from duplicate bank payments."
+    },
+    {
+      "id": "w14-07",
+      "title": "Compare plausible explanations for an unusual pattern",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Possible explanation",
+            "Evidence to check"
+          ],
+          "rows": [
+            [
+              "Two valid invoices",
+              "Invoice numbers and goods received"
+            ],
+            [
+              "Duplicate import",
+              "Source IDs and import history"
+            ],
+            [
+              "Accidental duplicate payment",
+              "Bank and supplier records"
+            ],
+            [
+              "Unauthorized payment",
+              "Approvals and recipient details"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Test alternatives against independent evidence.",
+      "notes": "Use similar reasoning for welfare, community spending, tax, and environmental claims. An expense label does not prove an outcome or legality. Low tax expense alone does not establish misconduct. This scenario is separate from assessed datasets."
+    },
+    {
+      "id": "w14-08",
+      "title": "Try it: write a qualified recommendation",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "A supplier-payment extract has two $2,400 entries with similar references. Invoices and bank confirmations are not yet available."
+        }
+      ],
+      "lead": "Write a supported finding and a proportionate next step.",
+      "takeaway": "State what is known and what remains uncertain.",
+      "notes": "Accept equivalent cautious wording. Ask what new evidence would change the conclusion.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "text",
+            "text": "The extract contains a possible duplicate payment that needs verification. Reconcile both entries to invoices, approvals, and bank records before concluding that cash was lost or misconduct occurred."
+          }
+        ]
+      }
+    },
+    {
+      "id": "w14-09",
+      "title": "Check the report against the project outputs",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "bullets",
+          "items": [
+            "Figures agree with the four statement tabs.",
+            "Ratios show inputs, formulas, periods, and units.",
+            "Claims cite a source or transaction.",
+            "Alternatives and missing evidence are acknowledged.",
+            "Recommendations follow from the findings."
+          ]
+        }
+      ],
+      "takeaway": "A clear report lets another reader verify the reasoning.",
+      "notes": "Supports the year-end report. Assignment instructions retain their own deadlines and assessment criteria."
+    }
+  ],
+  "$schema": "../content-schema.json"
+}

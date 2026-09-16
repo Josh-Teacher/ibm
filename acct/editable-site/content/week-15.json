@@ -1,0 +1,342 @@
+{
+  "_comment": "Edit this lecture here. _comment fields are ignored; JSON does not accept // comments. Keep IDs stable for saved links.",
+  "id": "week-15",
+  "week": 15,
+  "title": "Integrate and explain the results",
+  "goal": "Explain how a transaction affects the records, statements, ratios, and final business recommendation.",
+  "sources": [
+    "openstax",
+    "kimmel"
+  ],
+  "slides": [
+    {
+      "id": "w15-01",
+      "title": "Retrieve the full path from evidence to a decision",
+      "type": "opener",
+      "blocks": [
+        {
+          "type": "sequence",
+          "items": [
+            {
+              "heading": "Evidence",
+              "text": "What happened?"
+            },
+            {
+              "heading": "Records",
+              "text": "Which accounts change?"
+            },
+            {
+              "heading": "Statements",
+              "text": "What results follow?"
+            },
+            {
+              "heading": "Decision",
+              "text": "What is supported?"
+            }
+          ]
+        }
+      ],
+      "takeaway": "Explain the links, not just the final numbers.",
+      "notes": "Use the Harbor case in the handout. Opening balances: Cash $4,000, Equipment $6,000, Notes Payable $3,000, Common Stock $5,000, Retained Earnings $2,000. Six June events; no adjustments or closing entries. Suitable for review around a final exam."
+    },
+    {
+      "id": "w15-02",
+      "title": "Trace one transaction across the records",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Account",
+            "Debit ($)",
+            "Credit ($)"
+          ],
+          "rows": [
+            [
+              "Accounts Receivable",
+              "2,000",
+              ""
+            ],
+            [
+              "Service Revenue",
+              "",
+              "2,000"
+            ]
+          ]
+        },
+        {
+          "type": "sequence",
+          "items": [
+            {
+              "heading": "Ledger",
+              "text": "Post both R1 lines."
+            },
+            {
+              "heading": "Income",
+              "text": "Revenue rises $2,000."
+            },
+            {
+              "heading": "Position",
+              "text": "Receivables and equity rise."
+            },
+            {
+              "heading": "Cash",
+              "text": "No cash movement yet."
+            }
+          ]
+        }
+      ],
+      "lead": "Harbor · R1 · Complete $2,000 of services on account.",
+      "takeaway": "The eventual collection is a separate transaction.",
+      "notes": "The later $1,200 collection leaves an $800 receivable. Revenue is not recognized again."
+    },
+    {
+      "id": "w15-03",
+      "title": "Check the four financial statements together",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Harbor Services · June · USD",
+            "Check"
+          ],
+          "rows": [
+            [
+              "Income statement",
+              "$2,000 − $300 = $1,700 net income"
+            ],
+            [
+              "Retained earnings",
+              "$2,000 + $1,700 − $200 = $3,500"
+            ],
+            [
+              "Balance sheet",
+              "$11,000 assets = $2,500 liabilities + $8,500 equity"
+            ],
+            [
+              "Cash flows",
+              "$4,000 beginning − $600 change = $3,400 ending"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Profit, retained earnings, equity, and cash connect.",
+      "notes": "Assets: Cash $3,400 + AR $800 + Inventory $800 + Equipment $6,000. Equity: Common Stock $5,000 + RE $3,500. Loan maturity is not supplied, so do not invent a current portion or liquidity ratio. Students derive the figures from the handout first."
+    },
+    {
+      "id": "w15-04",
+      "title": "Explain a profit-versus-cash difference",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Cash activity",
+            "Amount ($)"
+          ],
+          "rows": [
+            [
+              "Operating: collection − utilities − inventory",
+              "100"
+            ],
+            [
+              "Investing",
+              "0"
+            ],
+            [
+              "Financing: principal and dividend",
+              "(700)"
+            ],
+            {
+              "cells": [
+                "Net decrease in cash",
+                "(600)"
+              ],
+              "kind": "total"
+            }
+          ]
+        }
+      ],
+      "lead": "Net income is positive $1,700, while cash falls $600.",
+      "takeaway": "Credit sales, unsold inventory, and financing explain the difference.",
+      "notes": "Operating cash: $1,200 − $300 − $800 = $100. Profit bridge: $1,700 − AR increase $800 − inventory increase $800 = $100. Then subtract principal $500 and dividends $200. No new adjusting entry is needed."
+    },
+    {
+      "id": "w15-05",
+      "title": "Recalculate a ratio after a supported correction",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "Suppose the $300 utilities payment was recorded as Equipment. Revenue is $2,000."
+        }
+      ],
+      "lead": "Find net profit margin before and after correcting the error.",
+      "takeaway": "A correct ratio formula cannot repair wrong input accounts.",
+      "notes": "Alternative erroneous version of Harbor; all other events correct. Cash is unchanged by the correction. High margins reflect a small teaching set, not a business benchmark.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "table",
+            "columns": [
+              "Measure",
+              "Before",
+              "After"
+            ],
+            "rows": [
+              [
+                "Net income ($)",
+                "2,000",
+                "1,700"
+              ],
+              [
+                "Net profit margin",
+                "100%",
+                "85%"
+              ]
+            ]
+          },
+          {
+            "type": "table",
+            "columns": [
+              "Account",
+              "Debit ($)",
+              "Credit ($)"
+            ],
+            "rows": [
+              [
+                "Utilities Expense",
+                "300",
+                ""
+              ],
+              [
+                "Equipment",
+                "",
+                "300"
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "w15-06",
+      "title": "Evaluate an ethical claim using evidence",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "The equipment error increased reported profit. Does that prove it was intentional?"
+        }
+      ],
+      "takeaway": "Separate the accounting effect from its possible explanation.",
+      "notes": "Discuss misunderstanding, negligence, and intentional manipulation as alternatives to investigate.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "text",
+            "text": "No. It establishes a misclassification. Intent needs further evidence, such as repeated patterns, instructions, or altered source records."
+          }
+        ]
+      }
+    },
+    {
+      "id": "w15-07",
+      "title": "Defend a recommendation and its limitations",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Recommendation",
+              "text": "Monitor collections and cash needs before adding fixed payment commitments."
+            },
+            {
+              "heading": "Evidence and limit",
+              "text": "Profit is $1,700, but cash fell $600. One month does not establish a trend."
+            }
+          ]
+        }
+      ],
+      "takeaway": "State both the reason and the missing evidence.",
+      "notes": "Pairs defend or challenge the recommendation. Useful evidence includes later collections, forecasts, and loan repayment terms."
+    },
+    {
+      "id": "w15-08",
+      "title": "Complete the cumulative error challenge",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Independent error",
+            "What should change?"
+          ],
+          "rows": [
+            [
+              "Utilities paid $300 recorded as Equipment",
+              "Accounts and profit?"
+            ],
+            [
+              "$500 principal repayment in operating cash flows",
+              "Cash-flow category?"
+            ],
+            [
+              "$200 dividend deducted as income-statement expense",
+              "Statement placement?"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Repair the source of each error and update affected outputs.",
+      "notes": "Independent mistakes, not a combined erroneous statement set. Principal is a cash-flow classification error. Dividend is a statement-placement error with the original Dividends account already correct. Only the first requires the shown journal correction.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "table",
+            "columns": [
+              "Error",
+              "Correction"
+            ],
+            "rows": [
+              [
+                "Utilities",
+                "Debit Utilities Expense; credit Equipment $300. Profit falls $300."
+              ],
+              [
+                "Principal",
+                "Move $500 outflow to financing. Total cash change is unchanged."
+              ],
+              [
+                "Dividend",
+                "Exclude from expenses; deduct in retained earnings."
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "w15-09",
+      "title": "Final review of the course learning goals",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "bullets",
+          "items": [
+            "Analyze and journalize transactions from evidence.",
+            "Post accounts and check a trial balance.",
+            "Prepare and connect the four statements.",
+            "Calculate ratios using explicit conventions.",
+            "Support a recommendation with qualified evidence."
+          ]
+        }
+      ],
+      "takeaway": "Accurate records → connected reports → defensible decisions.",
+      "notes": "Ask which link students can now explain and which needs practice. No new assessed prerequisite is introduced."
+    }
+  ],
+  "$schema": "../content-schema.json"
+}

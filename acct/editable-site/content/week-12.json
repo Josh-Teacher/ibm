@@ -1,0 +1,289 @@
+{
+  "_comment": "Edit this lecture here. _comment fields are ignored; JSON does not accept // comments. Keep IDs stable for saved links.",
+  "id": "week-12",
+  "week": 12,
+  "title": "Liquidity and working capital",
+  "goal": "Calculate and interpret current, quick, and cash ratios without assuming a universal ideal value.",
+  "sources": [
+    "openstax",
+    "kimmel"
+  ],
+  "slides": [
+    {
+      "id": "w12-01",
+      "title": "Can the business meet its near-term obligations?",
+      "type": "opener",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Resources",
+              "text": "Cash and assets expected to be realized or used soon."
+            },
+            {
+              "heading": "Obligations",
+              "text": "Supplier bills, customer services owed, and current loan principal."
+            }
+          ]
+        }
+      ],
+      "takeaway": "Liquidity is about amounts and timing.",
+      "notes": "A customer advance may be settled by providing services rather than paying cash."
+    },
+    {
+      "id": "w12-02",
+      "title": "Working capital compares current assets and liabilities",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "equation",
+          "text": "Working capital = Current assets − Current liabilities"
+        },
+        {
+          "type": "equation",
+          "text": "$12,640 − $8,100 = $4,540"
+        }
+      ],
+      "takeaway": "Working capital is a dollar amount, not a cash balance.",
+      "notes": "Current liabilities include $6,000 of note principal. Inventory and prepaid insurance are not cash available today.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w12-03",
+      "title": "Calculate the current ratio",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "fraction",
+          "label": "Current ratio",
+          "numerator": "Current assets",
+          "denominator": "Current liabilities",
+          "suffix": ""
+        },
+        {
+          "type": "equation",
+          "text": "$12,640 ÷ $8,100 = 1.56 times"
+        }
+      ],
+      "takeaway": "$1.56 of current assets per $1 of current liabilities.",
+      "notes": "Round final results only. A ratio above one does not guarantee payment on time. There is no universal ideal across industries.",
+      "sources": [
+        "case",
+        "secguide"
+      ]
+    },
+    {
+      "id": "w12-04",
+      "title": "Identify which assets belong in the quick ratio",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Include in quick assets",
+            "Exclude"
+          ],
+          "rows": [
+            [
+              "Cash and cash equivalents",
+              "Inventory"
+            ],
+            [
+              "Short-term marketable investments",
+              "Prepaid expenses"
+            ],
+            [
+              "Net receivables",
+              "Unused supplies"
+            ]
+          ]
+        },
+        {
+          "type": "fraction",
+          "label": "Quick ratio",
+          "numerator": "$8,840 cash + $1,000 receivables",
+          "denominator": "$8,100 current liabilities",
+          "suffix": "= 1.21 times"
+        }
+      ],
+      "takeaway": "Subtracting inventory alone would leave prepaid insurance in the numerator.",
+      "notes": "No investments or receivable allowance in this case. Use qualifying net receivables in fuller datasets.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w12-05",
+      "title": "Calculate the cash ratio",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "fraction",
+          "label": "Cash ratio",
+          "numerator": "Cash + Cash equivalents",
+          "denominator": "Current liabilities",
+          "suffix": ""
+        },
+        {
+          "type": "equation",
+          "text": "$8,840 ÷ $8,100 = 1.09 times"
+        }
+      ],
+      "takeaway": "This course uses cash and cash equivalents in the numerator.",
+      "notes": "Some references also include marketable securities. State the convention before comparing. The case has neither cash equivalents nor such securities.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w12-06",
+      "title": "Use one balance sheet to compare all three ratios",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Measure",
+            "Numerator ($)",
+            "Result"
+          ],
+          "rows": [
+            [
+              "Current ratio",
+              "12,640",
+              "1.56 times"
+            ],
+            [
+              "Quick ratio",
+              "9,840",
+              "1.21 times"
+            ],
+            [
+              "Cash ratio",
+              "8,840",
+              "1.09 times"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "All three use current liabilities of $8,100.",
+      "notes": "Current to quick excludes Inventory $2,200 and Prepaid Insurance $600. Quick to cash excludes Receivables $1,000.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w12-07",
+      "title": "A stronger ratio can still hide a cash problem",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "bullets",
+          "items": [
+            "Receivables may be overdue or disputed.",
+            "Inventory may sell slowly.",
+            "Reporting-date cash may be temporary.",
+            "Debt payments may fall due before customer collections."
+          ]
+        }
+      ],
+      "takeaway": "Read ratios beside cash flows and account details.",
+      "notes": "A high ratio can reflect excess inventory or slow collections. Business models and payment timing affect interpretation.",
+      "sources": [
+        "secguide"
+      ]
+    },
+    {
+      "id": "w12-08",
+      "title": "Try it: explain a liquidity change",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "Summit Trail pays $600 of Accounts Payable immediately after June 30."
+        }
+      ],
+      "lead": "What happens to cash and the current ratio?",
+      "takeaway": "The current ratio rises even though cash falls.",
+      "notes": "Hypothetical subsequent event, not an extra June transaction. Nothing else changes.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "table",
+            "columns": [
+              "Measure",
+              "Before",
+              "After"
+            ],
+            "rows": [
+              [
+                "Cash ($)",
+                "8,840",
+                "8,240"
+              ],
+              [
+                "Current assets ($)",
+                "12,640",
+                "12,040"
+              ],
+              [
+                "Current liabilities ($)",
+                "8,100",
+                "7,500"
+              ],
+              [
+                "Current ratio",
+                "1.56 times",
+                "1.61 times"
+              ]
+            ]
+          }
+        ]
+      },
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w12-09",
+      "title": "Choose a useful comparison and state a limitation",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "sequence",
+          "items": [
+            {
+              "heading": "Compare",
+              "text": "Use prior periods and similar businesses."
+            },
+            {
+              "heading": "Explain",
+              "text": "Name the accounts driving the change."
+            },
+            {
+              "heading": "Qualify",
+              "text": "Check collectibility, timing, and conditions."
+            }
+          ]
+        }
+      ],
+      "lead": "What evidence would you request before recommending another loan?",
+      "notes": "Supports the year-end report. Avoid universal healthy thresholds and “higher is always better.”",
+      "answer": {
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Request a cash forecast, customer collection history, and debt payment schedule. Explain how each affects the ability to pay."
+          }
+        ]
+      },
+      "sources": [
+        "secguide"
+      ]
+    }
+  ],
+  "$schema": "../content-schema.json"
+}

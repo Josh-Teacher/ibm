@@ -1,0 +1,376 @@
+{
+  "_comment": "Edit this lecture here. _comment fields are ignored; JSON does not accept // comments. Keep IDs stable for saved links.",
+  "id": "week-04",
+  "week": 4,
+  "title": "Build the journal from evidence",
+  "goal": "Turn source transactions into complete, traceable journal entries, including compound entries.",
+  "sources": [
+    "openstax",
+    "kimmel"
+  ],
+  "slides": [
+    {
+      "id": "w04-01",
+      "title": "Every journal entry starts with evidence",
+      "type": "opener",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Description",
+              "text": "Bought equipment for $2,000 cash."
+            },
+            {
+              "heading": "Evidence",
+              "text": "Check the date, item, amount, payment method, and business involved."
+            }
+          ]
+        }
+      ],
+      "takeaway": "An account guess is not a substitute for evidence.",
+      "notes": "Preserve the original description. Flag missing essential facts rather than inventing values."
+    },
+    {
+      "id": "w04-02",
+      "title": "Keep dates, transaction IDs, and account names consistent",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Field",
+            "Why it matters"
+          ],
+          "rows": [
+            [
+              "Date",
+              "Correct accounting period"
+            ],
+            [
+              "Transaction ID",
+              "Trace to source evidence"
+            ],
+            [
+              "Account name",
+              "Consistent posting"
+            ],
+            [
+              "Amount",
+              "Complete debit–credit check"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Keep raw data unchanged and document corrections.",
+      "notes": "Two equal amounts do not establish that two records are duplicates."
+    },
+    {
+      "id": "w04-03",
+      "title": "A journal records events in chronological order",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Date / ID",
+            "Account",
+            "Debit ($)",
+            "Credit ($)"
+          ],
+          "rows": [
+            [
+              "June 1 / T01",
+              "Cash",
+              "10,000",
+              ""
+            ],
+            [
+              "T01",
+              "Common Stock",
+              "",
+              "10,000"
+            ],
+            [
+              "June 2 / T02",
+              "Vehicle",
+              "14,000",
+              ""
+            ],
+            [
+              "T02",
+              "Cash",
+              "",
+              "2,000"
+            ],
+            [
+              "T02",
+              "Notes Payable",
+              "",
+              "12,000"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "One transaction can require several account lines.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w04-04",
+      "title": "Work through one complete journal entry",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "sequence",
+          "items": [
+            {
+              "heading": "Evidence",
+              "text": "June rent paid: $800."
+            },
+            {
+              "heading": "Accounts",
+              "text": "Rent Expense and Cash."
+            },
+            {
+              "heading": "Direction",
+              "text": "Expense rises; cash falls."
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Account",
+            "Debit ($)",
+            "Credit ($)"
+          ],
+          "rows": [
+            [
+              "Rent Expense",
+              "800",
+              ""
+            ],
+            [
+              "Cash",
+              "",
+              "800"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Debits $800 = credits $800.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w04-05",
+      "title": "A compound entry can have more than two lines",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "equation",
+          "text": "Total debits = Total credits"
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Use every account needed to describe the event.",
+            "The number of debit lines need not equal the number of credit lines.",
+            "Keep all lines under one transaction ID."
+          ]
+        }
+      ],
+      "takeaway": "Equal amounts matter; equal line counts do not.",
+      "notes": "If the worksheet uses paired debit/credit columns, use linked split rows for a compound transaction."
+    },
+    {
+      "id": "w04-06",
+      "title": "Record the van purchase with cash and a note",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Account",
+            "Debit ($)",
+            "Credit ($)"
+          ],
+          "rows": [
+            [
+              "Vehicle",
+              "14,000",
+              ""
+            ],
+            [
+              "Cash",
+              "",
+              "2,000"
+            ],
+            [
+              "Notes Payable",
+              "",
+              "12,000"
+            ],
+            {
+              "cells": [
+                "Total",
+                "14,000",
+                "14,000"
+              ],
+              "kind": "total"
+            }
+          ]
+        }
+      ],
+      "lead": "T02 · Van cost $14,000; cash paid $2,000; signed note $12,000.",
+      "takeaway": "Record the full asset cost and both financing sources.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w04-07",
+      "title": "Keep loan principal separate from interest",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Account",
+            "Debit ($)",
+            "Credit ($)"
+          ],
+          "rows": [
+            [
+              "Notes Payable",
+              "500",
+              ""
+            ],
+            [
+              "Interest Expense",
+              "60",
+              ""
+            ],
+            [
+              "Cash",
+              "",
+              "560"
+            ]
+          ]
+        }
+      ],
+      "lead": "T12 · Pay $500 principal and $60 interest.",
+      "takeaway": "Principal reduces a liability; interest is an expense.",
+      "notes": "The interest amount is supplied. No additional interest accrual is assigned.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w04-08",
+      "title": "Try it: journalize a small transaction set",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "ID",
+            "Event"
+          ],
+          "rows": [
+            [
+              "A",
+              "Issue shares for $6,000 cash"
+            ],
+            [
+              "B",
+              "Buy $300 unused supplies: pay $100, owe $200"
+            ],
+            [
+              "C",
+              "Earn $900 services on account"
+            ],
+            [
+              "D",
+              "Pay $200 current rent"
+            ],
+            [
+              "E",
+              "Borrow $1,000 cash from a bank"
+            ]
+          ]
+        }
+      ],
+      "notes": "Separate USD practice set. Require one account per journal line; the answer summarizes each event to keep the projected text readable. B is a compound entry.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "table",
+            "columns": [
+              "ID",
+              "Debit",
+              "Credit"
+            ],
+            "rows": [
+              [
+                "A",
+                "Cash 6,000",
+                "Common Stock 6,000"
+              ],
+              [
+                "B",
+                "Supplies 300",
+                "Cash 100; Accounts Payable 200"
+              ],
+              [
+                "C",
+                "Accounts Receivable 900",
+                "Service Revenue 900"
+              ],
+              [
+                "D",
+                "Rent Expense 200",
+                "Cash 200"
+              ],
+              [
+                "E",
+                "Cash 1,000",
+                "Notes Payable 1,000"
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "w04-09",
+      "title": "Check each event before it is posted",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "bullets",
+          "items": [
+            "Every required event has a traceable ID.",
+            "Account names match the chart of accounts.",
+            "Accounts and timing fit the evidence.",
+            "Debits equal credits for each event."
+          ]
+        }
+      ],
+      "lead": "Exit check: can a balanced journal entry still be wrong?",
+      "notes": "Supports Milestone 1. Correct the source record before preparing later summaries.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Yes. An equipment purchase recorded as Rent Expense and Cash balances, but it uses the wrong debit account."
+          }
+        ]
+      }
+    }
+  ],
+  "$schema": "../content-schema.json"
+}

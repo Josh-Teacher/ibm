@@ -1,0 +1,433 @@
+{
+  "_comment": "Edit this lecture here. _comment fields are ignored; JSON does not accept // comments. Keep IDs stable for saved links.",
+  "id": "week-08",
+  "week": 8,
+  "title": "Apply the accounting workflow",
+  "goal": "Complete and explain the sequence from an unfamiliar event to a checked trial balance.",
+  "sources": [
+    "openstax",
+    "kimmel"
+  ],
+  "slides": [
+    {
+      "id": "w08-01",
+      "title": "Retrieve the rules without looking at the chart",
+      "type": "opener",
+      "blocks": [
+        {
+          "type": "bullets",
+          "items": [
+            "Which accounts normally increase with a debit?",
+            "Does receivable collection create new revenue?",
+            "Can a balanced trial balance still be wrong?"
+          ]
+        }
+      ],
+      "notes": "Two minutes individually, then pairs. This lecture can fit around a midterm without removing new prerequisites.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "bullets",
+            "items": [
+              "Assets, expenses, and dividends increase with debits.",
+              "Collection exchanges a receivable for cash.",
+              "Omissions, duplicates, and wrong accounts can preserve equality."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "w08-02",
+      "title": "Read the mini-case and identify the evidence",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "ID",
+            "June event"
+          ],
+          "rows": [
+            [
+              "A",
+              "Issue shares for $6,000 cash"
+            ],
+            [
+              "B",
+              "Buy equipment for $2,000 cash"
+            ],
+            [
+              "C",
+              "Earn services and receive $1,500 cash"
+            ],
+            [
+              "D",
+              "Receive unpaid June utilities invoice for $300"
+            ]
+          ]
+        }
+      ],
+      "lead": "Pine Services Co. · fictional · USD · all opening balances zero",
+      "takeaway": "Complete the workflow before revealing answers.",
+      "notes": "Use a separate worksheet. Allow 15–20 minutes to analyze, journalize, post, and prepare a trial balance. No other transactions or adjustments."
+    },
+    {
+      "id": "w08-03",
+      "title": "Analyze the account effects",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "ID",
+            "Accounts",
+            "Direction?"
+          ],
+          "rows": [
+            [
+              "A",
+              "Cash · Common Stock",
+              "?"
+            ],
+            [
+              "B",
+              "Equipment · Cash",
+              "?"
+            ],
+            [
+              "C",
+              "Cash · Service Revenue",
+              "?"
+            ],
+            [
+              "D",
+              "Utilities Expense · Accounts Payable",
+              "?"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Choose account type and direction first.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "table",
+            "columns": [
+              "ID",
+              "Increases",
+              "Decreases"
+            ],
+            "rows": [
+              [
+                "A",
+                "Cash; Common Stock",
+                "None"
+              ],
+              [
+                "B",
+                "Equipment",
+                "Cash"
+              ],
+              [
+                "C",
+                "Cash; Service Revenue",
+                "None"
+              ],
+              [
+                "D",
+                "Utilities Expense; Accounts Payable",
+                "None"
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "w08-04",
+      "title": "Write the journal entries",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "Record the date, ID, accounts, debits, and credits for every event."
+        },
+        {
+          "type": "equation",
+          "text": "Check each event: Debits = Credits"
+        }
+      ],
+      "notes": "Answer is a compact summary in USD. Students write one account per journal line.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "table",
+            "columns": [
+              "ID",
+              "Debit",
+              "Credit"
+            ],
+            "rows": [
+              [
+                "A",
+                "Cash 6,000",
+                "Common Stock 6,000"
+              ],
+              [
+                "B",
+                "Equipment 2,000",
+                "Cash 2,000"
+              ],
+              [
+                "C",
+                "Cash 1,500",
+                "Service Revenue 1,500"
+              ],
+              [
+                "D",
+                "Utilities Expense 300",
+                "Accounts Payable 300"
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "w08-05",
+      "title": "Post the entries to the ledger",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "Group journal lines by account. Keep the reference on each posting."
+        }
+      ],
+      "notes": "Cash debits combine A and C. Keep the individual references in the working ledger.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "table",
+            "columns": [
+              "Account",
+              "Debit movements ($)",
+              "Credit movements ($)",
+              "Balance"
+            ],
+            "rows": [
+              [
+                "Cash",
+                "7,500",
+                "2,000",
+                "5,500 Dr"
+              ],
+              [
+                "Equipment",
+                "2,000",
+                "0",
+                "2,000 Dr"
+              ],
+              [
+                "Accounts Payable",
+                "0",
+                "300",
+                "300 Cr"
+              ],
+              [
+                "Common Stock",
+                "0",
+                "6,000",
+                "6,000 Cr"
+              ],
+              [
+                "Service Revenue",
+                "0",
+                "1,500",
+                "1,500 Cr"
+              ],
+              [
+                "Utilities Expense",
+                "300",
+                "0",
+                "300 Dr"
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "w08-06",
+      "title": "Prepare the trial balance",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "List the six ending account balances and add the two columns."
+        }
+      ],
+      "notes": "Pine Services Co., June 30. Do not mix these balances with Summit Trail.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "table",
+            "columns": [
+              "Account",
+              "Debit ($)",
+              "Credit ($)"
+            ],
+            "rows": [
+              [
+                "Cash",
+                "5,500",
+                ""
+              ],
+              [
+                "Equipment",
+                "2,000",
+                ""
+              ],
+              [
+                "Utilities Expense",
+                "300",
+                ""
+              ],
+              [
+                "Accounts Payable",
+                "",
+                "300"
+              ],
+              [
+                "Common Stock",
+                "",
+                "6,000"
+              ],
+              [
+                "Service Revenue",
+                "",
+                "1,500"
+              ],
+              {
+                "cells": [
+                  "Total",
+                  "7,800",
+                  "7,800"
+                ],
+                "kind": "total"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "w08-07",
+      "title": "Diagnose an error that still balances",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "Suppose the $2,000 equipment purchase was recorded as Rent Expense and Cash."
+        }
+      ],
+      "lead": "Would the trial balance agree? What would be misleading?",
+      "answer": {
+        "blocks": [
+          {
+            "type": "bullets",
+            "items": [
+              "The totals still agree.",
+              "Equipment is understated by $2,000.",
+              "Expenses are overstated and net income understated by $2,000."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "w08-08",
+      "title": "Explain a correction to a classmate",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "sequence",
+          "items": [
+            {
+              "heading": "Evidence",
+              "text": "The invoice identifies equipment."
+            },
+            {
+              "heading": "Correction",
+              "text": "Move the $2,000 debit from Rent Expense to Equipment."
+            },
+            {
+              "heading": "Propagation",
+              "text": "Refresh the ledger, trial balance, and reports."
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Account",
+            "Debit ($)",
+            "Credit ($)"
+          ],
+          "rows": [
+            [
+              "Equipment",
+              "2,000",
+              ""
+            ],
+            [
+              "Rent Expense",
+              "",
+              "2,000"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Preserve what changed and why.",
+      "notes": "Use this correcting entry after the wrong entry was posted. Do not also reverse and re-enter the original transaction."
+    },
+    {
+      "id": "w08-09",
+      "title": "Identify the next step toward financial statements",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Pine Services result",
+            "Amount ($)"
+          ],
+          "rows": [
+            [
+              "Revenue",
+              "1,500"
+            ],
+            [
+              "Utilities expense",
+              "(300)"
+            ],
+            {
+              "cells": [
+                "Net income",
+                "1,200"
+              ],
+              "kind": "total"
+            },
+            [
+              "Assets: cash + equipment",
+              "7,500"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Different accounts supply different statements.",
+      "notes": "Discuss performance versus position. Week 9 develops full statement preparation; this is a preview, not a new assessment requirement."
+    }
+  ],
+  "$schema": "../content-schema.json"
+}

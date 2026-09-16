@@ -1,0 +1,279 @@
+{
+  "_comment": "Edit this lecture here. _comment fields are ignored; JSON does not accept // comments. Keep IDs stable for saved links.",
+  "id": "week-01",
+  "week": 1,
+  "title": "What accounting helps us decide",
+  "goal": "Identify the users of accounting information and the different questions answered by the four course statements.",
+  "sources": [
+    "openstax",
+    "kimmel"
+  ],
+  "slides": [
+    {
+      "id": "w01-01",
+      "title": "What can the accounts tell a business owner?",
+      "type": "opener",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Performance",
+              "text": "Did we earn a profit?"
+            },
+            {
+              "heading": "Position",
+              "text": "What do we own and owe?"
+            }
+          ]
+        }
+      ],
+      "lead": "Summit Trail Co. provides outdoor services and sells equipment.",
+      "takeaway": "A bank balance answers only part of the question.",
+      "notes": "Fictional teaching company, separate from assessed datasets. Ask what a lender would want to know."
+    },
+    {
+      "id": "w01-02",
+      "title": "Accounting turns evidence into useful information",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "sequence",
+          "items": [
+            {
+              "heading": "Identify",
+              "text": "Find a measurable event and its evidence."
+            },
+            {
+              "heading": "Record",
+              "text": "Translate the event into accounts and amounts."
+            },
+            {
+              "heading": "Communicate",
+              "text": "Prepare useful reports."
+            }
+          ]
+        }
+      ],
+      "takeaway": "Reliable reports depend on reliable records.",
+      "notes": "Examples of evidence: invoices, receipts, payroll records, bank records, contracts. Not every document requires an entry."
+    },
+    {
+      "id": "w01-03",
+      "title": "Keep the business separate from its owners",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Event",
+            "Whose records?"
+          ],
+          "rows": [
+            [
+              "The company buys a van",
+              "The company"
+            ],
+            [
+              "An owner buys personal groceries",
+              "The owner"
+            ],
+            [
+              "An owner invests in company shares",
+              "Each party records its own side"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Use the company’s perspective.",
+      "notes": "Even a sole proprietor separates personal and business records for accounting."
+    },
+    {
+      "id": "w01-04",
+      "title": "Business forms explain the equity terminology",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Business form",
+            "Equity terminology"
+          ],
+          "rows": [
+            [
+              "Sole proprietorship",
+              "Owner’s capital · drawings"
+            ],
+            [
+              "Partnership",
+              "Partners’ capital · distributions"
+            ],
+            [
+              "Corporation",
+              "Common Stock · Retained Earnings · Dividends"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Our recurring case is a corporation.",
+      "notes": "Keep legal and tax details outside this comparison. Common Stock is a simplified contributed-capital account."
+    },
+    {
+      "id": "w01-05",
+      "title": "Different users ask different questions",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Managers",
+              "text": "Which activity earns enough to continue? Can we hire another employee?"
+            },
+            {
+              "heading": "Outside users",
+              "text": "Lenders ask about repayment. Investors consider return and risk."
+            }
+          ]
+        }
+      ],
+      "takeaway": "Different users ask different questions of the same records."
+    },
+    {
+      "id": "w01-06",
+      "title": "Four statements tell connected parts of the story",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Course statement",
+            "Main question"
+          ],
+          "rows": [
+            [
+              "Income statement",
+              "What profit or loss did we earn?"
+            ],
+            [
+              "Retained earnings statement",
+              "How did retained earnings change?"
+            ],
+            [
+              "Balance sheet",
+              "What are our assets, liabilities, and equity?"
+            ],
+            [
+              "Statement of cash flows",
+              "Why did cash increase or decrease?"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Read the statements together.",
+      "notes": "Published company reports may show a broader statement of changes in shareholders’ equity."
+    },
+    {
+      "id": "w01-07",
+      "title": "A balance sheet is a snapshot; other statements cover a period",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "At June 30",
+              "text": "The balance sheet shows balances at one date."
+            },
+            {
+              "heading": "For the month ended June 30",
+              "text": "Income, retained earnings, and cash flows cover a period."
+            }
+          ]
+        }
+      ],
+      "takeaway": "Check the company, date or period, and currency."
+    },
+    {
+      "id": "w01-08",
+      "title": "Try it: cash in, cash out, and the ending balance",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Cash record",
+            "Amount ($)"
+          ],
+          "rows": [
+            [
+              "Opening cash",
+              "500"
+            ],
+            [
+              "Cash received",
+              "800"
+            ],
+            [
+              "Cash paid",
+              "(300)"
+            ]
+          ]
+        }
+      ],
+      "lead": "Find ending cash. Can you also calculate profit?",
+      "notes": "The receipt could be borrowing or revenue; the payment could buy an asset or pay an expense.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "equation",
+            "text": "500 + 800 − 300 = $1,000"
+          },
+          {
+            "type": "text",
+            "text": "Profit remains unknown. We need to know what the receipt and payment were for."
+          }
+        ]
+      }
+    },
+    {
+      "id": "w01-09",
+      "title": "Course workflow and exit check",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "sequence",
+          "items": [
+            {
+              "heading": "Transactions",
+              "text": "Analyze and journalize."
+            },
+            {
+              "heading": "Accounts",
+              "text": "Post and prepare a trial balance."
+            },
+            {
+              "heading": "Statements",
+              "text": "Prepare the four course reports."
+            },
+            {
+              "heading": "Analysis",
+              "text": "Explain the results."
+            }
+          ]
+        }
+      ],
+      "lead": "Exit check: which statement helps investigate a cash shortage?",
+      "notes": "Introduce the five assignment milestones. Keep team setup and submission dates in the assignment instructions.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Start with cash flows; then examine receivables, inventory, and obligations on the balance sheet."
+          }
+        ]
+      }
+    }
+  ],
+  "$schema": "../content-schema.json"
+}

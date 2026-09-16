@@ -1,0 +1,378 @@
+{
+  "_comment": "Edit this lecture here. _comment fields are ignored; JSON does not accept // comments. Keep IDs stable for saved links.",
+  "id": "week-10",
+  "week": 10,
+  "title": "The balance sheet and statement links",
+  "goal": "Prepare a classified balance sheet and reconcile equity to the retained earnings statement.",
+  "sources": [
+    "openstax",
+    "kimmel"
+  ],
+  "slides": [
+    {
+      "id": "w10-01",
+      "title": "What does the business have and owe at this date?",
+      "type": "opener",
+      "blocks": [
+        {
+          "type": "equation",
+          "text": "Assets = Liabilities + Shareholders’ equity"
+        },
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Resources",
+              "text": "Cash, receivables, inventory, insurance, and the van."
+            },
+            {
+              "heading": "Claims",
+              "text": "Obligations to others and the owners’ residual interest."
+            }
+          ]
+        }
+      ],
+      "takeaway": "The balance sheet reports position at a date.",
+      "notes": "Use the June 30 balances, including ending retained earnings.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w10-02",
+      "title": "Distinguish current and noncurrent assets",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Current assets",
+            "Noncurrent assets"
+          ],
+          "rows": [
+            [
+              "Cash available for current use",
+              "Vehicle used for several years"
+            ],
+            [
+              "Receivables from normal sales",
+              "Other long-term equipment"
+            ],
+            [
+              "Inventory in the operating cycle",
+              "Other resources held for long-term use"
+            ],
+            [
+              "Insurance used in the coming year",
+              ""
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Apply the operating cycle or one-year horizon appropriate to the item.",
+      "notes": "The normal operating cycle can exceed one year for inventory and trade receivables. For other items consider realization or use within 12 months; cash restrictions also matter. Our case has a simple one-year cycle."
+    },
+    {
+      "id": "w10-03",
+      "title": "Distinguish current and noncurrent liabilities",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Liabilities at June 30",
+            "Amount ($)"
+          ],
+          "rows": [
+            [
+              "Accounts Payable — current",
+              "1,200"
+            ],
+            [
+              "Unearned Revenue — July service",
+              "900"
+            ],
+            [
+              "Note principal due in next 12 months",
+              "6,000"
+            ],
+            {
+              "cells": [
+                "Current liabilities",
+                "8,100"
+              ],
+              "kind": "total"
+            },
+            [
+              "Remaining note principal — noncurrent",
+              "5,500"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "A loan can have both current and noncurrent portions.",
+      "notes": "The remaining note is $11,500. Twelve $500 principal payments make $6,000 current. Actual terms and rights to defer settlement matter in fuller reporting.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w10-04",
+      "title": "Show contributed capital and retained earnings",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Shareholders’ equity",
+            "Amount ($)"
+          ],
+          "rows": [
+            [
+              "Common Stock",
+              "10,000"
+            ],
+            [
+              "Ending Retained Earnings",
+              "3,040"
+            ],
+            {
+              "cells": [
+                "Total equity",
+                "13,040"
+              ],
+              "kind": "total"
+            }
+          ]
+        }
+      ],
+      "takeaway": "Use corporate equity accounts consistently.",
+      "notes": "Do not add Owner’s Capital, Owner’s Investment, or current net income again.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w10-05",
+      "title": "Build the classified balance sheet",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "splitTables",
+          "tables": [
+            {
+              "type": "table",
+              "columns": [
+                "Assets ($)",
+                "Amount"
+              ],
+              "rows": [
+                [
+                  "Cash",
+                  "8,840"
+                ],
+                [
+                  "Accounts Receivable",
+                  "1,000"
+                ],
+                [
+                  "Inventory",
+                  "2,200"
+                ],
+                [
+                  "Prepaid Insurance",
+                  "600"
+                ],
+                {
+                  "cells": [
+                    "Current assets",
+                    "12,640"
+                  ],
+                  "kind": "total"
+                },
+                [
+                  "Vehicle",
+                  "14,000"
+                ],
+                {
+                  "cells": [
+                    "Total assets",
+                    "26,640"
+                  ],
+                  "kind": "total"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "columns": [
+                "Liabilities and equity ($)",
+                "Amount"
+              ],
+              "rows": [
+                [
+                  "Accounts Payable",
+                  "1,200"
+                ],
+                [
+                  "Unearned Revenue",
+                  "900"
+                ],
+                [
+                  "Current note portion",
+                  "6,000"
+                ],
+                {
+                  "cells": [
+                    "Current liabilities",
+                    "8,100"
+                  ],
+                  "kind": "total"
+                },
+                [
+                  "Noncurrent note portion",
+                  "5,500"
+                ],
+                {
+                  "cells": [
+                    "Total liabilities",
+                    "13,600"
+                  ],
+                  "kind": "total"
+                },
+                [
+                  "Common Stock",
+                  "10,000"
+                ],
+                [
+                  "Retained Earnings",
+                  "3,040"
+                ],
+                {
+                  "cells": [
+                    "Liabilities and equity",
+                    "26,640"
+                  ],
+                  "kind": "total"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "lead": "Summit Trail Co. · Balance sheet · June 30 · USD",
+      "takeaway": "$26,640 = $13,600 + $13,040.",
+      "notes": "Vehicle remains at cost in the no-adjustments exercise. Do not describe this simplified statement as fully standards-compliant.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w10-06",
+      "title": "Trace net income through retained earnings to equity",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "sequence",
+          "items": [
+            {
+              "heading": "Income statement",
+              "text": "Net income: $3,440."
+            },
+            {
+              "heading": "Retained earnings",
+              "text": "$0 + $3,440 − $400 = $3,040."
+            },
+            {
+              "heading": "Balance sheet equity",
+              "text": "$10,000 + $3,040 = $13,040."
+            }
+          ]
+        }
+      ],
+      "takeaway": "Profit enters ending equity through retained earnings.",
+      "notes": "Link statement cells instead of retyping amounts.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w10-07",
+      "title": "A balanced equation is necessary but not sufficient",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "A $600 equipment purchase is incorrectly recorded as Rent Expense."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Effect",
+            "Amount ($)"
+          ],
+          "rows": [
+            [
+              "Assets understated",
+              "600"
+            ],
+            [
+              "Net income and ending equity understated",
+              "600"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "The equation can balance when both sides are wrong.",
+      "notes": "Cash was credited correctly. Missing equipment understates assets; overstated expense understates equity."
+    },
+    {
+      "id": "w10-08",
+      "title": "Try it: resolve a statement-linking error",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "equation",
+          "text": "Reported equity = $10,000 + $3,040 + $3,440 = $16,480"
+        }
+      ],
+      "lead": "A student adds net income separately to ending retained earnings. What is wrong?",
+      "notes": "Fix the statement link; no journal entry is needed for a presentation formula error.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "equation",
+            "text": "Correct equity = $10,000 + $3,040 = $13,040"
+          },
+          {
+            "type": "text",
+            "text": "The extra $3,440 repeats net income already included in ending retained earnings."
+          }
+        ]
+      },
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w10-09",
+      "title": "Check the date, cash balance, and total equity",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "bullets",
+          "items": [
+            "Use the same company and reporting date.",
+            "Cash matches the ledger and trial balance.",
+            "Current debt follows the repayment terms.",
+            "Retained earnings matches its statement.",
+            "Assets equal liabilities plus equity."
+          ]
+        }
+      ],
+      "takeaway": "Week 11 will reconcile cash to the cash flow statement.",
+      "notes": "Supports Balance_Sheet. Check inventory and prepaid insurance have not been expensed or counted twice."
+    }
+  ],
+  "$schema": "../content-schema.json"
+}

@@ -1,0 +1,284 @@
+{
+  "_comment": "Edit this lecture here. _comment fields are ignored; JSON does not accept // comments. Keep IDs stable for saved links.",
+  "id": "week-13",
+  "week": 13,
+  "title": "Profitability financing and efficiency",
+  "goal": "Use margin, ROA, debt-to-equity, and asset turnover to support a qualified business conclusion.",
+  "sources": [
+    "openstax",
+    "kimmel"
+  ],
+  "slides": [
+    {
+      "id": "w13-01",
+      "title": "How well does the business use its resources?",
+      "type": "opener",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Cedar Co. — fictional, USD",
+            "Year 1",
+            "Year 2"
+          ],
+          "rows": [
+            [
+              "Revenue",
+              "90,000",
+              "100,000"
+            ],
+            [
+              "Net income",
+              "9,000",
+              "12,500"
+            ],
+            [
+              "Beginning / ending assets",
+              "70,000 / 80,000",
+              "80,000 / 100,000"
+            ],
+            [
+              "Ending liabilities",
+              "48,000",
+              "60,000"
+            ],
+            [
+              "Ending equity",
+              "32,000",
+              "40,000"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Use the same two-year case for all four ratios.",
+      "notes": "These are full years, separate from Summit Trail’s startup month. Prior ending assets equal the next year’s beginning assets."
+    },
+    {
+      "id": "w13-02",
+      "title": "Calculate net profit margin",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "fraction",
+          "label": "Net profit margin",
+          "numerator": "Net income",
+          "denominator": "Revenue",
+          "suffix": "× 100%"
+        },
+        {
+          "type": "equation",
+          "text": "Year 2: $12,500 ÷ $100,000 × 100% = 12.5%"
+        }
+      ],
+      "takeaway": "Net income is $0.125 per $1 of revenue.",
+      "notes": "Year 1: $9,000 / $90,000 = 10%. Net profit margin is different from gross margin."
+    },
+    {
+      "id": "w13-03",
+      "title": "Use average assets to calculate ROA",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "equation",
+          "text": "Average assets = ($80,000 + $100,000) ÷ 2 = $90,000"
+        },
+        {
+          "type": "fraction",
+          "label": "ROA",
+          "numerator": "Net income",
+          "denominator": "Average total assets",
+          "suffix": "× 100%"
+        },
+        {
+          "type": "text",
+          "text": "Year 2: $12,500 ÷ $90,000 × 100% = 13.9%."
+        }
+      ],
+      "takeaway": "Match period profit with the resources used during that period.",
+      "notes": "Use the simple beginning/end average here. More frequent averages can help when assets change substantially during a year. Never assume missing beginning assets are zero."
+    },
+    {
+      "id": "w13-04",
+      "title": "Define the debt-to-equity convention",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "fraction",
+          "label": "Debt-to-equity",
+          "numerator": "Total liabilities",
+          "denominator": "Total shareholders’ equity",
+          "suffix": ""
+        },
+        {
+          "type": "equation",
+          "text": "Year 2: $60,000 ÷ $40,000 = 1.50 times"
+        }
+      ],
+      "takeaway": "This course uses all liabilities in the numerator.",
+      "notes": "Some references use only interest-bearing debt. Confirm the definition before comparing. Both balances are from the same date; Year 1 is also 1.50."
+    },
+    {
+      "id": "w13-05",
+      "title": "Calculate asset turnover with average assets",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "fraction",
+          "label": "Asset turnover",
+          "numerator": "Revenue",
+          "denominator": "Average total assets",
+          "suffix": ""
+        },
+        {
+          "type": "equation",
+          "text": "Year 2: $100,000 ÷ $90,000 = 1.11 times"
+        }
+      ],
+      "takeaway": "$1.11 revenue per $1 of average assets.",
+      "notes": "Year 1: $90,000 / $75,000 = 1.20. More assets do not automatically improve revenue generated per asset dollar."
+    },
+    {
+      "id": "w13-06",
+      "title": "Use periods, units, and comparisons consistently",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Ratio",
+            "Display",
+            "Basis"
+          ],
+          "rows": [
+            [
+              "Net profit margin",
+              "Percent",
+              "Same-period profit and revenue"
+            ],
+            [
+              "ROA",
+              "Percent",
+              "Period profit / average assets"
+            ],
+            [
+              "Debt-to-equity",
+              "Times",
+              "Same-date liabilities and equity"
+            ],
+            [
+              "Asset turnover",
+              "Times",
+              "Period revenue / average assets"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Monthly ratios are not directly comparable to full-year ratios.",
+      "notes": "If beginning balances are missing, say average-based ratios cannot be calculated reliably. Label any permitted alternative explicitly. Match policies and business models too.",
+      "sources": [
+        "secguide"
+      ]
+    },
+    {
+      "id": "w13-07",
+      "title": "Handle zero denominators and negative equity",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Zero denominator",
+              "text": "Report the ratio as undefined or not meaningful and explain why."
+            },
+            {
+              "heading": "Negative equity",
+              "text": "Negative debt-to-equity does not mean low financial risk."
+            }
+          ]
+        }
+      ],
+      "takeaway": "A spreadsheet result still needs interpretation.",
+      "notes": "Negative profit with positive revenue can produce meaningful loss margins and ROA. Do not generalize the negative-equity caution to every negative ratio. Near-zero denominators also produce unstable results."
+    },
+    {
+      "id": "w13-08",
+      "title": "Try it: compare two periods and explain the drivers",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Measure",
+            "Year 1",
+            "Year 2"
+          ],
+          "rows": [
+            [
+              "Net profit margin",
+              "10.0%",
+              "12.5%"
+            ],
+            [
+              "ROA",
+              "12.0%",
+              "13.9%"
+            ],
+            [
+              "Debt-to-equity",
+              "1.50 times",
+              "1.50 times"
+            ],
+            [
+              "Asset turnover",
+              "1.20 times",
+              "1.11 times"
+            ]
+          ]
+        }
+      ],
+      "lead": "Which measures improved? Which weakened?",
+      "takeaway": "Higher margin more than offset lower turnover in ROA.",
+      "notes": "Using unrounded values, margin × turnover = ROA under these definitions. Do not claim a cause without evidence about prices, costs, or asset use.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "bullets",
+            "items": [
+              "Profitability improved: margin and ROA rose.",
+              "Turnover fell: revenue grew more slowly than average assets.",
+              "The liabilities-to-equity proportion stayed the same."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "w13-09",
+      "title": "Support one recommendation with the numbers",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "sequence",
+          "items": [
+            {
+              "heading": "Evidence",
+              "text": "Margin rose to 12.5%; turnover fell to 1.11 times."
+            },
+            {
+              "heading": "Interpretation",
+              "text": "Profitability improved while revenue per asset dollar weakened."
+            },
+            {
+              "heading": "Recommendation",
+              "text": "Review utilization of recent asset additions."
+            }
+          ]
+        }
+      ],
+      "takeaway": "Request capacity and sales evidence before deciding to invest more.",
+      "notes": "A qualified fictional teaching recommendation. Distinguish a plausible explanation from an established cause."
+    }
+  ],
+  "$schema": "../content-schema.json"
+}

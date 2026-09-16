@@ -1,0 +1,382 @@
+{
+  "_comment": "Edit this lecture here. _comment fields are ignored; JSON does not accept // comments. Keep IDs stable for saved links.",
+  "id": "week-07",
+  "week": 7,
+  "title": "Prepare and check the trial balance",
+  "goal": "Build a trial balance from ledger balances and distinguish arithmetic agreement from accounting accuracy.",
+  "sources": [
+    "openstax",
+    "kimmel"
+  ],
+  "slides": [
+    {
+      "id": "w07-01",
+      "title": "The trial balance summarizes account balances",
+      "type": "opener",
+      "blocks": [
+        {
+          "type": "sequence",
+          "items": [
+            {
+              "heading": "Journal",
+              "text": "Record the event."
+            },
+            {
+              "heading": "Ledger",
+              "text": "Group movements by account."
+            },
+            {
+              "heading": "Trial balance",
+              "text": "List ending account balances."
+            }
+          ]
+        }
+      ],
+      "takeaway": "The trial balance is an internal working report.",
+      "notes": "It is not one of the four financial statements."
+    },
+    {
+      "id": "w07-02",
+      "title": "Use ending balances rather than transaction totals",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Cash — June",
+            "Amount ($)"
+          ],
+          "rows": [
+            [
+              "Debit movements",
+              "17,200"
+            ],
+            [
+              "Credit movements",
+              "(8,360)"
+            ],
+            {
+              "cells": [
+                "Ending debit balance",
+                "8,840"
+              ],
+              "kind": "total"
+            }
+          ]
+        }
+      ],
+      "takeaway": "Carry $8,840 to the Cash trial balance line.",
+      "notes": "Include opening balances in other datasets. Summit Trail starts at zero.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w07-03",
+      "title": "Place each balance in the debit or credit column",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Account",
+            "Debit ($)",
+            "Credit ($)"
+          ],
+          "rows": [
+            [
+              "Cash",
+              "8,840",
+              ""
+            ],
+            [
+              "Accounts Payable",
+              "",
+              "1,200"
+            ],
+            [
+              "Dividends",
+              "400",
+              ""
+            ],
+            [
+              "Service Revenue",
+              "",
+              "4,300"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Each nonzero account balance normally appears in one column.",
+      "notes": "This excerpt does not balance on its own. Use the actual balance side; investigate unexpected signs.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w07-04",
+      "title": "Build a trial balance from the teaching ledger",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "splitTables",
+          "tables": [
+            {
+              "type": "table",
+              "columns": [
+                "Debit balances ($)",
+                "Amount"
+              ],
+              "rows": [
+                [
+                  "Cash",
+                  "8,840"
+                ],
+                [
+                  "Vehicle",
+                  "14,000"
+                ],
+                [
+                  "Inventory",
+                  "2,200"
+                ],
+                [
+                  "Accounts Receivable",
+                  "1,000"
+                ],
+                [
+                  "Cost of Goods Sold",
+                  "1,800"
+                ],
+                [
+                  "Salaries Expense",
+                  "1,000"
+                ],
+                [
+                  "Rent Expense",
+                  "800"
+                ],
+                [
+                  "Interest Expense",
+                  "60"
+                ],
+                [
+                  "Dividends",
+                  "400"
+                ],
+                [
+                  "Utilities Expense",
+                  "200"
+                ],
+                [
+                  "Prepaid Insurance",
+                  "600"
+                ],
+                {
+                  "cells": [
+                    "Total",
+                    "30,900"
+                  ],
+                  "kind": "total"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "columns": [
+                "Credit balances ($)",
+                "Amount"
+              ],
+              "rows": [
+                [
+                  "Common Stock",
+                  "10,000"
+                ],
+                [
+                  "Notes Payable",
+                  "11,500"
+                ],
+                [
+                  "Accounts Payable",
+                  "1,200"
+                ],
+                [
+                  "Service Revenue",
+                  "4,300"
+                ],
+                [
+                  "Sales Revenue",
+                  "3,000"
+                ],
+                [
+                  "Unearned Revenue",
+                  "900"
+                ],
+                {
+                  "cells": [
+                    "Total",
+                    "30,900"
+                  ],
+                  "kind": "total"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "lead": "Summit Trail Co. · Trial balance · June 30 · USD",
+      "takeaway": "Every balance comes from the ledger.",
+      "notes": "All 17 nonzero balances appear. Beginning Retained Earnings is zero; no closing entries have been made. Revenue, expense, and dividend accounts therefore remain separate.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w07-05",
+      "title": "Check debit and credit totals",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "equation",
+          "text": "Debit balances $30,900 = Credit balances $30,900"
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Add the columns independently.",
+            "Use the same accounts and reporting date.",
+            "Review missing accounts and unusual balances."
+          ]
+        }
+      ],
+      "takeaway": "Agreement is an arithmetic check, not proof of accuracy.",
+      "sources": [
+        "case",
+        "trial"
+      ]
+    },
+    {
+      "id": "w07-06",
+      "title": "Trace an imbalance through the workflow",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "sequence",
+          "items": [
+            {
+              "heading": "Re-add",
+              "text": "Check totals and formula ranges."
+            },
+            {
+              "heading": "Compare",
+              "text": "Match trial balance lines to ledger balances."
+            },
+            {
+              "heading": "Trace",
+              "text": "Match postings to journal lines."
+            },
+            {
+              "heading": "Verify",
+              "text": "Compare the journal to evidence."
+            }
+          ]
+        }
+      ],
+      "takeaway": "Locate the cause before changing records.",
+      "notes": "Divisibility by nine can suggest a transposition, but is only a clue. Never use a plug account to force equality."
+    },
+    {
+      "id": "w07-07",
+      "title": "Some errors leave the trial balance balanced",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Error",
+            "Why totals still agree"
+          ],
+          "rows": [
+            [
+              "Omit a whole transaction",
+              "Neither side is recorded"
+            ],
+            [
+              "Duplicate a complete entry",
+              "Both sides are duplicated"
+            ],
+            [
+              "Debit Equipment instead of Rent Expense",
+              "The wrong debit equals the credit"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Check completeness and classification as well as equality.",
+      "sources": [
+        "trial"
+      ]
+    },
+    {
+      "id": "w07-08",
+      "title": "Try it: diagnose omission and misclassification",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Error A",
+              "text": "A $200 utilities debit is posted; the payable credit is missing."
+            },
+            {
+              "heading": "Error B",
+              "text": "A $600 equipment purchase is recorded as Rent Expense and Cash."
+            }
+          ]
+        }
+      ],
+      "notes": "For B, debit Equipment and credit Rent Expense if using a documented correcting entry. Preserve the correction history; do not correct twice.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "table",
+            "columns": [
+              "Error",
+              "Effect and repair"
+            ],
+            "rows": [
+              [
+                "A",
+                "Credits are $200 too low. Post the missing payable credit."
+              ],
+              [
+                "B",
+                "Totals agree. Move $600 from Rent Expense to Equipment."
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "w07-09",
+      "title": "Check completeness before making statements",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "bullets",
+          "items": [
+            "All source events are accounted for.",
+            "Balances reconcile to the ledger.",
+            "Unexpected accounts and signs are explained.",
+            "Known errors have been corrected and traced."
+          ]
+        }
+      ],
+      "takeaway": "Start statements from a checked trial balance.",
+      "notes": "Assignment scope: no adjusting entries, adjusted trial balance, or closing entries. Fuller accrual reporting may require depreciation, estimates, and timing adjustments. This exercise does not claim full compliance with every standard."
+    }
+  ],
+  "$schema": "../content-schema.json"
+}

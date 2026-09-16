@@ -1,0 +1,339 @@
+{
+  "_comment": "Edit this lecture here. _comment fields are ignored; JSON does not accept // comments. Keep IDs stable for saved links.",
+  "id": "week-09",
+  "week": 9,
+  "title": "Income and retained earnings statements",
+  "goal": "Calculate net income and carry it correctly into ending retained earnings.",
+  "sources": [
+    "openstax",
+    "kimmel"
+  ],
+  "slides": [
+    {
+      "id": "w09-01",
+      "title": "What did the business earn during the period?",
+      "type": "opener",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Revenue",
+              "text": "Services and merchandise sold during June."
+            },
+            {
+              "heading": "Expenses",
+              "text": "Costs incurred to earn revenue and operate during June."
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "text": "Revenue − Expenses = Net income"
+        }
+      ],
+      "takeaway": "An income statement covers a period.",
+      "notes": "Return to Summit Trail; amounts are USD. Supports Income_Statement and Retained_Earnings."
+    },
+    {
+      "id": "w09-02",
+      "title": "Select revenue and expense accounts from the trial balance",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Include in income",
+            "Keep out of income"
+          ],
+          "rows": [
+            [
+              "Service Revenue · Sales Revenue",
+              "Cash · Accounts Receivable"
+            ],
+            [
+              "Cost of Goods Sold",
+              "Inventory · Vehicle"
+            ],
+            [
+              "Salaries · Rent · Utilities expenses",
+              "Accounts Payable · Notes Payable"
+            ],
+            [
+              "Interest Expense",
+              "Common Stock · Dividends"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Account type determines statement destination."
+    },
+    {
+      "id": "w09-03",
+      "title": "Separate sales, cost of goods sold, and operating expenses",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Account group",
+            "Amount ($)"
+          ],
+          "rows": [
+            [
+              "Merchandise sales revenue",
+              "3,000"
+            ],
+            [
+              "Service revenue",
+              "4,300"
+            ],
+            [
+              "Merchandise cost of goods sold",
+              "1,800"
+            ],
+            [
+              "Operating expenses",
+              "2,000"
+            ],
+            [
+              "Interest expense",
+              "60"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Keep revenue and expense categories visible.",
+      "notes": "Operating expenses are salaries, rent, and utilities. All service salaries are classified as operating expense in this simplified case. No tax or depreciation calculations.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w09-04",
+      "title": "Build the income statement and calculate net income",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "statement",
+          "company": "Summit Trail Co. — fictional",
+          "title": "Income statement",
+          "period": "For the month ended June 30 · USD",
+          "rows": [
+            [
+              "Service revenue",
+              "4,300"
+            ],
+            [
+              "Sales revenue",
+              "3,000"
+            ],
+            {
+              "cells": [
+                "Total revenue",
+                "7,300"
+              ],
+              "kind": "total"
+            },
+            [
+              "Cost of goods sold",
+              "(1,800)"
+            ],
+            {
+              "cells": [
+                "Gross profit",
+                "5,500"
+              ],
+              "kind": "total"
+            },
+            [
+              "Operating expenses",
+              "(2,000)"
+            ],
+            {
+              "cells": [
+                "Operating income",
+                "3,500"
+              ],
+              "kind": "total"
+            },
+            [
+              "Interest expense",
+              "(60)"
+            ],
+            {
+              "cells": [
+                "Net income",
+                "3,440"
+              ],
+              "kind": "total"
+            }
+          ]
+        }
+      ],
+      "takeaway": "$7,300 revenue − $3,860 expenses = $3,440.",
+      "notes": "Operating expenses: Salaries $1,000 + Rent $800 + Utilities $200. Simplified teaching statement, with omitted categories outside the exercise.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w09-05",
+      "title": "Explain gross profit and net income",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Gross profit: $5,500",
+              "text": "Revenue less supplied merchandise COGS."
+            },
+            {
+              "heading": "Net income: $3,440",
+              "text": "Revenue less all recorded expenses."
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "text": "$5,500 − $2,000 − $60 = $3,440"
+        }
+      ],
+      "takeaway": "Positive gross profit can still be followed by a net loss.",
+      "notes": "Company gross profit includes service revenue with salaries below gross profit. Merchandise-only gross profit is $1,200. Compare consistent cost classifications.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w09-06",
+      "title": "Dividends affect retained earnings rather than expenses",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Income statement",
+              "text": "Net income remains $3,440."
+            },
+            {
+              "heading": "Retained earnings",
+              "text": "The $400 dividend reduces the amount retained."
+            }
+          ]
+        }
+      ],
+      "takeaway": "Shareholder distributions are not expenses.",
+      "notes": "T13 declares and pays the dividend. It does not require a separate Dividends Payable balance.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w09-07",
+      "title": "Build the retained earnings statement",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "statement",
+          "company": "Summit Trail Co. — fictional",
+          "title": "Retained earnings statement",
+          "period": "For the month ended June 30 · USD",
+          "rows": [
+            [
+              "Beginning retained earnings",
+              "0"
+            ],
+            [
+              "Add: net income",
+              "3,440"
+            ],
+            [
+              "Less: dividends",
+              "(400)"
+            ],
+            {
+              "cells": [
+                "Ending retained earnings",
+                "3,040"
+              ],
+              "kind": "total"
+            }
+          ]
+        }
+      ],
+      "takeaway": "Transfer $3,040 to balance-sheet equity.",
+      "notes": "Compute ending retained earnings without requiring closing entries. Revenue, expense, and dividend accounts remain in the unclosed trial balance.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w09-08",
+      "title": "Try it: link the two statements",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Separate practice company",
+            "Amount ($)"
+          ],
+          "rows": [
+            [
+              "Revenue",
+              "9,000"
+            ],
+            [
+              "Expenses",
+              "6,500"
+            ],
+            [
+              "Beginning retained earnings",
+              "1,200"
+            ],
+            [
+              "Dividends",
+              "700"
+            ]
+          ]
+        }
+      ],
+      "lead": "Calculate net income and ending retained earnings.",
+      "notes": "Extension: with a $500 loss instead, ending retained earnings is zero.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "equation",
+            "text": "Net income = $9,000 − $6,500 = $2,500"
+          },
+          {
+            "type": "equation",
+            "text": "Ending retained earnings = $1,200 + $2,500 − $700 = $3,000"
+          }
+        ]
+      }
+    },
+    {
+      "id": "w09-09",
+      "title": "Check periods, signs, and the net income transfer",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "bullets",
+          "items": [
+            "Use the same company, currency, and period.",
+            "Revenue and expenses match the trial balance.",
+            "Transfer the same net income between statements.",
+            "Subtract dividends once; carry ending retained earnings forward."
+          ]
+        }
+      ],
+      "takeaway": "The statements must connect numerically.",
+      "notes": "Do not add net income again after transferring ending retained earnings."
+    }
+  ],
+  "$schema": "../content-schema.json"
+}

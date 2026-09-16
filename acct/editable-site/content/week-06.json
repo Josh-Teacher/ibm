@@ -1,0 +1,343 @@
+{
+  "_comment": "Edit this lecture here. _comment fields are ignored; JSON does not accept // comments. Keep IDs stable for saved links.",
+  "id": "week-06",
+  "week": 6,
+  "title": "Post the journal to the ledger",
+  "goal": "Post each journal line to the correct account and calculate a reliable ending balance.",
+  "sources": [
+    "openstax",
+    "kimmel"
+  ],
+  "slides": [
+    {
+      "id": "w06-01",
+      "title": "The journal tells the event; the ledger tells the account",
+      "type": "opener",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Journal",
+              "text": "What happened on June 12?"
+            },
+            {
+              "heading": "Ledger",
+              "text": "What happened to Cash across all dates?"
+            }
+          ]
+        }
+      ],
+      "takeaway": "Posting reorganizes the same entries by account.",
+      "notes": "Do not create new transactions when posting. References support tracing in both directions."
+    },
+    {
+      "id": "w06-02",
+      "title": "Read a T-account and a running-balance account",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "taccounts",
+          "accounts": [
+            {
+              "name": "Cash — T01 and T02 only",
+              "debits": [
+                "10,000"
+              ],
+              "credits": [
+                "2,000"
+              ],
+              "balance": "Ending balance: $8,000 debit"
+            }
+          ]
+        }
+      ],
+      "takeaway": "The ending balance is the difference between the sides.",
+      "notes": "A running-balance ledger shows the balance after each dated entry.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w06-03",
+      "title": "Post dates, references, debits, and credits",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Date",
+            "Ref",
+            "Cash debit ($)",
+            "Cash credit ($)"
+          ],
+          "rows": [
+            [
+              "June 1",
+              "T01",
+              "10,000",
+              ""
+            ],
+            [
+              "June 2",
+              "T02",
+              "",
+              "2,000"
+            ],
+            [
+              "June 3",
+              "T03",
+              "",
+              "2,400"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Copy each amount to the same side as the journal entry.",
+      "notes": "Use exact account names. Accounts Receivable and Accounts Payable are different accounts.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w06-04",
+      "title": "Calculate a cash account balance",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Date / ref",
+            "Debit ($)",
+            "Credit ($)",
+            "Balance ($)"
+          ],
+          "rows": [
+            [
+              "June 1 / T01",
+              "10,000",
+              "",
+              "10,000"
+            ],
+            [
+              "June 2 / T02",
+              "",
+              "2,000",
+              "8,000"
+            ],
+            [
+              "June 3 / T03",
+              "",
+              "2,400",
+              "5,600"
+            ],
+            [
+              "June 7 / T05",
+              "1,800",
+              "",
+              "7,400"
+            ],
+            [
+              "June 12 / T07",
+              "3,000",
+              "",
+              "10,400"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Cash: prior balance + debits − credits.",
+      "notes": "Excerpt through June 12. After all 16 transactions, Cash is $8,840.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w06-05",
+      "title": "Calculate a payable with a credit balance",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Accounts Payable",
+            "Debit ($)",
+            "Credit ($)",
+            "Credit balance ($)"
+          ],
+          "rows": [
+            [
+              "June 5 / T04",
+              "",
+              "1,600",
+              "1,600"
+            ],
+            [
+              "June 20 / T10",
+              "600",
+              "",
+              "1,000"
+            ],
+            [
+              "June 30 / T15",
+              "",
+              "200",
+              "1,200"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Usual payable: prior credit balance + credits − debits.",
+      "notes": "A signed-balance formula can work for all accounts if its convention is consistent.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w06-06",
+      "title": "Post the same transaction to every affected account",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Account",
+            "Debit ($)",
+            "Credit ($)"
+          ],
+          "rows": [
+            [
+              "Accounts Receivable",
+              "2,500",
+              ""
+            ],
+            [
+              "Service Revenue",
+              "",
+              "2,500"
+            ]
+          ]
+        },
+        {
+          "type": "taccounts",
+          "accounts": [
+            {
+              "name": "Accounts Receivable",
+              "debits": [
+                "T06  2,500"
+              ],
+              "credits": []
+            },
+            {
+              "name": "Service Revenue",
+              "debits": [],
+              "credits": [
+                "T06  2,500"
+              ]
+            }
+          ]
+        }
+      ],
+      "takeaway": "Post every affected account.",
+      "notes": "Only T06 is displayed here; these are not complete June ledger accounts.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w06-07",
+      "title": "Connect the course worksheet to ledger accounts",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "sequence",
+          "items": [
+            {
+              "heading": "Journal line",
+              "text": "Date, ID, account, debit, credit."
+            },
+            {
+              "heading": "Account record",
+              "text": "Gather every matching line."
+            },
+            {
+              "heading": "Ending balance",
+              "text": "Net the debit and credit totals."
+            }
+          ]
+        }
+      ],
+      "takeaway": "The worksheet layout can change; the accounting logic stays.",
+      "notes": "Link or aggregate journal data rather than retyping it. If using SUMIFS, use exact account names and complete ranges."
+    },
+    {
+      "id": "w06-08",
+      "title": "Try it: locate a missed or misposted line",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "T05 entry",
+            "Journal",
+            "Ledger"
+          ],
+          "rows": [
+            [
+              "Cash debit",
+              "1,800",
+              "Omitted"
+            ],
+            [
+              "Service Revenue credit",
+              "1,800",
+              "Posted"
+            ]
+          ]
+        }
+      ],
+      "lead": "What happens to Cash and the trial balance?",
+      "takeaway": "Repair the missing posting; do not invent a balancing entry.",
+      "notes": "The journal entry is already correct. This is a posting correction, not an adjusting entry.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "bullets",
+            "items": [
+              "Cash is understated by $1,800.",
+              "Total debit balances are $1,800 too low.",
+              "Post the missing Cash debit with reference T05."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "w06-09",
+      "title": "Reconcile posting completeness to the journal",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "bullets",
+          "items": [
+            "Every journal line appears in its ledger account.",
+            "Dates and IDs remain traceable.",
+            "Ledger movements match journal movements.",
+            "Ending balances use a consistent sign convention."
+          ]
+        }
+      ],
+      "lead": "Exit check: does posting change an entry’s accounts or amounts?",
+      "notes": "Supports the general ledger milestone. Matching movement totals alone cannot establish correct classification.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "text",
+            "text": "No. Posting transfers existing account effects to the ledger. It does not recognize the transaction again."
+          }
+        ]
+      }
+    }
+  ],
+  "$schema": "../content-schema.json"
+}

@@ -1,0 +1,344 @@
+{
+  "_comment": "Edit this lecture here. _comment fields are ignored; JSON does not accept // comments. Keep IDs stable for saved links.",
+  "id": "week-05",
+  "week": 5,
+  "title": "Inventory and connected transactions",
+  "goal": "Record the purchase, sale, collection, and payment events of a simple retail business.",
+  "sources": [
+    "openstax",
+    "kimmel"
+  ],
+  "slides": [
+    {
+      "id": "w05-01",
+      "title": "Inventory is an asset until its cost is expensed",
+      "type": "opener",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Goods held for sale",
+              "text": "Inventory is an asset."
+            },
+            {
+              "heading": "Goods sold",
+              "text": "Their cost becomes Cost of Goods Sold."
+            }
+          ]
+        }
+      ],
+      "takeaway": "Buying merchandise does not automatically create an expense.",
+      "notes": "Costs are supplied. No FIFO, weighted-average, write-down, or inventory adjustment requirement."
+    },
+    {
+      "id": "w05-02",
+      "title": "Purchase inventory for cash or on account",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Purchase",
+            "Debit",
+            "Credit"
+          ],
+          "rows": [
+            [
+              "$2,400 cash",
+              "Inventory 2,400",
+              "Cash 2,400"
+            ],
+            [
+              "$1,600 on account",
+              "Inventory 1,600",
+              "Accounts Payable 1,600"
+            ]
+          ]
+        },
+        {
+          "type": "equation",
+          "text": "Inventory purchased = $4,000"
+        }
+      ],
+      "takeaway": "The payment method changes the other account.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w05-03",
+      "title": "A retail sale has a selling price and a cost",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "compare",
+          "items": [
+            {
+              "heading": "Selling price",
+              "text": "$3,000 charged to the customer."
+            },
+            {
+              "heading": "Inventory cost",
+              "text": "$1,800 cost of the merchandise sold."
+            }
+          ]
+        },
+        {
+          "type": "equation",
+          "text": "Merchandise gross profit = $3,000 − $1,800 = $1,200"
+        }
+      ],
+      "takeaway": "Selling price and inventory cost are different amounts.",
+      "notes": "This is merchandise gross profit for T07, not full-company net income.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w05-04",
+      "title": "Record revenue and cost of goods sold separately",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Account",
+            "Debit ($)",
+            "Credit ($)"
+          ],
+          "rows": [
+            [
+              "Cash",
+              "3,000",
+              ""
+            ],
+            [
+              "Sales Revenue",
+              "",
+              "3,000"
+            ],
+            [
+              "Cost of Goods Sold",
+              "1,800",
+              ""
+            ],
+            [
+              "Inventory",
+              "",
+              "1,800"
+            ]
+          ]
+        }
+      ],
+      "lead": "June 12 · T07 · Cash sale $3,000; cost $1,800.",
+      "takeaway": "Record both the revenue and the inventory cost.",
+      "notes": "Keep both entries linked to T07. The second entry has no cash movement.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w05-05",
+      "title": "A later customer payment settles a receivable",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Account",
+            "Debit ($)",
+            "Credit ($)"
+          ],
+          "rows": [
+            [
+              "Cash",
+              "1,500",
+              ""
+            ],
+            [
+              "Accounts Receivable",
+              "",
+              "1,500"
+            ]
+          ]
+        }
+      ],
+      "lead": "Collect $1,500 toward the June 10 customer invoice.",
+      "takeaway": "Collection does not create revenue again.",
+      "notes": "The same collection pattern follows a merchandise credit sale.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w05-06",
+      "title": "A later supplier payment settles a payable",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Account",
+            "Debit ($)",
+            "Credit ($)"
+          ],
+          "rows": [
+            [
+              "Accounts Payable",
+              "600",
+              ""
+            ],
+            [
+              "Cash",
+              "",
+              "600"
+            ]
+          ]
+        },
+        {
+          "type": "equation",
+          "text": "Supplier balance = $1,600 − $600 = $1,000"
+        }
+      ],
+      "takeaway": "Payment reduces the payable; it does not buy inventory again.",
+      "notes": "The final Accounts Payable also includes a later $200 utilities invoice.",
+      "sources": [
+        "case"
+      ]
+    },
+    {
+      "id": "w05-07",
+      "title": "Follow one purchase and sale through the accounts",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "table",
+          "columns": [
+            "Stage",
+            "Inventory ($)",
+            "Profit effect ($)",
+            "Cash effect ($)"
+          ],
+          "rows": [
+            [
+              "Buy inventory for cash",
+              "+2,400",
+              "0",
+              "−2,400"
+            ],
+            [
+              "Sell goods costing $1,800 for $3,000",
+              "−1,800",
+              "+1,200",
+              "+3,000"
+            ],
+            [
+              "Net change",
+              "+600",
+              "+1,200",
+              "+600"
+            ]
+          ]
+        }
+      ],
+      "takeaway": "Inventory, profit, and cash move by different amounts.",
+      "notes": "This isolated sequence uses only T03 and T07; it is not the full June inventory balance."
+    },
+    {
+      "id": "w05-08",
+      "title": "Try it: complete the transaction sequence",
+      "type": "practice",
+      "blocks": [
+        {
+          "type": "bullets",
+          "items": [
+            "Buy merchandise costing $1,000 on account.",
+            "Sell half of it for $800 on account.",
+            "Collect $600 from the customer.",
+            "Pay the supplier $400."
+          ]
+        }
+      ],
+      "lead": "Find ending inventory, receivable, payable, and gross profit.",
+      "notes": "Separate practice case, zero opening balances, no other transactions. Cost of half the inventory is $500.",
+      "answer": {
+        "blocks": [
+          {
+            "type": "table",
+            "columns": [
+              "Item",
+              "Amount ($)"
+            ],
+            "rows": [
+              [
+                "Inventory",
+                "500"
+              ],
+              [
+                "Accounts Receivable",
+                "200"
+              ],
+              [
+                "Accounts Payable",
+                "600"
+              ],
+              [
+                "Gross profit",
+                "300"
+              ],
+              [
+                "Net cash increase",
+                "200"
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "w05-09",
+      "title": "Check inventory, gross profit, and cash separately",
+      "type": "concept",
+      "blocks": [
+        {
+          "type": "equation",
+          "text": "Beginning inventory + Purchases − COGS = Ending inventory"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Summit Trail, June",
+            "Amount ($)"
+          ],
+          "rows": [
+            [
+              "Beginning inventory",
+              "0"
+            ],
+            [
+              "Purchases",
+              "4,000"
+            ],
+            [
+              "Cost of goods sold",
+              "(1,800)"
+            ],
+            {
+              "cells": [
+                "Ending inventory",
+                "2,200"
+              ],
+              "kind": "total"
+            }
+          ]
+        }
+      ],
+      "takeaway": "This check is independent of when suppliers are paid.",
+      "sources": [
+        "case"
+      ]
+    }
+  ],
+  "$schema": "../content-schema.json"
+}

@@ -1,0 +1,205 @@
+{
+  "_comment": "Edit lecture order, titles, colors, and source references here.",
+  "title": "Accounting",
+  "lectures": [
+    {
+      "id": "week-01",
+      "week": 1,
+      "title": "What accounting helps us decide",
+      "file": "content/week-01.json",
+      "color": "#276BBD",
+      "ink": "#14365E",
+      "soft": "#E9F0F8",
+      "onColor": "#FFFFFF"
+    },
+    {
+      "id": "week-02",
+      "week": 2,
+      "title": "Accounts and transaction analysis",
+      "file": "content/week-02.json",
+      "color": "#208FA8",
+      "ink": "#104854",
+      "soft": "#E9F4F6",
+      "onColor": "#000000"
+    },
+    {
+      "id": "week-03",
+      "week": 3,
+      "title": "Profit cash and equity",
+      "file": "content/week-03.json",
+      "color": "#219A8B",
+      "ink": "#104D46",
+      "soft": "#E9F5F3",
+      "onColor": "#000000"
+    },
+    {
+      "id": "week-04",
+      "week": 4,
+      "title": "Build the journal from evidence",
+      "file": "content/week-04.json",
+      "color": "#3C9D56",
+      "ink": "#1E4E2B",
+      "soft": "#ECF5EE",
+      "onColor": "#000000"
+    },
+    {
+      "id": "week-05",
+      "week": 5,
+      "title": "Inventory and connected transactions",
+      "file": "content/week-05.json",
+      "color": "#79AA38",
+      "ink": "#3C551C",
+      "soft": "#F2F6EB",
+      "onColor": "#000000"
+    },
+    {
+      "id": "week-06",
+      "week": 6,
+      "title": "Post the journal to the ledger",
+      "file": "content/week-06.json",
+      "color": "#A6B83B",
+      "ink": "#535C1E",
+      "soft": "#F6F8EB",
+      "onColor": "#000000"
+    },
+    {
+      "id": "week-07",
+      "week": 7,
+      "title": "Prepare and check the trial balance",
+      "file": "content/week-07.json",
+      "color": "#D3C83F",
+      "ink": "#6A6420",
+      "soft": "#FBFAEC",
+      "onColor": "#000000"
+    },
+    {
+      "id": "week-08",
+      "week": 8,
+      "title": "Apply the accounting workflow",
+      "file": "content/week-08.json",
+      "color": "#E6C448",
+      "ink": "#736224",
+      "soft": "#FCF9ED",
+      "onColor": "#000000"
+    },
+    {
+      "id": "week-09",
+      "week": 9,
+      "title": "Income and retained earnings statements",
+      "file": "content/week-09.json",
+      "color": "#E8B04A",
+      "ink": "#745825",
+      "soft": "#FDF7ED",
+      "onColor": "#000000"
+    },
+    {
+      "id": "week-10",
+      "week": 10,
+      "title": "The balance sheet and statement links",
+      "file": "content/week-10.json",
+      "color": "#E69740",
+      "ink": "#734C20",
+      "soft": "#FCF5EC",
+      "onColor": "#000000"
+    },
+    {
+      "id": "week-11",
+      "week": 11,
+      "title": "Explain the change in cash",
+      "file": "content/week-11.json",
+      "color": "#DF793E",
+      "ink": "#703C1F",
+      "soft": "#FCF2EC",
+      "onColor": "#000000"
+    },
+    {
+      "id": "week-12",
+      "week": 12,
+      "title": "Liquidity and working capital",
+      "file": "content/week-12.json",
+      "color": "#D75C48",
+      "ink": "#6C2E24",
+      "soft": "#FBEFED",
+      "onColor": "#000000"
+    },
+    {
+      "id": "week-13",
+      "week": 13,
+      "title": "Profitability financing and efficiency",
+      "file": "content/week-13.json",
+      "color": "#BE4E5D",
+      "ink": "#5F272E",
+      "soft": "#F8EDEF",
+      "onColor": "#FFFFFF"
+    },
+    {
+      "id": "week-14",
+      "week": 14,
+      "title": "Read reports and evaluate claims",
+      "file": "content/week-14.json",
+      "color": "#9D4C70",
+      "ink": "#4E2638",
+      "soft": "#F5EDF1",
+      "onColor": "#FFFFFF"
+    },
+    {
+      "id": "week-15",
+      "week": 15,
+      "title": "Integrate and explain the results",
+      "file": "content/week-15.json",
+      "color": "#795185",
+      "ink": "#3C2842",
+      "soft": "#F2EEF3",
+      "onColor": "#FFFFFF"
+    }
+  ],
+  "sources": {
+    "openstax": {
+      "title": "OpenStax — Principles of Accounting, Volume 1: Financial Accounting",
+      "url": "https://openstax.org/details/books/principles-financial-accounting",
+      "detail": "Course textbook supplied as Financial Accounting.pdf."
+    },
+    "kimmel": {
+      "title": "Kimmel and Weygandt — Survey of Accounting, 2nd edition",
+      "detail": "Supplied course textbook; transaction analysis, statements, cash flows, and ratios."
+    },
+    "case": {
+      "title": "Summit Trail teaching case",
+      "detail": "Original fictional June example. See the case handout. All amounts are USD; no adjusting or closing entries."
+    },
+    "trial": {
+      "title": "OpenStax — Prepare a Trial Balance",
+      "url": "https://openstax.org/books/principles-financial-accounting/pages/3-6-prepare-a-trial-balance"
+    },
+    "ias7": {
+      "title": "IFRS Foundation — IAS 7",
+      "url": "https://www.ifrs.org/issued-standards/list-of-standards/ias-7-statement-of-cash-flows/",
+      "detail": "Cash reconciliation and noncash disclosure. The teaching case states its own US GAAP interest convention."
+    },
+    "secguide": {
+      "title": "SEC — Beginners’ Guide to Financial Statements",
+      "url": "https://www.sec.gov/investor/pubs/begfinstmtguide.htm"
+    },
+    "foreign": {
+      "title": "SEC — Financial Reporting Manual, Topic 6",
+      "url": "https://www.sec.gov/about/divisions-offices/division-corporation-finance/financial-reporting-manual/frm-topic-6"
+    },
+    "korea": {
+      "title": "IFRS Foundation — South Korea jurisdiction profile",
+      "url": "https://www.ifrs.org/use-around-the-world/use-of-ifrs-standards-by-jurisdiction/view-jurisdiction/south-korea/"
+    },
+    "valueup": {
+      "title": "Korean FSC — Corporate Value-up Program, February 26, 2024",
+      "url": "https://www.fsc.go.kr/eng/pr010101/81778"
+    },
+    "ifrs18": {
+      "title": "IFRS Foundation — IFRS 18",
+      "url": "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-18-presentation-and-disclosure-in-financial-statements/"
+    },
+    "apple": {
+      "title": "Apple — 2025 Form 10-K",
+      "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm",
+      "detail": "Fixed-year reading; fiscal year ended September 27, 2025. Source figures checked against the filing."
+    }
+  }
+}

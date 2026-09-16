@@ -1,0 +1,21 @@
+{
+  "company": "Cedar Co. — fictional",
+  "currency": "USD",
+  "period": "Two full years",
+  "year1": {
+    "revenue": 90000,
+    "net_income": 9000,
+    "beginning_assets": 70000,
+    "ending_assets": 80000,
+    "liabilities": 48000,
+    "equity": 32000
+  },
+  "year2": {
+    "revenue": 100000,
+    "net_income": 12500,
+    "beginning_assets": 80000,
+    "ending_assets": 100000,
+    "liabilities": 60000,
+    "equity": 40000
+  }
+}
