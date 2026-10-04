@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terra Galactic Force Terminal</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --accent: #89dce7;
+      --text: #d0e1e6;
+      --muted: #92afb8;
+      --edge: #335965;
+      --button: #142a33;
+      --hover: #203e47;
+      --glow: #3677aa26;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+    * { box-sizing: border-box; }
+    html { background: #03060e; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: 72px 24px;
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.72;
+      background: radial-gradient(ellipse at 12% 80%, #14213d 0, transparent 65%), #03060e;
+      isolation: isolate;
+    }
+    .space-scene, .vignette {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -2;
+    }
+    .space-scene { transform: scale(1.025); }
+    .space, .sparkles {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .sparkle {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, #eaf4ff 0, #adcaff70 12%, #669de630 30%, transparent 70%);
+      opacity: .06;
+    }
+    .atmosphere { opacity: .18; }
+    .motion-ready { animation: space-drift 150s ease-in-out infinite alternate; }
+    .motion-ready .sparkle { animation: star-shimmer var(--period) ease-in-out var(--delay) infinite; }
+    .motion-ready .atmosphere { animation: atmosphere-breathe 18s ease-in-out -6s infinite alternate; }
+    .is-paused, .is-paused .sparkle, .is-paused .atmosphere { animation-play-state: paused; }
+    @keyframes space-drift {
+      from { transform: scale(1.025) translate(-.28%, .18%); }
+      to { transform: scale(1.032) translate(.28%, -.18%); }
+    }
+    @keyframes star-shimmer {
+      0%, 100% { opacity: .035; }
+      50% { opacity: .25; }
+    }
+    @keyframes atmosphere-breathe {
+      from { opacity: .10; }
+      to { opacity: .27; }
+    }
+    .vignette {
+      z-index: -1;
+      background: radial-gradient(ellipse at center, transparent 45%, #02040b99 100%);
+    }
+    .terminal {
+      position: relative;
+      width: min(100%, 620px);
+      background: #090b0e;
+      border: 1px solid var(--edge);
+      border-radius: 6px;
+      box-shadow: 0 0 0 5px #07090ed9, 0 22px 75px #000c, 0 0 42px var(--glow);
+    }
+    .titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 18px;
+      background: #101318;
+      border-bottom: 1px solid #292c30;
+      border-radius: 5px 5px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+      letter-spacing: 1px;
+    }
+    .status-light {
+      width: 6px;
+      height: 6px;
+      flex: 0 0 auto;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent);
+    }
+    .content { padding: 25px 30px 24px; }
+    .heading {
+      text-align: center;
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid #292b2e;
+    }
+    h1 {
+      margin: 0 0 7px;
+      color: var(--accent);
+      font-size: 18px;
+      line-height: 1.5;
+      letter-spacing: .35px;
+      font-weight: 500;
+    }
+    .access {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+      letter-spacing: 1.5px;
+    }
+    .section-label {
+      display: block;
+      margin: 0 0 9px;
+      color: var(--accent);
+      font-size: 12px;
+      line-height: 1.5;
+      letter-spacing: 1.3px;
+      font-weight: 400;
+    }
+    .story { margin: 0 0 24px; }
+    .hint {
+      margin-bottom: 26px;
+      padding-left: 15px;
+      border-left: 2px solid var(--accent);
+    }
+    .hint p { margin: 0; font-size: 14px; line-height: 1.75; }
+    form { margin: 0; }
+    .answer-label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 12px; }
+    .input-row { display: flex; align-items: stretch; gap: 9px; }
+    input {
+      flex: 1 1 0;
+      min-width: 0;
+      width: 100%;
+      padding: 11px 13px;
+      border: 1px solid var(--edge);
+      border-radius: 2px;
+      background: #101319;
+      color: var(--text);
+      font: inherit;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    input::placeholder { color: var(--muted); opacity: .8; }
+    button { font: inherit; cursor: pointer; }
+    .verify {
+      min-height: 46px;
+      padding: 11px 17px;
+      border: 1px solid var(--accent);
+      border-radius: 2px;
+      background: var(--button);
+      color: var(--accent);
+      font-size: 12px;
+      line-height: 1.5;
+      letter-spacing: 1px;
+    }
+    .verify:hover { background: var(--hover); }
+    input:focus-visible, button:focus-visible, a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+    }
+    .feedback {
+      margin-top: 17px;
+      padding: 13px 15px;
+      border: 1px solid var(--edge);
+      border-radius: 2px;
+      background: #101318;
+      font-size: 14px;
+      line-height: 1.75;
+      overflow-wrap: anywhere;
+    }
+    .access-granted { color: var(--text); }
+    .access-denied { color: #ffb9b3; border-color: #87524c; }
+    .feedback p { margin: 0; }
+    .feedback p + p { margin-top: 10px; }
+    .feedback-label { color: var(--accent); font-size: 12px; letter-spacing: 1px; }
+    a { color: var(--accent); text-underline-offset: 4px; }
+    a:hover { text-decoration-thickness: 2px; }
+    .continue { display: inline-block; padding: 5px 0; letter-spacing: .6px; }
+    .bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 3px 18px;
+      border-top: 1px solid #24272b;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+    .music-toggle {
+      min-height: 44px;
+      padding: 8px 0 8px 12px;
+      border: 0;
+      border-radius: 2px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+      letter-spacing: .5px;
+    }
+    .music-toggle:hover { color: var(--accent); }
+    .footer-controls { display: flex; align-items: center; gap: 14px; }
+    .motion-toggle {
+      min-height: 44px;
+      padding: 8px 0;
+      border: 0;
+      border-radius: 2px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+      letter-spacing: .5px;
+    }
+    .motion-toggle:hover { color: var(--accent); }
+    audio { display: none; }
+    [hidden] { display: none !important; }
+    noscript p { margin: 18px 0 0; color: #ffb9b3; font-size: 13px; }
+    @media (max-width: 640px) {
+      body { padding: 82px 20px; }
+      .content { padding: 23px 24px; }
+    }
+    @media (max-width: 420px) {
+      body { padding: 78px 16px; }
+      .titlebar { padding: 10px 14px; }
+      .content { padding: 22px 19px; }
+      h1 { font-size: 16px; }
+      .input-row { flex-direction: column; }
+      input { flex: 0 0 auto; }
+      .verify { width: 100%; }
+      .bottom { padding: 7px 14px 3px; gap: 0; font-size: 10px; flex-wrap: wrap; }
+      .footer-controls { flex: 1 1 100%; justify-content: space-between; }
+      .music-toggle, .motion-toggle { font-size: 10px; }
+    }
+
+  
+    .signin-field { margin-bottom: 17px; }
+    .signin-field input, .signin-field select { display: block; width: 100%; }
+    select { padding: 11px 13px; background: #101319; border: 1px solid var(--edge); border-radius: 2px; color: var(--text); font: inherit; font-size: 16px; min-height: 46px; }
+    select:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    .signin-submit { width: 100%; margin-top: 4px; }
+    button:disabled { opacity: .55; cursor: wait; }
+    .signout { min-height: 44px; padding: 8px 0; border: 0; border-radius: 2px; background: transparent; color: var(--muted); font-size: 11px; letter-spacing: .5px; }
+    .signout:hover { color: var(--accent); }
+    .choice-row { display: flex; gap: 12px; margin-top: 24px; }
+    .choice-row button { flex: 1; }
+    .message-line { font-size: 14px; line-height: 1.75; margin: 0 0 18px; }
+    .TGF-id-tag, .TGF-message { color: #a0ddea; }
+    .OSA-id-tag, .OSA-message { color: #f1c6a8; }
+    .OSA-AI-tag, .OSA-AI-message { color: #c4b3fa; }
+    .sparkle-text { display: block; color: var(--accent); text-align: center; font-size: 18px; }
+    .session-note { color: var(--muted); font-size: 13px; }
+    #notice { margin-top: 18px; }
+    @media (max-width: 420px) { .signout { font-size: 10px; } }
+</style>
+</head>
+<body>
+  <div class="space-scene" id="spaceScene" aria-hidden="true">
+    <canvas class="space" id="space"></canvas><div class="sparkles" id="sparkles"></div><canvas class="space atmosphere" id="atmosphere"></canvas>
+  </div>
+  <div class="vignette" aria-hidden="true"></div>
+  <main class="terminal" aria-labelledby="terminalTitle">
+    <div class="titlebar"><span>TGF_TERMINAL</span><span class="status-light" aria-hidden="true"></span></div>
+    <div class="content">
+      <header class="heading"><h1 id="terminalTitle">Terra Galactic Force Terminal</h1><div class="access" id="accessLabel">SIGN-ON REQUIRED</div></header>
+      <div id="terminalContent"></div>
+      <div class="feedback" id="notice" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+      <noscript><p>Enable JavaScript to use this terminal.</p></noscript>
+    </div>
+    <footer class="bottom"><span>TERRA GALACTIC FORCE</span><div class="footer-controls">
+      <button class="motion-toggle" id="motionToggle" type="button" aria-pressed="false" aria-label="Resume background animation">MOTION OFF</button>
+      <button class="music-toggle" id="musicToggle" type="button" aria-pressed="false" aria-label="Turn background music on" hidden>SOUND OFF</button>
+      <button class="signout" id="signOut" type="button" hidden>SIGN OUT</button>
+    </div></footer>
+  </main>
+  <audio id="backgroundMusic" loop preload="none"></audio>
+  <script>
+    (() => {
+      'use strict';
+      const BOOT = <?!= bootJson ?>;
+      const PREVIEW = false;
+
+      const canvas = document.getElementById('space');
+      const spaceScene = document.getElementById('spaceScene');
+      const sparkles = document.getElementById('sparkles');
+      const atmosphere = document.getElementById('atmosphere');
+      const motionButton = document.getElementById('motionToggle');
+      const motionPreference = window.matchMedia
+        ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: true };
+      let motionEnabled = !motionPreference.matches;
+      function updateMotion() {
+        spaceScene.classList.add('motion-ready');
+        spaceScene.classList.toggle('is-paused', !motionEnabled || document.hidden);
+        motionButton.textContent = motionEnabled ? 'MOTION ON' : 'MOTION OFF';
+        motionButton.setAttribute('aria-pressed', String(motionEnabled));
+        motionButton.setAttribute('aria-label', motionEnabled ? 'Pause background animation' : 'Resume background animation');
+      }
+      motionButton.addEventListener('click', () => { motionEnabled = !motionEnabled; updateMotion(); });
+      function preferenceChanged() { motionEnabled = !motionPreference.matches; updateMotion(); }
+      if (motionPreference.addEventListener) motionPreference.addEventListener('change', preferenceChanged);
+      else if (motionPreference.addListener) motionPreference.addListener(preferenceChanged);
+      document.addEventListener('visibilitychange', updateMotion);
+      window.addEventListener('pageshow', updateMotion);
+      let scene = BOOT.scene;
+      function hash(x, y) {
+        const n = Math.sin(x * 127.1 + y * 311.7 + scene.seed * .01) * 43758.5453;
+        return n - Math.floor(n);
+      }
+      function noise(x, y) {
+        const i = Math.floor(x), j = Math.floor(y), u = x - i, v = y - j;
+        const sx = u * u * (3 - 2 * u), sy = v * v * (3 - 2 * v);
+        return (hash(i, j) * (1 - sx) + hash(i + 1, j) * sx) * (1 - sy)
+          + (hash(i, j + 1) * (1 - sx) + hash(i + 1, j + 1) * sx) * sy;
+      }
+      function cloud(x, y) {
+        return noise(x, y) * .55 + noise(x * 2.03 + 9, y * 2.03 + 3) * .28
+          + noise(x * 4.1 + 4, y * 4.1 + 11) * .17;
+      }
+      function paintSpace() {
+        const width = window.innerWidth, height = window.innerHeight;
+        if (!width || !height) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        const scale = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.round(width * scale);
+        canvas.height = Math.round(height * scale);
+        ctx.scale(scale, scale);
+        atmosphere.width = canvas.width;
+        atmosphere.height = canvas.height;
+        const atmosphereContext = atmosphere.getContext('2d');
+        if (atmosphereContext) atmosphereContext.scale(scale, scale);
+        sparkles.replaceChildren();
+        ctx.fillStyle = '#020610';
+        ctx.fillRect(0, 0, width, height);
+
+        const nebula = document.createElement('canvas');
+        nebula.width = 420;
+        nebula.height = Math.min(950, Math.max(240, Math.round(420 * height / width)));
+        const nctx = nebula.getContext('2d');
+        if (nctx) {
+          const image = nctx.createImageData(nebula.width, nebula.height);
+          for (let y = 0; y < nebula.height; y++) for (let x = 0; x < nebula.width; x++) {
+            const nx = x / nebula.width, ny = y / nebula.height;
+            const f = cloud(nx * 6.5, ny * 7.5);
+            const curve = scene.direction === 1
+              ? .12 + nx * .69 + Math.sin(nx * 6.3) * .12
+              : scene.direction === 2 ? .3 + Math.sin(nx * 3.8) * .19
+              : .82 - nx * .59 + Math.sin(nx * 5.4) * .1;
+            const band = Math.exp(-Math.pow((ny - curve + (.5 - f) * .22) / .15, 2));
+            const wisps = Math.exp(-Math.pow((ny - curve - .19 + (.5 - f) * .34) / .25, 2)) * .25;
+            const density = Math.pow(Math.max(0, (f - .29) * 1.75), 1.75) * (band + wisps) * scene.strength;
+            const mix = (Math.sin(nx * 4.4 + .7) + 1) / 2;
+            const k = (y * nebula.width + x) * 4;
+            for (let c = 0; c < 3; c++) image.data[k + c] = Math.round(
+              3 + (scene.colors[0][c] * mix + scene.colors[1][c] * (1 - mix)) * density
+            );
+            image.data[k + 3] = 255;
+          }
+          nctx.putImageData(image, 0, 0);
+          ctx.drawImage(nebula, 0, 0, width, height);
+        }
+
+        let seed = scene.seed;
+        const random = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+        const count = Math.round(width * height / 680);
+        for (let i = 0; i < count; i++) {
+          const x = random() * width, y = random() * height, bright = random();
+          const radius = .3 + Math.pow(bright, 5) * 1.4;
+          if (bright > .973) {
+            const glow = ctx.createRadialGradient(x, y, 0, x, y, 7);
+            glow.addColorStop(0, '#dfefffbd');
+            glow.addColorStop(.25, '#7aa6ef66');
+            glow.addColorStop(1, '#6b8bc900');
+            ctx.fillStyle = glow;
+            ctx.fillRect(x - 7, y - 7, 14, 14);
+          }
+          ctx.fillStyle = `rgba(${190 + Math.round(bright * 60)},${205 + Math.round(bright * 44)},255,${.26 + bright * .68})`;
+          ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.fill();
+          if (bright > .985) {
+            const sparkle = document.createElement('span');
+            sparkle.className = 'sparkle';
+            sparkle.style.cssText = `left:${x / width * 100}%;top:${y / height * 100}%;--period:${8 + hash(x, y) * 9}s;--delay:${-(x * .017 + y * .013) % 17}s;`;
+            sparkles.appendChild(sparkle);
+          }
+          if (bright > .995) {
+            ctx.strokeStyle = '#badcff70'; ctx.lineWidth = .6;
+            ctx.beginPath(); ctx.moveTo(x - 5, y); ctx.lineTo(x + 5, y);
+            ctx.moveTo(x, y - 5); ctx.lineTo(x, y + 5); ctx.stroke();
+          }
+        }
+
+        function planet(cx, cy, r, colors, tilt = 0, icy = false) {
+          if (atmosphereContext) {
+            const breathingHalo = atmosphereContext.createRadialGradient(cx, cy, r * .99, cx, cy, r * 1.05);
+            breathingHalo.addColorStop(0, colors[0] + '00');
+            breathingHalo.addColorStop(.18, colors[0] + 'ad');
+            breathingHalo.addColorStop(.42, colors[1] + '66');
+            breathingHalo.addColorStop(1, colors[1] + '00');
+            atmosphereContext.fillStyle = breathingHalo;
+            atmosphereContext.fillRect(cx - r * 1.05, cy - r * 1.05, r * 2.1, r * 2.1);
+          }
+          const halo = ctx.createRadialGradient(cx, cy, r * .985, cx, cy, r * 1.065);
+          halo.addColorStop(0, '#a0dfff00'); halo.addColorStop(.2, colors[0] + '78');
+          halo.addColorStop(.36, colors[1] + '44'); halo.addColorStop(1, '#122f5a00');
+          ctx.fillStyle = halo; ctx.fillRect(cx - r * 1.07, cy - r * 1.07, r * 2.14, r * 2.14);
+          ctx.save(); ctx.translate(cx, cy); ctx.rotate(tilt);
+          ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.clip();
+          const fill = ctx.createRadialGradient(-r * .55, -r * .65, r * .08, r * .15, r * .1, r * 1.4);
+          fill.addColorStop(0, colors[0]); fill.addColorStop(.21, colors[1]);
+          fill.addColorStop(.48, colors[2]); fill.addColorStop(.72, colors[3]); fill.addColorStop(1, '#020912');
+          ctx.fillStyle = fill; ctx.fillRect(-r, -r, r * 2, r * 2);
+          for (let j = 0; j < 94; j++) {
+            const py = -r + j * r / 47;
+            ctx.strokeStyle = `rgba(195,208,234,${.025 + random() * (icy ? .065 : .11)})`;
+            ctx.lineWidth = 2 + random() * r * .025;
+            ctx.beginPath(); ctx.moveTo(-r, py);
+            ctx.bezierCurveTo(-r * .4, py + r * .1, r * .3, py - r * .16, r, py + r * .04); ctx.stroke();
+          }
+          const shadow = ctx.createLinearGradient(-r * .5, -r, r * .65, r * .15);
+          shadow.addColorStop(0, '#02061100'); shadow.addColorStop(.55, '#02061190'); shadow.addColorStop(1, '#020611fa');
+          ctx.fillStyle = shadow; ctx.fillRect(-r, -r, r * 2, r * 2);
+          ctx.restore();
+          ctx.strokeStyle = colors[0] + '80'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.arc(cx, cy, r, -Math.PI * .95, -Math.PI * .08); ctx.stroke();
+        }
+
+        if (scene.kind === 'orbit') {
+          planet(width * .10, height * .87, Math.max(width * .37, 210),
+            ['#b9daf5', '#5b9acb', '#1c4c7f', '#0a203e'], -.12);
+        }
+        if (scene.kind === 'rings') {
+          const cx = width * .93, cy = height * .26, r = Math.max(124, Math.min(width * .155, 280));
+          function rings(front) {
+            ctx.save(); ctx.translate(cx, cy); ctx.rotate(-.35);
+            for (let j = 0; j < 48; j++) {
+              const ring = r * (1.32 + j * .011);
+              ctx.strokeStyle = `rgba(176,155,220,${(.03 + random() * .10) * (front ? 1.35 : .75)})`;
+              ctx.lineWidth = 1.5;
+              ctx.beginPath(); ctx.ellipse(0, 0, ring, ring * .29, 0, front ? 0 : Math.PI, front ? Math.PI : Math.PI * 2); ctx.stroke();
+            }
+            ctx.restore();
+          }
+          rings(false);
+          planet(cx, cy, r, ['#ddd0f3', '#8c73b5', '#49316b', '#1b1439'], -.35);
+          rings(true);
+        }
+        if (scene.kind === 'horizon') {
+          const r = Math.max(width * .7, 420);
+          planet(width * .58, height + r * .51, r,
+            ['#e1f3f9', '#8eb7c8', '#325c73', '#0b253b'], .1, true);
+          planet(width * .13, height * .17, Math.max(14, width * .019),
+            ['#c8d7e1', '#718391', '#2b394c', '#0a1424'], 0, true);
+        }
+      }
+      let lastSize = '';
+      let repaint = 0;
+      function schedulePaint() {
+        cancelAnimationFrame(repaint);
+        repaint = requestAnimationFrame(() => {
+          const size = `${window.innerWidth}:${window.innerHeight}:${window.devicePixelRatio}`;
+          if (size !== lastSize) { paintSpace(); lastSize = size; }
+        });
+      }
+      window.addEventListener('resize', schedulePaint, { passive: true });
+      updateMotion();
+      schedulePaint();
+
+      function setBackdrop(nextScene) {
+        if (JSON.stringify(scene) !== JSON.stringify(nextScene)) { scene = nextScene; lastSize = ''; schedulePaint(); }
+      }
+
+      const content = document.getElementById('terminalContent');
+      const notice = document.getElementById('notice');
+      const title = document.getElementById('terminalTitle');
+      const access = document.getElementById('accessLabel');
+      const signOutButton = document.getElementById('signOut');
+      const music = document.getElementById('backgroundMusic');
+      const musicButton = document.getElementById('musicToggle');
+      const SESSION_KEY = 'dd.session.v1';
+      let sessionToken = '';
+      let currentTicket = '';
+      let generation = 0;
+      let busy = false;
+      let draft = null;
+      let currentAudio = '';
+
+      function escapeText(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
+      }
+      function savedSession(value) {
+        try {
+          if (value === undefined) return sessionStorage.getItem(SESSION_KEY) || '';
+          if (value) sessionStorage.setItem(SESSION_KEY, value); else sessionStorage.removeItem(SESSION_KEY);
+        } catch (_) { /* Storage may be unavailable in an embedded browser. */ }
+        return '';
+      }
+      function showNotice(message, denied = false) {
+        notice.hidden = !message;
+        notice.className = denied ? 'feedback access-denied' : 'feedback';
+        notice.textContent = message || '';
+      }
+      function setBusy(value) {
+        busy = value;
+        content.querySelectorAll('input, select, button').forEach(control => { control.disabled = value; });
+        signOutButton.disabled = value;
+      }
+      function setTheme(theme) {
+        ['accent', 'text', 'muted', 'edge', 'button', 'hover', 'glow'].forEach(key => {
+          if (/^#[0-9a-f]{6}([0-9a-f]{2})?$/i.test(theme[key] || '')) document.documentElement.style.setProperty('--' + key, theme[key]);
+        });
+      }
+      function rpc(method, ...args) {
+        return new Promise((resolve, reject) => {
+          if (PREVIEW) { reject(new Error('Design preview — sign-on is inactive.')); return; }
+          if (typeof google === 'undefined' || !google.script || !google.script.run) { reject(new Error('Terminal connection unavailable.')); return; }
+          google.script.run.withSuccessHandler(resolve).withFailureHandler(() => reject(new Error('Terminal connection interrupted. Please reconnect.')))[method](...args);
+        });
+      }
+      function checkReply(reply) {
+        if (!reply || !reply.ok) {
+          const error = new Error(reply && reply.message || 'Terminal connection unavailable.');
+          error.code = reply && reply.code || 'UNAVAILABLE';
+          throw error;
+        }
+        return reply;
+      }
+      function requestId() {
+        if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+        return Date.now().toString(16) + '-' + Math.random().toString(16).slice(2) + Math.random().toString(16).slice(2);
+      }
+      function resetAudio(url) {
+        const safeUrl = /^https:\/\//i.test(url || '') ? url : '';
+        if (safeUrl !== currentAudio) {
+          music.pause();
+          if (safeUrl) music.src = safeUrl; else music.removeAttribute('src');
+          currentAudio = safeUrl;
+          musicButton.textContent = 'SOUND OFF';
+          musicButton.setAttribute('aria-pressed', 'false');
+        }
+        musicButton.hidden = !safeUrl;
+      }
+      function answerForm(label, placeholder) {
+        return `<form id="answerForm" data-action="verify" onsubmit="return false" method="post"><label class="answer-label" for="answer">${escapeText(label)}</label><div class="input-row"><input id="answer" name="answer" type="text" maxlength="512" autocomplete="off" autocapitalize="off" spellcheck="false" required placeholder="${escapeText(placeholder)}"><button class="verify" type="submit">VERIFY</button></div></form>`;
+      }
+      function showSignOn(message = '') {
+        generation++;
+        busy = false;
+        signOutButton.disabled = false;
+        currentTicket = '';
+        draft = null;
+        title.textContent = 'Terra Galactic Force Terminal';
+        access.textContent = 'SIGN-ON REQUIRED';
+        setTheme(BOOT.theme);
+        setBackdrop(BOOT.scene);
+        resetAudio('');
+        signOutButton.hidden = true;
+        content.innerHTML = `<p class="story">Enter your Gradeviewer credentials to establish a terminal session.</p>
+          <form id="signOnForm" data-action="signOn" onsubmit="return false" method="post">
+            <div class="signin-field"><label class="answer-label" for="classKey">Class</label><select id="classKey" name="classKey" required><option value="" disabled selected>Select your class...</option>${BOOT.classes.map(option => `<option value="${escapeText(option.key)}">${escapeText(option.label)}</option>`).join('')}</select></div>
+            <div class="signin-field"><label class="answer-label" for="studentId">Student ID</label><input id="studentId" name="studentId" type="text" maxlength="64" autocomplete="username" required></div>
+            <div class="signin-field"><label class="answer-label" for="password">Password</label><input id="password" name="password" type="password" maxlength="256" autocomplete="current-password" required></div>
+            <button class="verify signin-submit" type="submit">SIGN ON</button>
+          </form>`;
+        showNotice(message || (PREVIEW ? 'Design preview — sign-on is inactive.' : ''), Boolean(message));
+      }
+      function clearSession(message) {
+        sessionToken = '';
+        savedSession('');
+        showSignOn(message || 'Session ended. Please sign on again.');
+      }
+      function applyView(view) {
+        const allowed = ['clue', 'waiting', 'decision', 'key', 'transmission', 'completeKeep', 'completeShare'];
+        if (!view || !allowed.includes(view.kind) || typeof view.ticket !== 'string') throw new Error('Terminal response unavailable.');
+        const same = currentTicket === view.ticket && content.childElementCount > 0;
+        currentTicket = view.ticket;
+        signOutButton.hidden = false;
+        setTheme(view.theme);
+        setBackdrop(view.scene);
+        title.textContent = view.title || 'Terra Galactic Force Terminal';
+        access.textContent = view.access || 'GENERAL ACCESS';
+        resetAudio(view.audioUrl);
+        if (same) return;
+        if (view.kind === 'clue') {
+          content.innerHTML = `<section aria-labelledby="storyLabel"><h2 class="section-label" id="storyLabel">STORY UPDATE</h2><p class="story">${escapeText(view.story)}</p></section><aside class="hint" aria-labelledby="hintLabel"><h2 class="section-label" id="hintLabel">HINT</h2><p>${escapeText(view.hint)}</p></aside>${answerForm('Clue answer', 'Enter your finding...')}`;
+        } else if (view.kind === 'key') {
+          content.innerHTML = `<p class="story">${escapeText(view.text)}</p>${answerForm('Level 2 encryption key', view.prompt)}`;
+        } else if (view.kind === 'decision') {
+          content.innerHTML = `<p class="story">${escapeText(view.text)}</p><div class="choice-row"><button class="verify" type="button" data-choice="KEEP">[ KEEP ]</button><button class="verify" type="button" data-choice="SHARE">[ SHARE ]</button></div>`;
+        } else if (view.kind === 'transmission') {
+          content.innerHTML = view.messages.map(message => `<p class="message-line">${message}</p>`).join('') + '<button class="verify" type="button" data-close-transmission>[ CLOSE SESSION ]</button>';
+        } else if (view.kind === 'completeShare') {
+          content.innerHTML = view.storyLines.filter(Boolean).map(line => `<p class="message-line">${line}</p>`).join('');
+        } else if (view.kind === 'completeKeep') {
+          const url = /^https:\/\/youtu\.be\//.test(view.videoUrl || '') ? view.videoUrl : '';
+          content.innerHTML = `<p class="story">${escapeText(view.text)}</p>${url ? `<a class="continue" href="${escapeText(url)}" target="_blank" rel="noopener noreferrer">[ OPEN TRANSMISSION ]</a>` : ''}`;
+        } else content.innerHTML = `<p class="story">${escapeText(view.text)}</p>`;
+        const input = content.querySelector('#answer');
+        if (input && draft && draft.ticket === view.ticket) input.value = draft.answer;
+        draft = null;
+      }
+      function showReconnect(message) {
+        generation++;
+        busy = false;
+        signOutButton.disabled = false;
+        currentTicket = '';
+        content.innerHTML = '<p class="story">Re-establish the terminal connection to continue.</p><button class="verify" type="button" data-reconnect>RECONNECT</button>';
+        showNotice(message, true);
+        resetAudio('');
+      }
+      async function refreshCurrent(quiet = false) {
+        if (!sessionToken || document.hidden || busy || PREVIEW) return;
+        const mine = ++generation;
+        setBusy(true);
+        if (!quiet) showNotice('Establishing terminal connection...');
+        try {
+          const reply = checkReply(await rpc('getCurrent', sessionToken));
+          if (mine !== generation || document.hidden) return;
+          const changed = currentTicket !== reply.view.ticket;
+          applyView(reply.view);
+          if (!quiet || changed) showNotice('');
+        } catch (error) {
+          if (mine !== generation) return;
+          if (error.code === 'LOGIN_REQUIRED') clearSession(error.message);
+          else showReconnect(error.message);
+        } finally { if (mine === generation) setBusy(false); }
+      }
+      async function submitSignOn(form) {
+        if (busy) return;
+        const classKey = form.elements.classKey.value;
+        const id = form.elements.studentId.value.trim();
+        const password = form.elements.password.value;
+        form.elements.password.value = '';
+        if (PREVIEW) { showNotice('Design preview — sign-on is inactive.'); return; }
+        const mine = ++generation;
+        setBusy(true);
+        showNotice('Checking credentials...');
+        try {
+          const reply = checkReply(await rpc('signOn', classKey, id, password));
+          if (mine !== generation || document.hidden) return;
+          sessionToken = reply.sessionToken;
+          savedSession(sessionToken);
+          applyView(reply.view);
+          showNotice('');
+        } catch (error) { if (mine === generation) showNotice(error.message, true); }
+        finally { if (mine === generation) setBusy(false); }
+      }
+      async function performAction(method, ...details) {
+        if (busy || !sessionToken || !currentTicket || document.hidden) return;
+        const mine = ++generation;
+        const ticket = currentTicket;
+        const id = requestId();
+        setBusy(true);
+        showNotice('Verifying transmission...');
+        try {
+          const reply = checkReply(await rpc(method, sessionToken, ticket, ...details, id));
+          if (mine !== generation || document.hidden) return;
+          applyView(reply.view);
+          showNotice(reply.message || '', reply.code === 'DENIED');
+        } catch (error) {
+          if (mine !== generation) return;
+          if (error.code === 'LOGIN_REQUIRED') clearSession(error.message);
+          else {
+            showNotice(error.message, true);
+            // A response may have been lost after a committed answer. Reload authoritative state.
+            if (error.code === 'UNAVAILABLE' || !error.code) {
+              setBusy(false);
+              refreshCurrent();
+            }
+          }
+        } finally { if (mine === generation) setBusy(false); }
+      }
+      content.addEventListener('submit', event => {
+        event.preventDefault();
+        const form = event.target;
+        if (form.dataset.action === 'signOn') submitSignOn(form);
+        else if (form.dataset.action === 'verify') performAction('verifyCurrent', form.elements.answer.value);
+      });
+      content.addEventListener('click', event => {
+        const choice = event.target.closest('[data-choice]');
+        if (choice) { performAction('chooseOutcome', choice.dataset.choice); return; }
+        if (event.target.closest('[data-close-transmission]')) { performAction('closeTransmission'); return; }
+        if (event.target.closest('[data-reconnect]')) refreshCurrent();
+      });
+      signOutButton.addEventListener('click', async () => {
+        const previousToken = sessionToken;
+        sessionToken = '';
+        savedSession('');
+        showSignOn();
+        if (previousToken) { try { await rpc('signOut', previousToken); } catch (_) {} }
+      });
+      musicButton.addEventListener('click', async () => {
+        if (!currentAudio) return;
+        if (!music.paused) { music.pause(); return; }
+        try { await music.play(); }
+        catch { musicButton.textContent = 'SOUND UNAVAILABLE'; }
+      });
+      function updateSound() {
+        musicButton.textContent = music.paused ? 'SOUND OFF' : 'SOUND ON';
+        musicButton.setAttribute('aria-pressed', String(!music.paused));
+        musicButton.setAttribute('aria-label', music.paused ? 'Turn background music on' : 'Turn background music off');
+      }
+      music.addEventListener('play', updateSound);
+      music.addEventListener('pause', updateSound);
+      function concealProtectedView() {
+        const password = content.querySelector('#password');
+        if (password) password.value = '';
+        if (!sessionToken) return;
+        const input = content.querySelector('#answer');
+        if (input) draft = { ticket: currentTicket, answer: input.value };
+        generation++;
+        busy = false;
+        currentTicket = '';
+        content.replaceChildren();
+        showNotice('');
+        music.pause();
+      }
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) concealProtectedView(); else refreshCurrent();
+      });
+      window.addEventListener('pagehide', concealProtectedView);
+      window.addEventListener('pageshow', event => { if (event.persisted) refreshCurrent(); });
+      window.setInterval(() => { if (!document.hidden && sessionToken && !busy) refreshCurrent(true); }, 30000);
+      showSignOn();
+      if (!PREVIEW) {
+        sessionToken = savedSession();
+        if (sessionToken) refreshCurrent();
+      }
+
+    })();
+  </script>
+</body>
+</html>
