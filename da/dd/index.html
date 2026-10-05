@@ -341,7 +341,7 @@ function createDataDetectivesConnection(config) {
   function connect() {
     if (current) return current.promise;
     if (window.location.origin !== config.clientOrigin || window.top !== window) {
-      return Promise.reject(new Error('Open the terminal directly at josh-teacher.github.io/ibm/da/dd/.'));
+      return Promise.reject(new Error('Open the terminal directly at josuedean.github.io/ibm/da/dd/.'));
     }
     let url, channel;
     try {
@@ -421,7 +421,7 @@ function createDataDetectivesConnection(config) {
 }
 
     // Public deployment URL; answer keys and Sheet credentials remain in Apps Script.
-    const DD_CONNECTION = createDataDetectivesConnection({"appUrl": "https://script.google.com/macros/s/AKfycbwo9sae9WRxQRvnY47CoistwXiEV7nSi2OMYV4ux9j5-MipJ3nn50Cu48WnLmQAeqvrLA/exec", "clientOrigin": "https://josuedean.github.io"});
+    const DD_CONNECTION = createDataDetectivesConnection({"appUrl": "https://script.google.com/macros/s/AKfycbyj72g5XVMeJPJIt7-9bxFVxiNEbs17RPNCd4Reqnhh--_BuaRZDB4adnSprZNHtT4V0A/exec", "clientOrigin": "https://josuedean.github.io"});
   </script>
   <script>
     (() => {
