@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="color-scheme" content="dark">
+  <title>Data Detectives — Terminal Uplink</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; margin: 0; }
+    body {
+      min-height: 100vh;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(1px 1px at 12% 20%, #9bb6d4 98%, transparent),
+        radial-gradient(1px 1px at 79% 16%, #809cb8 98%, transparent),
+        radial-gradient(1px 1px at 36% 77%, #617e99 98%, transparent),
+        radial-gradient(1px 1px at 86% 66%, #a3bad2 98%, transparent),
+        radial-gradient(ellipse at 70% 40%, #112138 0, #080e18 40%, #03060b 80%);
+      color: #d4e7f0;
+      font: 15px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+    main {
+      width: min(100%, 620px);
+      border: 1px solid #39556c;
+      background: #07101be8;
+      box-shadow: 0 20px 80px #0008;
+    }
+    header {
+      padding: 12px 20px;
+      border-bottom: 1px solid #263c50;
+      color: #84bfdb;
+      font-size: 12px;
+      letter-spacing: .12em;
+    }
+    .content { padding: 24px; }
+    p { margin: 0 0 16px; }
+    #status::before { content: "> "; color: #7ebbd9; }
+    a { color: #9cddf5; text-underline-offset: 4px; }
+    a:focus-visible { outline: 2px solid #9cddf5; outline-offset: 5px; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main aria-label="Data Detectives terminal connection">
+    <header>TERRA GALACTIC FORCE // DATA DETECTIVES</header>
+    <div class="content">
+      <p id="status" role="status">Establishing terminal uplink…</p>
+      <a id="open-terminal" hidden>Open terminal</a>
+      <noscript><p>Enable JavaScript to open the terminal.</p></noscript>
+    </div>
+  </main>
+  <script>
+    // GitHub Pages entry file: put this in the published dd folder as index.html.
+    // Replace ONLY the value below with the deployed Apps Script URL ending /exec.
+    // Keep Code.gs, Game.gs, and the Apps Script Index.html in the private Google project.
+    const APP_URL = 'PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE';
+
+    const status = document.getElementById('status');
+    const link = document.getElementById('open-terminal');
+    try {
+      const destination = new URL(APP_URL);
+      if (destination.protocol !== 'https:' || destination.hostname !== 'script.google.com' ||
+          !destination.pathname.endsWith('/exec')) {
+        throw new Error('A deployed Apps Script web app URL is required.');
+      }
+      link.href = destination.href;
+      link.hidden = false;
+      status.textContent = 'Opening secure terminal…';
+      // Replace this history entry so Back does not immediately redirect again.
+      window.location.replace(destination.href);
+    } catch (error) {
+      status.textContent = 'The terminal is temporarily unavailable. Please check back soon.';
+      console.error('Data Detectives entry: replace APP_URL with the deployed /exec URL.');
+    }
+  </script>
+</body>
+</html>
