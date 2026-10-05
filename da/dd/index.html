@@ -4,6 +4,7 @@
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="same-origin">
   <title>Terra Galactic Force Terminal</title>
   <style>
     :root {
@@ -75,15 +76,28 @@
     }
     .vignette {
       z-index: -1;
-      background: radial-gradient(ellipse at center, transparent 45%, #02040b99 100%);
+      background: radial-gradient(ellipse at center, #01040c38 8%, transparent 64%, #02040ba6 100%);
     }
     .terminal {
       position: relative;
       width: min(100%, 620px);
-      background: #090b0e;
-      border: 1px solid var(--edge);
-      border-radius: 6px;
-      box-shadow: 0 0 0 5px #07090ed9, 0 22px 75px #000c, 0 0 42px var(--glow);
+      background: linear-gradient(145deg, #141c26 0%, #0c121b 36%, #080c13 100%);
+      border: 1px solid var(--accent);
+      border-radius: 9px;
+      box-shadow: 0 0 0 1px #e0f2ff12, 0 0 0 6px #050912c9,
+        0 38px 100px 20px #000d, 0 12px 30px #000b, 0 0 85px 12px var(--glow),
+        inset 0 1px 0 #eff8ff24, inset 0 -1px 0 #0009;
+    }
+    .terminal::before {
+      content: "";
+      position: absolute;
+      top: -1px;
+      left: 12%;
+      right: 12%;
+      height: 2px;
+      pointer-events: none;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      box-shadow: 0 -5px 26px var(--glow);
     }
     .titlebar {
       display: flex;
@@ -91,9 +105,10 @@
       justify-content: space-between;
       gap: 12px;
       padding: 10px 18px;
-      background: #101318;
-      border-bottom: 1px solid #292c30;
-      border-radius: 5px 5px 0 0;
+      background: linear-gradient(180deg, #233040, #17212d);
+      border-bottom: 1px solid var(--edge);
+      border-radius: 8px 8px 0 0;
+      box-shadow: inset 0 1px 0 #ffffff12, 0 4px 16px #0005;
       color: var(--muted);
       font-size: 11px;
       line-height: 1.5;
@@ -107,6 +122,10 @@
       border-radius: 50%;
       box-shadow: 0 0 8px var(--accent);
     }
+    .connection-indicator { display: flex; align-items: center; gap: 10px; font-size: 10px; letter-spacing: .6px; }
+    #connectionStatus[data-state="offline"] { color: #ffbeaa; }
+    #connectionStatus[data-state="offline"] + .status-light { background: #ffb08d; box-shadow: 0 0 7px #ffb08d66; }
+    .retry-link { margin-top: 12px; font-size: 11px; min-height: 40px; }
     .content { padding: 25px 30px 24px; }
     .heading {
       text-align: center;
@@ -154,7 +173,8 @@
       padding: 11px 13px;
       border: 1px solid var(--edge);
       border-radius: 2px;
-      background: #101319;
+      background: #070c14;
+      box-shadow: inset 0 2px 7px #0007, 0 1px 0 #ffffff07;
       color: var(--text);
       font: inherit;
       font-size: 16px;
@@ -279,11 +299,12 @@
   </div>
   <div class="vignette" aria-hidden="true"></div>
   <main class="terminal" aria-labelledby="terminalTitle">
-    <div class="titlebar"><span>TGF_TERMINAL</span><span class="status-light" aria-hidden="true"></span></div>
+    <div class="titlebar"><span>TGF_TERMINAL</span><span class="connection-indicator"><span id="connectionStatus" role="status" aria-live="polite">CONNECTING</span><span class="status-light" aria-hidden="true"></span></span></div>
     <div class="content">
       <header class="heading"><h1 id="terminalTitle">Terra Galactic Force Terminal</h1><div class="access" id="accessLabel">SIGN-ON REQUIRED</div></header>
       <div id="terminalContent"></div>
       <div class="feedback" id="notice" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+      <button class="verify retry-link" id="retryConnection" type="button" hidden>RETRY LINK</button>
       <noscript><p>Enable JavaScript to use this terminal.</p></noscript>
     </div>
     <footer class="bottom"><span>TERRA GALACTIC FORCE</span><div class="footer-controls">
@@ -298,8 +319,14 @@
 function createDataDetectivesConnection(config) {
   'use strict';
   const protocol = 'dd-bridge-v1';
+  const apiVersion = 2;
   const arity = { signOn: 3, getCurrent: 1, verifyCurrent: 4, chooseOutcome: 4, closeTransmission: 3, signOut: 1 };
   let current = null;
+  function connectionError(code, message) {
+    const error = new Error(message + ' [' + code + ']');
+    error.code = code;
+    return error;
+  }
   function randomId() {
     const bytes = new Uint8Array(16);
     window.crypto.getRandomValues(bytes);
@@ -341,14 +368,14 @@ function createDataDetectivesConnection(config) {
   function connect() {
     if (current) return current.promise;
     if (window.location.origin !== config.clientOrigin || window.top !== window) {
-      return Promise.reject(new Error('Open the terminal directly at josuedean.github.io/ibm/da/dd/.'));
+      return Promise.reject(connectionError('PUBLIC_URL_REQUIRED', 'Open the terminal directly at josuedean.github.io/ibm/da/dd/'));
     }
     let url, channel;
     try {
       url = new URL(config.appUrl);
       if (url.protocol !== 'https:' || url.hostname !== 'script.google.com' || !url.pathname.endsWith('/exec')) throw new Error();
       channel = randomId();
-    } catch (_) { return Promise.reject(new Error('Terminal connection is not configured. Please contact your instructor.')); }
+    } catch (_) { return Promise.reject(connectionError('CONFIGURATION', 'Terminal connection is not configured. Please contact your instructor.')); }
     const frame = document.createElement('iframe');
     frame.hidden = true;
     frame.title = 'Data Detectives server connection';
@@ -365,9 +392,17 @@ function createDataDetectivesConnection(config) {
       if (state.remote && (event.source !== state.remote || event.origin !== state.origin)) return;
       if (message.kind === 'ready') {
         const boot = message.boot;
+        if (!boot || boot.apiVersion !== apiVersion) {
+          disconnect(connectionError('UPDATE_REQUIRED', 'The terminal server needs an update. Please contact your instructor.'));
+          return;
+        }
         if (!boot || !Array.isArray(boot.classes) || !boot.classes.length || boot.classes.length > 20 ||
             boot.classes.some(option => !option || typeof option.key !== 'string' || typeof option.label !== 'string') ||
-            !boot.theme || !boot.scene) return;
+            !boot.theme || !boot.scene || typeof boot.ready !== 'boolean') return;
+        if (!boot.ready) {
+          disconnect(connectionError('SETUP_REQUIRED', 'Terminal setup is incomplete. Please contact your instructor.'));
+          return;
+        }
         state.remote = event.source;
         state.origin = event.origin;
         state.remote.postMessage({ protocol: protocol, channel: channel, kind: 'ack' }, state.origin);
@@ -388,10 +423,10 @@ function createDataDetectivesConnection(config) {
     current = state;
     window.addEventListener('message', state.receive);
     frame.addEventListener('error', () => {
-      if (current === state) disconnect(new Error('Terminal connection unavailable. Please try signing on again.'));
+      if (current === state) disconnect(connectionError('CONNECTION_FAILED', 'Cannot reach the terminal server. Check your connection or contact your instructor.'));
     });
     state.timer = window.setTimeout(() => {
-      if (current === state) disconnect(new Error('Terminal connection unavailable. Please try signing on again.'));
+      if (current === state) disconnect(connectionError('CONNECTION_TIMEOUT', 'The terminal server did not connect. Retry; if it persists, contact your instructor.'));
     }, 20000);
     url.searchParams.set('transport', 'bridge');
     url.searchParams.set('channel', channel);
@@ -408,7 +443,7 @@ function createDataDetectivesConnection(config) {
     const id = randomId();
     return new Promise((resolve, reject) => {
       const timer = window.setTimeout(() => {
-        if (current === state) disconnect(new Error('Terminal connection interrupted. Please reconnect.'));
+        if (current === state) disconnect(connectionError('REQUEST_TIMEOUT', 'The server did not respond. Reconnect to check your saved progress.'));
       }, 45000);
       state.pending.set(id, { resolve: resolve, reject: reject, timer: timer });
       try {
@@ -420,13 +455,13 @@ function createDataDetectivesConnection(config) {
   return Object.freeze({ connect: connect, call: call });
 }
 
-    // Public deployment URL; answer keys and Sheet credentials remain in Apps Script.
-    const DD_CONNECTION = createDataDetectivesConnection({"appUrl": "https://script.google.com/macros/s/AKfycbyj72g5XVMeJPJIt7-9bxFVxiNEbs17RPNCd4Reqnhh--_BuaRZDB4adnSprZNHtT4V0A/exec", "clientOrigin": "https://josuedean.github.io"});
+    // Public endpoint; credentials and answer keys remain private.
+    const DD_CONNECTION = createDataDetectivesConnection({"appUrl": "https://script.google.com/macros/library/d/1aqAIu6jrxMjVPJCvwBys7u3p2x0T7by-vo1Dt6aDU_39zPzzipjqrG7X/4", "clientOrigin": "https://josuedean.github.io"});
   </script>
   <script>
     (() => {
       'use strict';
-      const BOOT = {"classes": [{"key": "da_mon", "label": "Data Analysis (Mon)"}, {"key": "da_wed", "label": "Data Analysis (Wed)"}], "theme": {"accent": "#89dce7", "text": "#d0e1e6", "muted": "#92afb8", "edge": "#335965", "button": "#142a33", "hover": "#203e47", "glow": "#3677aa26"}, "scene": {"seed": 56447, "kind": "nebula", "direction": 0, "colors": [[95, 54, 160], [40, 88, 160]], "strength": 0.92}};
+      const BOOT = {"classes": [{"key": "da_mon", "label": "Data Analysis (Mon)"}, {"key": "da_wed", "label": "Data Analysis (Wed)"}], "theme": {"accent": "#89dce7", "text": "#d0e1e6", "muted": "#92afb8", "edge": "#335965", "button": "#142a33", "hover": "#203e47", "glow": "#3677aa26"}, "scene": {"seed": 56447, "kind": "nebula", "direction": 0, "colors": [[95, 54, 160], [40, 88, 160]], "strength": 0.92}, "build": "", "apiVersion": 2, "ready": false};
       const PREVIEW = false;
 
       const canvas = document.getElementById('space');
@@ -619,6 +654,10 @@ function createDataDetectivesConnection(config) {
       }
 
       const content = document.getElementById('terminalContent');
+      const REMOTE = DD_CONNECTION;
+      const CLIENT_BUILD = '2026-10-05.1';
+      const linkStatus = document.getElementById('connectionStatus');
+      const retryConnection = document.getElementById('retryConnection');
       const notice = document.getElementById('notice');
       const title = document.getElementById('terminalTitle');
       const access = document.getElementById('accessLabel');
@@ -648,10 +687,52 @@ function createDataDetectivesConnection(config) {
         notice.className = denied ? 'feedback access-denied' : 'feedback';
         notice.textContent = message || '';
       }
+      function setLinkStatus(text, offline = false) {
+        linkStatus.textContent = text;
+        linkStatus.setAttribute('data-state', offline ? 'offline' : 'online');
+        linkStatus.title = 'Client ' + CLIENT_BUILD + '; server ' + (BOOT.build || 'not connected');
+      }
+      function showFailure(error) {
+        const ordinary = ['DENIED', 'LOGIN_LIMIT', 'LOGIN_REQUIRED', 'INVALID_INPUT', 'INVALID_ACTION', 'BUSY'].includes(error.code);
+        if (!ordinary) {
+          setLinkStatus(error.code === 'SETUP_REQUIRED' ? 'SETUP REQUIRED' : 'LINK UNAVAILABLE', true);
+          retryConnection.hidden = Boolean(sessionToken);
+          console.warn('Data Detectives ' + CLIENT_BUILD + ': ' + (error.code || 'CONNECTION_FAILED') + '. ' + error.message);
+        }
+        showNotice(error.message, true);
+      }
+      async function probeConnection() {
+        const mine = generation;
+        setLinkStatus('CONNECTING');
+        retryConnection.hidden = true;
+        try {
+          const boot = REMOTE ? await REMOTE.connect() : BOOT;
+          if (boot.apiVersion !== 2 || !boot.ready) {
+            const error = new Error('Terminal setup is incomplete. Please contact your instructor. [SETUP_REQUIRED]');
+            error.code = 'SETUP_REQUIRED';
+            throw error;
+          }
+          Object.assign(BOOT, boot);
+          setLinkStatus('LINK READY');
+          if (!sessionToken && mine === generation) {
+            const select = content.querySelector('#classKey');
+            if (select) {
+              const selected = select.value;
+              select.innerHTML = '<option value="" disabled selected>Select your class...</option>' +
+                BOOT.classes.map(option => `<option value="${escapeText(option.key)}">${escapeText(option.label)}</option>`).join('');
+              if (BOOT.classes.some(option => option.key === selected)) select.value = selected;
+            }
+            setTheme(BOOT.theme);
+            setBackdrop(BOOT.scene);
+            showNotice('');
+          }
+        } catch (error) { if (!sessionToken && mine === generation) showFailure(error); }
+      }
       function setBusy(value) {
         busy = value;
         content.querySelectorAll('input, select, button').forEach(control => { control.disabled = value; });
         signOutButton.disabled = value;
+        retryConnection.disabled = value;
       }
       function setTheme(theme) {
         ['accent', 'text', 'muted', 'edge', 'button', 'hover', 'glow'].forEach(key => {
@@ -660,9 +741,13 @@ function createDataDetectivesConnection(config) {
       }
       function rpc(method, ...args) {
         if (PREVIEW) return Promise.reject(new Error('Design preview — sign-on is inactive.'));
-        return DD_CONNECTION.call(method, args);
+        return REMOTE.call(method, args);
       }
       function checkReply(reply) {
+        if (reply && (reply.ok || ['DENIED', 'LOGIN_LIMIT', 'LOGIN_REQUIRED', 'INVALID_INPUT', 'INVALID_ACTION', 'BUSY'].includes(reply.code))) {
+          setLinkStatus('LINK READY');
+          retryConnection.hidden = true;
+        }
         if (!reply || !reply.ok) {
           const error = new Error(reply && reply.message || 'Terminal connection unavailable.');
           error.code = reply && reply.code || 'UNAVAILABLE';
@@ -674,8 +759,17 @@ function createDataDetectivesConnection(config) {
         if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
         return Date.now().toString(16) + '-' + Math.random().toString(16).slice(2) + Math.random().toString(16).slice(2);
       }
+      function safeHttpsUrl(value, hostname = '') {
+        if (typeof value !== 'string' || !value) return '';
+        try {
+          const url = new URL(value);
+          if (url.protocol !== 'https:' || url.username || url.password) return '';
+          if (hostname && (url.hostname !== hostname || url.port)) return '';
+          return url.href;
+        } catch (_) { return ''; }
+      }
       function resetAudio(url) {
-        const safeUrl = /^https:\/\//i.test(url || '') ? url : '';
+        const safeUrl = safeHttpsUrl(url);
         if (safeUrl !== currentAudio) {
           music.pause();
           if (safeUrl) music.src = safeUrl; else music.removeAttribute('src');
@@ -700,6 +794,7 @@ function createDataDetectivesConnection(config) {
         setBackdrop(BOOT.scene);
         resetAudio('');
         signOutButton.hidden = true;
+        retryConnection.hidden = true;
         content.innerHTML = `<p class="story">Enter your Gradeviewer credentials to establish a terminal session.</p>
           <form id="signOnForm" data-action="signOn" onsubmit="return false" method="post">
             <div class="signin-field"><label class="answer-label" for="classKey">Class</label><select id="classKey" name="classKey" required><option value="" disabled selected>Select your class...</option>${BOOT.classes.map(option => `<option value="${escapeText(option.key)}">${escapeText(option.label)}</option>`).join('')}</select></div>
@@ -719,6 +814,8 @@ function createDataDetectivesConnection(config) {
         if (!view || !allowed.includes(view.kind) || typeof view.ticket !== 'string') throw new Error('Terminal response unavailable.');
         const same = currentTicket === view.ticket && content.childElementCount > 0;
         currentTicket = view.ticket;
+        setLinkStatus('LINK READY');
+        retryConnection.hidden = true;
         signOutButton.hidden = false;
         setTheme(view.theme);
         setBackdrop(view.scene);
@@ -737,7 +834,7 @@ function createDataDetectivesConnection(config) {
         } else if (view.kind === 'completeShare') {
           content.innerHTML = view.storyLines.filter(Boolean).map(line => `<p class="message-line">${line}</p>`).join('');
         } else if (view.kind === 'completeKeep') {
-          const url = /^https:\/\/youtu\.be\//.test(view.videoUrl || '') ? view.videoUrl : '';
+          const url = safeHttpsUrl(view.videoUrl, 'youtu.be');
           content.innerHTML = `<p class="story">${escapeText(view.text)}</p>${url ? `<a class="continue" href="${escapeText(url)}" target="_blank" rel="noopener noreferrer">[ OPEN TRANSMISSION ]</a>` : ''}`;
         } else content.innerHTML = `<p class="story">${escapeText(view.text)}</p>`;
         const input = content.querySelector('#answer');
@@ -767,7 +864,7 @@ function createDataDetectivesConnection(config) {
         } catch (error) {
           if (mine !== generation) return;
           if (error.code === 'LOGIN_REQUIRED') clearSession(error.message);
-          else showReconnect(error.message);
+          else { showReconnect(error.message); showFailure(error); }
         } finally { if (mine === generation) setBusy(false); }
       }
       async function submitSignOn(form) {
@@ -779,7 +876,7 @@ function createDataDetectivesConnection(config) {
         if (PREVIEW) { showNotice('Design preview — sign-on is inactive.'); return; }
         const mine = ++generation;
         setBusy(true);
-        showNotice('Checking credentials...');
+        showNotice('Establishing terminal session...');
         try {
           const reply = checkReply(await rpc('signOn', classKey, id, password));
           if (mine !== generation || document.hidden) return;
@@ -787,7 +884,7 @@ function createDataDetectivesConnection(config) {
           savedSession(sessionToken);
           applyView(reply.view);
           showNotice('');
-        } catch (error) { if (mine === generation) showNotice(error.message, true); }
+        } catch (error) { if (mine === generation) showFailure(error); }
         finally { if (mine === generation) setBusy(false); }
       }
       async function performAction(method, ...details) {
@@ -806,9 +903,9 @@ function createDataDetectivesConnection(config) {
           if (mine !== generation) return;
           if (error.code === 'LOGIN_REQUIRED') clearSession(error.message);
           else {
-            showNotice(error.message, true);
+            showFailure(error);
             // A response may have been lost after a committed answer. Reload authoritative state.
-            if (error.code === 'UNAVAILABLE' || !error.code) {
+            if (!['INVALID_INPUT', 'INVALID_ACTION', 'BUSY'].includes(error.code)) {
               setBusy(false);
               refreshCurrent();
             }
@@ -833,6 +930,9 @@ function createDataDetectivesConnection(config) {
         savedSession('');
         showSignOn();
         if (previousToken) { try { await rpc('signOut', previousToken); } catch (_) {} }
+      });
+      retryConnection.addEventListener('click', () => {
+        if (REMOTE) probeConnection(); else window.location.reload();
       });
       musicButton.addEventListener('click', async () => {
         if (!currentAudio) return;
@@ -867,27 +967,9 @@ function createDataDetectivesConnection(config) {
       window.addEventListener('pageshow', event => { if (event.persisted) refreshCurrent(); });
       window.setInterval(() => { if (!document.hidden && sessionToken && !busy) refreshCurrent(true); }, 30000);
       showSignOn();
+      if (PREVIEW) setLinkStatus('DESIGN PREVIEW');
       if (!PREVIEW) {
-        const openingGeneration = generation;
-        DD_CONNECTION.connect().then(boot => {
-          BOOT.classes = boot.classes;
-          BOOT.theme = boot.theme;
-          BOOT.scene = boot.scene;
-          if (!sessionToken && generation === openingGeneration) {
-            // Update public sign-on settings without clearing credentials already being typed.
-            const select = content.querySelector('#classKey');
-            if (select) {
-              const selected = select.value;
-              select.innerHTML = '<option value="" disabled selected>Select your class...</option>' +
-                BOOT.classes.map(option => `<option value="${escapeText(option.key)}">${escapeText(option.label)}</option>`).join('');
-              if (BOOT.classes.some(option => option.key === selected)) select.value = selected;
-            }
-            setTheme(BOOT.theme);
-            setBackdrop(BOOT.scene);
-          }
-        }).catch(error => {
-          if (!sessionToken && generation === openingGeneration) showNotice(error.message, true);
-        });
+        probeConnection();
         sessionToken = savedSession();
         if (sessionToken) refreshCurrent();
       }
