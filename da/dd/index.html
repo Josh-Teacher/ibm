@@ -368,7 +368,7 @@ function createDataDetectivesConnection(config) {
   function connect() {
     if (current) return current.promise;
     if (window.location.origin !== config.clientOrigin || window.top !== window) {
-      return Promise.reject(connectionError('PUBLIC_URL_REQUIRED', 'Open the terminal directly at josuedean.github.io/ibm/da/dd/'));
+      return Promise.reject(connectionError('PUBLIC_URL_REQUIRED', 'Open the terminal directly at josh-teacher.github.io/ibm/da/dd/'));
     }
     let url, channel;
     try {
