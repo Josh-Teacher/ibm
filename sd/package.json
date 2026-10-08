@@ -1,0 +1,8 @@
+{
+  "name": "space-dilemma-tournament-viewer",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": { "test": "node --test tests/core.test.mjs", "test:runtime": "node --test tests/runtime.test.mjs", "test:ui": "node --test tests/ui.test.mjs", "test:preview": "node --test tests/preview.test.mjs", "build:preview": "node tools/build_preview.mjs" },
+  "devDependencies": { "jsdom": "26.1.0", "pyodide": "0.27.7", "esbuild": "0.25.12" }
+}

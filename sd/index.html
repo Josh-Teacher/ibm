@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d14">
+  <meta name="description" content="A classroom tournament viewer for the Space Dilemma: live decisions, faction standings, and reproducible Python strategy matches.">
+  <title>Space Dilemma · Tournament Viewer</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="vendor/gsap.min.js"></script>
+  <script type="module" src="js/app.js"></script>
+</head>
+<body data-profile="ocean">
+  <a class="skip-link" href="#arena">Skip to match viewer</a>
+  <header class="site-header">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="8" stroke="currentColor"/><ellipse cx="24" cy="24" rx="23" ry="12" transform="rotate(-35 24 24)" stroke="currentColor"/><circle cx="42" cy="12" r="3" fill="currentColor"/></svg>
+      <div><p class="eyebrow">SPACE DILEMMA / CLASSROOM SERIES</p><h1>Tournament Viewer</h1></div>
+    </div>
+    <nav class="header-actions" aria-label="Viewer tools">
+      <span id="demo-badge" class="tag demo-tag" hidden>DEMO ROSTER</span>
+      <button id="fullscreen" type="button" class="quiet">⛶ <span>Project</span></button>
+      <button id="open-settings" type="button">⚙ <span>Setup</span></button>
+    </nav>
+  </header>
+  <main>
+    <div class="mission-bar">
+      <div><p class="eyebrow">LIVE TOURNAMENT CONTROL</p><h2 id="tournament-name">Tournament 01</h2></div>
+      <div class="rule-tags"><span id="format-tag" class="tag">CROSS-FACTION</span><span id="round-tag" class="tag">100 ROUNDS</span><span id="multiplier-tag" class="tag">MULTIPLIER · SEALED</span></div>
+      <button id="start" type="button" class="primary">Reveal &amp; start <span aria-hidden="true">↗</span></button>
+      <button id="stop" type="button" class="danger" hidden>Stop tournament</button>
+    </div>
+    <div class="status-strip"><span id="status-light" class="status-light"></span><p id="status" role="status">Load your faction folders, or explore with the demo roster.</p><span id="match-counter" class="mono">STANDBY</span></div>
+    <section class="flight-deck" aria-label="Tournament arena">
+      <aside class="faction-panel faction-f2">
+        <div class="faction-heading"><span class="faction-index">02</span><div><p class="eyebrow">LEFT SIDE</p><h2 id="f2-title">Faction 2</h2></div><span id="f2-count" class="roster-count">0</span></div>
+        <div class="faction-total"><span>FACTION POINTS</span><strong id="f2-total">0</strong><small id="f2-survivors">Awaiting roster</small></div>
+        <ol id="f2-roster" class="roster" aria-label="Faction 2 strategies"></ol>
+        <div class="roster-empty" id="f2-empty"><span class="orbit-icon" aria-hidden="true">◌</span><p>Your strategies belong here.</p><small>Place Python files in <code>f2/</code>.</small></div>
+        <p class="faction-footnote"><span class="color-dot"></span><span id="f2-note">Ready to make contact</span></p>
+      </aside>
+      <section id="arena" class="arena-panel" tabindex="-1" aria-label="Current match visualization">
+        <div class="arena-heading"><span class="eyebrow" id="match-label">01 / MATCH SIGNAL</span><span id="live-tag" class="tag">AWAITING LAUNCH</span></div>
+        <div class="scoreboard">
+          <div id="left-scorebox" class="player-score faction-f2"><p id="left-faction" class="eyebrow">FACTION 2</p><h3 id="left-name">Select a strategy</h3><div><strong id="left-score">0</strong><span id="left-share">— SHARED</span></div></div>
+          <div class="round-dial"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="dial-track" cx="50" cy="50" r="44"/><circle id="round-ring" cx="50" cy="50" r="44"/></svg><span>ROUND</span><strong id="round-number">—</strong><small id="round-limit">/ 100</small></div>
+          <div id="right-scorebox" class="player-score faction-f1"><p id="right-faction" class="eyebrow">FACTION 1</p><h3 id="right-name">Select a strategy</h3><div><strong id="right-score">0</strong><span id="right-share">— SHARED</span></div></div>
+        </div>
+        <div class="history-heading"><span>COMPLETED ROUNDS</span><span id="history-count">0 ARCHIVED</span></div>
+        <div class="history-columns" aria-hidden="true"><span>ROUND</span><span id="left-column">F2 · DECISION / POINTS</span><span id="right-column">F1 · DECISION / POINTS</span></div>
+        <div id="history-window" class="history-window">
+          <div id="history-empty" class="history-empty"><svg viewBox="0 0 120 80" fill="none" aria-hidden="true"><ellipse cx="60" cy="40" rx="52" ry="20" stroke="currentColor"/><ellipse cx="60" cy="40" rx="20" ry="35" stroke="currentColor"/><circle cx="60" cy="40" r="5" fill="currentColor"/></svg><p>Two factions. One shared frontier.</p><small>The story unfolds one decision at a time.</small></div>
+          <div id="history-rows" role="table" aria-label="Recent completed rounds"></div>
+        </div>
+        <div class="decision-stage" id="decision-stage" aria-label="Current round decisions">
+          <div class="exchange-line" aria-hidden="true"></div>
+          <div id="cell-left" class="decision-cell faction-f2"><span class="cell-kicker">FACTION 2</span><strong class="cell-letter">?</strong><span class="cell-gain">DECISION PENDING</span></div>
+          <div id="cell-right" class="decision-cell faction-f1"><span class="cell-kicker">FACTION 1</span><strong class="cell-letter">?</strong><span class="cell-gain">DECISION PENDING</span></div>
+          <p id="round-phase" class="round-phase">AWAITING FIRST CONTACT</p>
+        </div>
+        <div class="playback-controls">
+          <button id="play-pause" type="button" class="play-button" disabled aria-label="Pause playback">Ⅱ</button>
+          <button id="step" type="button" disabled title="Archive the next round">Step</button>
+          <button id="replay" type="button" disabled>Replay</button>
+          <button id="skip-match" type="button" disabled>Finish match</button>
+          <label class="speed-control">SPEED <input id="speed" type="range" min="0.25" max="8" step="0.25" value="1"><output id="speed-value">1×</output></label>
+          <label class="check-label"><input id="auto-next" type="checkbox" checked> Auto next</label>
+        </div>
+        <div class="trend-heading"><span>SCORE TRAJECTORY</span><span id="match-summary">S = Share · K = Keep</span></div>
+        <svg id="score-chart" class="score-chart" viewBox="0 0 600 68" preserveAspectRatio="none" role="img" aria-label="Cumulative match score trajectory"><path class="chart-grid" d="M0 66H600 M0 34H600 M0 2H600"/><path id="chart-left" class="chart-line faction-f2" d=""/><path id="chart-right" class="chart-line faction-f1" d=""/></svg>
+      </section>
+      <aside class="faction-panel faction-f1">
+        <div class="faction-heading"><span class="faction-index">01</span><div><p class="eyebrow">RIGHT SIDE</p><h2 id="f1-title">Faction 1</h2></div><span id="f1-count" class="roster-count">0</span></div>
+        <div class="faction-total"><span>FACTION POINTS</span><strong id="f1-total">0</strong><small id="f1-survivors">Awaiting roster</small></div>
+        <ol id="f1-roster" class="roster" aria-label="Faction 1 strategies"></ol>
+        <div class="roster-empty" id="f1-empty"><span class="orbit-icon" aria-hidden="true">◌</span><p>Your strategies belong here.</p><small>Place Python files in <code>f1/</code>.</small></div>
+        <p class="faction-footnote"><span class="color-dot"></span><span id="f1-note">Ready to make contact</span></p>
+      </aside>
+    </section>
+    <section id="pairing-bar" class="pairing-bar" hidden aria-label="Select the next match"><div><p class="eyebrow">NEXT ENCOUNTER</p><span id="pairing-help">Choose the opening pair.</span></div><label>Faction 2 <select id="pair-left"></select></label><span class="vs">VS</span><label>Faction 1 <select id="pair-right"></select></label><button id="next-match" type="button" disabled class="primary">Next match →</button></section>
+    <section class="tournament-map panel">
+      <div class="section-heading"><div><p class="eyebrow">02 / THE BIG PICTURE</p><h2 id="map-title">The encounters ahead</h2></div><span id="map-subtitle">Each Faction 2 strategy meets every Faction 1 strategy.</span></div>
+      <div id="schedule-view" class="schedule-view"><p class="empty-state">Load a roster to see the tournament map.</p></div>
+    </section>
+    <section class="standings-panel panel">
+      <div class="section-heading"><div><p class="eyebrow">03 / TOURNAMENT STANDINGS</p><h2 id="winner-heading">Every decision counts.</h2></div><div class="export-actions"><button id="export-rounds" type="button" disabled>Rounds CSV ↓</button><button id="export-scores" type="button" disabled>Standings CSV ↓</button><button id="export-json" type="button" disabled>Save replay ↓</button><label class="import-button">Open replay<input id="import-json" type="file" accept=".json,application/json"></label></div></div>
+      <p id="scoring-note" class="help">Ranked by total payoff. Match wins carry no bonus. Completed matches enter the standings after playback.</p>
+      <div class="table-scroll"><table><thead><tr><th scope="col">RANK</th><th scope="col">STRATEGY</th><th scope="col">FACTION</th><th scope="col">POINTS</th><th scope="col">AVG / MATCH</th><th scope="col">AVG / ROUND</th><th scope="col">MATCHES</th><th scope="col">SHARE %</th></tr></thead><tbody id="standings-body"><tr><td colspan="8" class="empty-state">Standings will appear when strategies are loaded.</td></tr></tbody></table></div>
+    </section>
+    <footer><span>SPACE DILEMMA <span class="muted">/ TOURNAMENT VIEWER</span></span><span id="seed-footer">SEED · tournament-1</span><a href="README.md" target="_blank" rel="noopener">Setup &amp; rules ↗</a></footer>
+  </main>
+  <dialog id="settings-dialog" class="settings-dialog">
+    <form id="settings-form">
+      <div class="dialog-heading"><div><p class="eyebrow">MISSION CONFIGURATION</p><h2>Tournament setup</h2></div><button id="close-settings" type="button" class="icon-button" aria-label="Close setup">×</button></div>
+      <div class="settings-section"><h3>Roster &amp; presentation</h3><p class="help">Strategies load from <code>f1/</code> and <code>f2/</code>. Update the file lists with <code>python tools/build_manifest.py</code>.</p><div class="roster-actions"><button id="reload-roster" type="button">Load faction folders</button><button id="demo-roster" type="button">Load demo roster</button><span id="roster-status" class="help">No official strategies loaded.</span></div><div class="settings-grid"><label>Faction 2 name<input id="label-f2" maxlength="40" value="Faction 2"></label><label>Faction 1 name<input id="label-f1" maxlength="40" value="Faction 1"></label><label>Color profile<select id="profile"><option value="ocean">Ocean · blue / green</option><option value="solar">Solar · cyan / amber</option><option value="nebula">Nebula · violet / coral</option><option value="contrast">Contrast · blue / gold</option></select></label><label class="check-label"><input id="reduce-motion" type="checkbox"> Gentle motion</label></div></div>
+      <fieldset id="competition-settings" class="settings-section"><legend>Tournament rules</legend><label>Format<select id="format"><option value="t1">Tournament 1 · cross-faction · 100 rounds · ×1</option><option value="cross">Custom · cross-faction round robin</option><option value="full">Custom · full round robin</option><option value="survival">Custom · winner stays / elimination</option><option value="duels">Custom · selected matches / no elimination</option></select></label><p id="format-help" class="help">Tournament 1 fixes 100 rounds, full history, and multiplier 1.0. Each cross-faction pairing plays once.</p><div class="settings-grid"><label>Resource multiplier<input id="multiplier" type="number" min="0.5" max="1.5" step="0.01" value="1" disabled></label><label>Match ending<select id="ending" disabled><option value="fixed">Fixed round count</option><option value="probability">Probabilistic continuation</option></select></label><label><span id="rounds-label">Rounds per match</span><input id="rounds" type="number" min="1" max="5000" step="1" value="100" disabled></label><label id="continuation-label" hidden>Continue after each round (%)<input id="continuation" type="number" min="0" max="100" step="0.001" value="95"></label><label>History window<input id="history-limit" type="number" min="0" max="5000" step="1" value="0" disabled><small>0 = full history; otherwise last N completed rounds.</small></label><label>Schedule repetitions<input id="repeats" type="number" min="1" max="20" step="1" value="1" disabled></label></div><p id="expected-rounds" class="expected-rounds" hidden></p><label id="self-play-label" class="check-label" hidden><input id="self-play" type="checkbox"> Include self-play against an independent twin</label><label>Master random seed<div class="seed-input"><input id="seed" maxlength="120" value="tournament-1"><button id="new-seed" type="button">New seed</button></div></label><p class="help">The multiplier changes only mutual Keep: each side receives 2 × multiplier. The payoff matrix is revealed on launch.</p></fieldset>
+      <section id="queue-settings" class="settings-section" hidden><h3>Selected match queue</h3><div class="queue-inputs"><label>Faction 2<select id="queue-left"></select></label><label>Faction 1<select id="queue-right"></select></label><button id="add-pair" type="button">Add match +</button></div><ol id="match-queue" class="match-queue"></ol><p class="help">No strategies are eliminated. Add the same pair again to schedule another match.</p></section>
+      <div class="settings-section payoff-info"><h3>Your payoff matrix</h3><table><thead><tr><th>LEFT / RIGHT</th><th>SHARE</th><th>KEEP</th></tr></thead><tbody><tr><th>SHARE</th><td>3 / 3</td><td>1 / 5</td></tr><tr><th>KEEP</th><td>5 / 1</td><td id="kk-preview">2 / 2</td></tr></tbody></table><p class="help">Strategies return exactly <code>"S"</code> or <code>"K"</code>. Match state resets before every encounter. A tied elimination match waits for your choice of which strategy advances.</p></div>
+      <p id="settings-message" role="status" class="help"></p><div class="dialog-footer"><button id="apply-settings" class="primary" type="submit">Apply setup →</button></div>
+    </form>
+  </dialog>
+  <dialog id="reveal-dialog" class="reveal-dialog"><p class="eyebrow">THE FRONTIER HAS CHANGED</p><h2>Resource multiplier revealed.</h2><strong id="reveal-value">1.00×</strong><p>Mutual Keep now pays <b id="reveal-kk">2</b> points to each strategy.</p><div class="reveal-matrix"><span>SS <b>3 / 3</b></span><span>SK <b>1 / 5</b></span><span>KS <b>5 / 1</b></span><span>KK <b id="reveal-pair">2 / 2</b></span></div><button id="launch" type="button" class="primary">Launch tournament →</button><button id="cancel-launch" type="button" class="quiet">Back to setup</button></dialog>
+  <dialog id="tie-dialog" class="tie-dialog"><p class="eyebrow">ELIMINATION / INSTRUCTOR DECISION</p><h2>A dead heat.</h2><p id="tie-message">Both strategies finished with the same payoff.</p><p class="help">Scores remain unchanged. Select the strategy that advances; the other is eliminated.</p><div><button id="advance-left" type="button"></button><button id="advance-right" type="button"></button></div></dialog>
+  <noscript>This viewer needs JavaScript enabled to load and animate Python strategies.</noscript>
+</body>
+</html>
