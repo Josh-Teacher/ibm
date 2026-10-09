@@ -1,3 +1,7 @@
 {
-  "strategies": []
+  "strategies":[
+    {"file":"tft.py","name":"Tit for Tat"},
+    {"file":"orbit.py","name":"Orbit"},
+    {"file":"random.py","name":"Random"}
+  ]
 }
