@@ -7,8 +7,8 @@ function csvCell(value) {
 export function csv(rows){return '\uFEFF'+rows.map(row=>row.map(csvCell).join(',')).join('\r\n')+'\r\n';}
 export function roundsCSV(tournament,partial=null){
   const s=tournament.settings;
-  const rows=[['rules_version','master_seed','format','multiplier','history_limit','ending','continuation_percent','round_cap','match','repeat','match_status','credited','left_strategy','left_faction','left_sha256','right_strategy','right_faction','right_sha256','seed_left','seed_right','seed_ending','round','left_decision','right_decision','left_points','right_points','left_total','right_total','ended_by']];
-  for(const m of [...tournament.matches,...(partial&&!tournament.matches.includes(partial)?[partial]:[])])for(const r of m.rows)rows.push([VERSION,s.seed,s.format,s.multiplier,s.historyLimit,s.ending,s.continuation,s.rounds,m.index,m.repeat,m.status,tournament.matches.includes(m),m.left.name,m.left.faction,m.left.hash,m.right.name,m.right.faction,m.right.hash,m.seeds.left,m.seeds.right,m.seeds.ending,r.round,r.left,r.right,r.pointsLeft,r.pointsRight,r.totalLeft,r.totalRight,m.endedBy]);
+  const rows=[['rules_version','class_section','trial_match','master_seed','format','multiplier','history_limit','ending','continuation_percent','round_cap','match','repeat','match_status','credited','left_strategy','left_faction','left_sha256','right_strategy','right_faction','right_sha256','seed_left','seed_right','seed_ending','round','left_decision','right_decision','left_points','right_points','left_total','right_total','ended_by']];
+  for(const m of [...tournament.matches,...(partial&&!tournament.matches.includes(partial)?[partial]:[])])for(const r of m.rows)rows.push([VERSION,tournament.section.name,tournament.trial,s.seed,s.format,s.multiplier,s.historyLimit,s.ending,s.continuation,s.rounds,m.index,m.repeat,m.status,tournament.matches.includes(m),m.left.name,m.left.faction,m.left.hash,m.right.name,m.right.faction,m.right.hash,m.seeds.left,m.seeds.right,m.seeds.ending,r.round,r.left,r.right,r.pointsLeft,r.pointsRight,r.totalLeft,r.totalRight,m.endedBy]);
   return csv(rows);
 }
 export function standingsCSV(tournament){
@@ -17,12 +17,12 @@ export function standingsCSV(tournament){
   for(const t of standings.teams)rows.push([t.rank,t.name,t.faction,t.points,t.averageMatch,t.averageRound,t.matches,t.rounds,t.rounds?t.shares/t.rounds*100:0,t.wins,t.ties,tournament.settings.format==='survival'?(tournament.alive.has(t.id)?'surviving':'eliminated'):'no elimination']);
   rows.push([]);rows.push(['faction','total_points','strategies','strategy_rounds','average_per_round','share_percent']);
   for(const [f,t]of Object.entries(standings.factions))rows.push([f,t.points,t.strategies,t.rounds,t.rounds?t.points/t.rounds:0,t.rounds?t.shares/t.rounds*100:0]);
-  return csv(rows);
+  return csv(rows.map((row,i)=>i===0||row[0]==='faction'?['class_section',...row]:row.length?[tournament.section.name,...row]:row));
 }
 const metadata=s=>({id:s.id,name:s.name,faction:s.faction,filename:s.filename,hash:s.hash,demo:Boolean(s.demo)});
 export function replayJSON(tournament,partial=null,labels={}){
   const match=m=>({...m,left:metadata(m.left),right:metadata(m.right)});
-  return JSON.stringify({version:VERSION,created:tournament.created,settings:tournament.settings,labels,status:tournament.status,
+  return JSON.stringify({version:VERSION,created:tournament.created,settings:tournament.settings,labels,status:tournament.status,order:tournament.order,section:tournament.section,trial:tournament.trial,
     roster:tournament.roster.map(metadata),queue:tournament.settings.format==='duels'?tournament.schedule.filter(m=>m.repeat===1).map(m=>({left:m.left.id,right:m.right.id})):[],
     matches:tournament.matches.map(match),partial:partial&&!tournament.matches.includes(partial)?match(partial):null},null,2);
 }
@@ -33,7 +33,9 @@ export function parseReplay(text){
     if(!s||typeof s.id!=='string'||typeof s.name!=='string'||!['f1','f2'].includes(s.faction)||typeof s.hash!=='string'||!/^[0-9a-f]{64}$/i.test(s.hash))throw Error('Invalid strategy metadata.');
     return {...metadata(s),source:''};
   });
-  const settings=normalizeSettings(data.settings),tournament=new Tournament(roster,settings,data.queue);
+  const settings=normalizeSettings(data.settings),tournament=new Tournament(roster,settings,data.queue,data.order);
+  if(data.section){if(typeof data.section.id!=='string'||typeof data.section.name!=='string')throw Error('Invalid class section metadata.');tournament.section={id:data.section.id,name:data.section.name};}
+  tournament.trial=data.trial===true;
   const validate=(m,complete)=>{
     const left=roster.find(s=>s.id===m.left?.id),right=roster.find(s=>s.id===m.right?.id);
     if(!left||!right||!Array.isArray(m.rows)||m.rows.length>settings.rounds||!Number.isInteger(m.index)||m.index<1||!Number.isInteger(m.repeat)||m.repeat<1)throw Error('Invalid replay match.');
