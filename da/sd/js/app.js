@@ -81,7 +81,7 @@ async function fetchRoster(demo){
   if(state.active||state.computing||state.loading)return;
   const section=demo?{id:'demo',name:'Demo roster'}:state.classes.find(c=>c.id===$('class-section').value)??{id:'all',name:'All strategies'};
   state.loading=true;$('roster-status').textContent='Loading strategy files…';setControls();
-  try{const roster=await loadRoster(undefined,demo,section);resetCompetition();state.roster=roster;state.order=normalizeOrder(roster);state.section={id:section.id,name:section.name};state.queue=[];renderPairing();$('pair-left').value=state.order.f2[0]??'';$('pair-right').value=state.order.f1[0]??'';$('demo-badge').hidden=!demo;$('roster-status').textContent=`${section.name} · ${roster.filter(s=>s.faction==='f2').length} left / ${roster.filter(s=>s.faction==='f1').length} right${demo?' · example strategies only':''}`;say(roster.length?`${section.name} loaded. Configure the tournament, or select a pair for a trial match.`:section.id==='all'?'No strategies listed yet. Add .py files to f1/ and f2/, run tools/build_manifest.py, and reload.':`No strategies listed for ${section.name}. Add their filenames to classes/${section.manifest}.`);updateRuleTags(false);renderAll();}
+  try{const roster=await loadRoster(undefined,demo,section);resetCompetition();state.roster=roster;state.order=normalizeOrder(roster);state.section={id:section.id,name:section.name};state.queue=[];renderPairing();$('pair-left').value=state.order.f2[0]??'';$('pair-right').value=state.order.f1[0]??'';$('demo-badge').hidden=!demo;$('roster-status').textContent=`${section.name} · ${roster.filter(s=>s.faction==='f2').length} left / ${roster.filter(s=>s.faction==='f1').length} right${demo?' · example strategies only':''}`;say(roster.length?`${section.name} loaded. Configure the tournament, or select a pair for a trial match.`:'No strategies listed yet. Add filenames under the appropriate class in f1/manifest.json and f2/manifest.json, then reload.');updateRuleTags(false);renderAll();}
   catch(error){$('roster-status').textContent=error.message;say(error.message,'error');}
   finally{state.loading=false;setControls();}
 }
@@ -260,7 +260,7 @@ else initializeRoster();
 async function initializeRoster(){
   $('roster-status').textContent='Loading strategy files…';
   try{state.classes=await loadClassCatalog();for(const entry of state.classes){const option=document.createElement('option');option.value=entry.id;option.textContent=entry.name;$('class-section').append(option);}}
-  catch(error){$('class-help').textContent=`${error.message} The original f1/ and f2/ manifests remain available.`;}
+  catch(error){$('class-help').textContent=error.message;}
   await fetchRoster(false);
 }
 
