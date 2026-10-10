@@ -1,6 +1,0 @@
-{
-  "classes": [
-    {"id":"s1","name":"Monday Section 1","manifest":"s1.json"},
-    {"id":"s2","name":"Wednesday Section 2","manifest":"s2.json"}
-  ]
-}
