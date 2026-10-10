@@ -10,7 +10,7 @@
   <script defer src="vendor/gsap.min.js"></script>
   <script type="module" src="js/app.js"></script>
 </head>
-<body data-profile="ocean">
+<body data-profile="ocean" data-theme="dark">
   <a class="skip-link" href="#arena">Skip to match viewer</a>
   <header class="site-header">
     <div class="brand">
@@ -19,6 +19,7 @@
     </div>
     <nav class="header-actions" aria-label="Viewer tools">
       <span id="demo-badge" class="tag demo-tag" hidden>DEMO ROSTER</span>
+      <button id="theme-toggle" type="button" class="quiet" aria-pressed="false" aria-label="Switch to light mode">☀ <span>Light mode</span></button>
       <button id="fullscreen" type="button" class="quiet">⛶ <span>Project</span></button>
       <button id="open-settings" type="button">⚙ <span>Setup</span></button>
     </nav>
@@ -26,9 +27,10 @@
   <main>
     <div class="mission-bar">
       <div><p class="eyebrow">LIVE TOURNAMENT CONTROL</p><h2 id="tournament-name">Tournament 01</h2></div>
-      <div class="rule-tags"><span id="format-tag" class="tag">CROSS-FACTION</span><span id="round-tag" class="tag">100 ROUNDS</span><span id="multiplier-tag" class="tag">MULTIPLIER · SEALED</span></div>
+      <div class="rule-tags"><span id="section-tag" class="tag">ALL STRATEGIES</span><span id="format-tag" class="tag">CROSS-FACTION</span><span id="round-tag" class="tag">100 ROUNDS</span><span id="multiplier-tag" class="tag">MULTIPLIER · SEALED</span></div>
       <button id="start" type="button" class="primary">Reveal &amp; start <span aria-hidden="true">↗</span></button>
       <button id="stop" type="button" class="danger" hidden>Stop tournament</button>
+      <button id="finish-tournament" type="button" hidden>Finish tournament ↠</button>
     </div>
     <div class="status-strip"><span id="status-light" class="status-light"></span><p id="status" role="status">Load your faction folders, or explore with the demo roster.</p><span id="match-counter" class="mono">STANDBY</span></div>
     <section class="flight-deck" aria-label="Tournament arena">
@@ -77,12 +79,12 @@
         <p class="faction-footnote"><span class="color-dot"></span><span id="f1-note">Ready to make contact</span></p>
       </aside>
     </section>
-    <section id="pairing-bar" class="pairing-bar" hidden aria-label="Select the next match"><div><p class="eyebrow">NEXT ENCOUNTER</p><span id="pairing-help">Choose the opening pair.</span></div><label>Faction 2 <select id="pair-left"></select></label><span class="vs">VS</span><label>Faction 1 <select id="pair-right"></select></label><button id="next-match" type="button" disabled class="primary">Next match →</button></section>
+    <section id="pairing-bar" class="pairing-bar" hidden aria-label="Select the next match"><div><p class="eyebrow">MATCH SELECTION</p><span id="pairing-help">Choose a pair for a trial match.</span></div><label>Faction 2 <select id="pair-left"></select></label><span class="vs">VS</span><label>Faction 1 <select id="pair-right"></select></label><button id="trial-match" type="button" disabled>Run trial match</button><button id="next-match" type="button" disabled class="primary">Next match →</button></section>
     <section class="tournament-map panel">
       <div class="section-heading"><div><p class="eyebrow">02 / THE BIG PICTURE</p><h2 id="map-title">The encounters ahead</h2></div><span id="map-subtitle">Each Faction 2 strategy meets every Faction 1 strategy.</span></div>
       <div id="schedule-view" class="schedule-view"><p class="empty-state">Load a roster to see the tournament map.</p></div>
     </section>
-    <section class="standings-panel panel">
+    <section id="standings-panel" class="standings-panel panel">
       <div class="section-heading"><div><p class="eyebrow">03 / TOURNAMENT STANDINGS</p><h2 id="winner-heading">Every decision counts.</h2></div><div class="export-actions"><button id="export-rounds" type="button" disabled>Rounds CSV ↓</button><button id="export-scores" type="button" disabled>Standings CSV ↓</button><button id="export-json" type="button" disabled>Save replay ↓</button><label class="import-button">Open replay<input id="import-json" type="file" accept=".json,application/json"></label></div></div>
       <p id="scoring-note" class="help">Ranked by total payoff. Match wins carry no bonus. Completed matches enter the standings after playback.</p>
       <div class="table-scroll"><table><thead><tr><th scope="col">RANK</th><th scope="col">STRATEGY</th><th scope="col">FACTION</th><th scope="col">POINTS</th><th scope="col">AVG / MATCH</th><th scope="col">AVG / ROUND</th><th scope="col">MATCHES</th><th scope="col">SHARE %</th></tr></thead><tbody id="standings-body"><tr><td colspan="8" class="empty-state">Standings will appear when strategies are loaded.</td></tr></tbody></table></div>
@@ -92,15 +94,36 @@
   <dialog id="settings-dialog" class="settings-dialog">
     <form id="settings-form">
       <div class="dialog-heading"><div><p class="eyebrow">MISSION CONFIGURATION</p><h2>Tournament setup</h2></div><button id="close-settings" type="button" class="icon-button" aria-label="Close setup">×</button></div>
-      <div class="settings-section"><h3>Roster &amp; presentation</h3><p class="help">Strategies load from <code>f1/</code> and <code>f2/</code>. Update the file lists with <code>python tools/build_manifest.py</code>.</p><div class="roster-actions"><button id="reload-roster" type="button">Load faction folders</button><button id="demo-roster" type="button">Load demo roster</button><span id="roster-status" class="help">No official strategies loaded.</span></div><div class="settings-grid"><label>Faction 2 name<input id="label-f2" maxlength="40" value="Faction 2"></label><label>Faction 1 name<input id="label-f1" maxlength="40" value="Faction 1"></label><label>Color profile<select id="profile"><option value="ocean">Ocean · blue / green</option><option value="solar">Solar · cyan / amber</option><option value="nebula">Nebula · violet / coral</option><option value="contrast">Contrast · blue / gold</option></select></label><label class="check-label"><input id="reduce-motion" type="checkbox"> Gentle motion</label></div></div>
+      <div class="settings-section">
+        <h3>Roster &amp; presentation</h3>
+        <p class="help">All student Python files stay in <code>f1/</code> and <code>f2/</code>. Each class manifest selects its own roster.</p>
+        <label>Class section<select id="class-section"><option value="all">All strategies · original manifests</option></select></label>
+        <p id="class-help" class="help">Class names and file lists are configured in <code>classes/</code>.</p>
+        <div class="roster-actions"><button id="reload-roster" type="button">Load selected class</button><button id="demo-roster" type="button">Load demo roster</button><span id="roster-status" class="help">No official strategies loaded.</span></div>
+        <div class="settings-grid">
+          <label>Faction 2 name<input id="label-f2" maxlength="40" value="Faction 2"></label>
+          <label>Faction 1 name<input id="label-f1" maxlength="40" value="Faction 1"></label>
+          <label>Color profile<select id="profile"><option value="ocean">Ocean · blue / green</option><option value="solar">Solar · cyan / amber</option><option value="nebula">Nebula · violet / coral</option><option value="contrast">Contrast · blue / gold</option></select></label>
+          <label>Display theme<select id="theme"><option value="dark">Dark · space deck</option><option value="light">Light · classroom projection</option></select></label>
+          <label class="check-label"><input id="reduce-motion" type="checkbox"> Gentle motion</label>
+        </div>
+      </div>
       <fieldset id="competition-settings" class="settings-section"><legend>Tournament rules</legend><label>Format<select id="format"><option value="t1">Tournament 1 · cross-faction · 100 rounds · ×1</option><option value="cross">Custom · cross-faction round robin</option><option value="full">Custom · full round robin</option><option value="survival">Custom · winner stays / elimination</option><option value="duels">Custom · selected matches / no elimination</option></select></label><p id="format-help" class="help">Tournament 1 fixes 100 rounds, full history, and multiplier 1.0. Each cross-faction pairing plays once.</p><div class="settings-grid"><label>Resource multiplier<input id="multiplier" type="number" min="0.5" max="1.5" step="0.01" value="1" disabled></label><label>Match ending<select id="ending" disabled><option value="fixed">Fixed round count</option><option value="probability">Probabilistic continuation</option></select></label><label><span id="rounds-label">Rounds per match</span><input id="rounds" type="number" min="1" max="5000" step="1" value="100" disabled></label><label id="continuation-label" hidden>Continue after each round (%)<input id="continuation" type="number" min="0" max="100" step="0.001" value="95"></label><label>History window<input id="history-limit" type="number" min="0" max="5000" step="1" value="0" disabled><small>0 = full history; otherwise last N completed rounds.</small></label><label>Schedule repetitions<input id="repeats" type="number" min="1" max="20" step="1" value="1" disabled></label></div><p id="expected-rounds" class="expected-rounds" hidden></p><label id="self-play-label" class="check-label" hidden><input id="self-play" type="checkbox"> Include self-play against an independent twin</label><label>Master random seed<div class="seed-input"><input id="seed" maxlength="120" value="tournament-1"><button id="new-seed" type="button">New seed</button></div></label><p class="help">The multiplier changes only mutual Keep: each side receives 2 × multiplier. The payoff matrix is revealed on launch.</p></fieldset>
+      <fieldset id="order-settings" class="settings-section" hidden>
+        <legend>Winner-stays play order</legend>
+        <p class="help">Arrange each faction from first to last. The winner stays and the next surviving opponent follows this order. The match selectors also let you choose a trial pair.</p>
+        <div class="order-grid">
+          <div class="order-column faction-f2"><h3>Faction 2 · left</h3><ol id="order-f2" class="order-list"></ol></div>
+          <div class="order-column faction-f1"><h3>Faction 1 · right</h3><ol id="order-f1" class="order-list"></ol></div>
+        </div>
+      </fieldset>
       <section id="queue-settings" class="settings-section" hidden><h3>Selected match queue</h3><div class="queue-inputs"><label>Faction 2<select id="queue-left"></select></label><label>Faction 1<select id="queue-right"></select></label><button id="add-pair" type="button">Add match +</button></div><ol id="match-queue" class="match-queue"></ol><p class="help">No strategies are eliminated. Add the same pair again to schedule another match.</p></section>
       <div class="settings-section payoff-info"><h3>Your payoff matrix</h3><table><thead><tr><th>LEFT / RIGHT</th><th>SHARE</th><th>KEEP</th></tr></thead><tbody><tr><th>SHARE</th><td>3 / 3</td><td>1 / 5</td></tr><tr><th>KEEP</th><td>5 / 1</td><td id="kk-preview">2 / 2</td></tr></tbody></table><p class="help">Strategies return exactly <code>"S"</code> or <code>"K"</code>. Match state resets before every encounter. A tied elimination match waits for your choice of which strategy advances.</p></div>
       <p id="settings-message" role="status" class="help"></p><div class="dialog-footer"><button id="apply-settings" class="primary" type="submit">Apply setup →</button></div>
     </form>
   </dialog>
   <dialog id="reveal-dialog" class="reveal-dialog"><p class="eyebrow">THE FRONTIER HAS CHANGED</p><h2>Resource multiplier revealed.</h2><strong id="reveal-value">1.00×</strong><p>Mutual Keep now pays <b id="reveal-kk">2</b> points to each strategy.</p><div class="reveal-matrix"><span>SS <b>3 / 3</b></span><span>SK <b>1 / 5</b></span><span>KS <b>5 / 1</b></span><span>KK <b id="reveal-pair">2 / 2</b></span></div><button id="launch" type="button" class="primary">Launch tournament →</button><button id="cancel-launch" type="button" class="quiet">Back to setup</button></dialog>
-  <dialog id="tie-dialog" class="tie-dialog"><p class="eyebrow">ELIMINATION / INSTRUCTOR DECISION</p><h2>A dead heat.</h2><p id="tie-message">Both strategies finished with the same payoff.</p><p class="help">Scores remain unchanged. Select the strategy that advances; the other is eliminated.</p><div><button id="advance-left" type="button"></button><button id="advance-right" type="button"></button></div></dialog>
+  <dialog id="tie-dialog" class="tie-dialog"><p class="eyebrow">ELIMINATION / INSTRUCTOR DECISION</p><h2>Tie Breaker!</h2><p id="tie-message">Both strategies finished with the same payoff.</p><p class="help">Scores remain unchanged. Select the strategy that advances; the other is eliminated.</p><div><button id="advance-left" type="button"></button><button id="advance-right" type="button"></button></div></dialog>
   <noscript>This viewer needs JavaScript enabled to load and animate Python strategies.</noscript>
 </body>
 </html>
