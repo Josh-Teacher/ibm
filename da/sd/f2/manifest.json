@@ -1,12 +1,22 @@
 {
-  "strategies":[
-    {"file":"Black Crown F2 sneaky.py","name":"Black Crown"},
-    {"file":"claver_cat_F2_adaptive_trust.py","name":"Claver Cats"},
-    {"file":"Diana&Haru F2 pavlov.py","name":"Diana & Haru"},
-    {"file":"Ehsan and Abu F2 forgiving_trader.py","name":"Ehsan and Abu"},
-    {"file":"Fighting F2 Sleeper Agent.py","name":"Fighting"},
-    {"file":"Jobless F2 always_cooperate.py","name":"Jobless"},
-    {"file":"Shreya and Asmita F2 quadruply.py","name":"Shreya and Asmita"},
-    {"file":"UZB F2 RECIPROCAL.py","name":"UZB"}
-  ]
+  "classes": {
+    "monday": {
+      "name": "Monday Section 1",
+      "strategies": [
+        {"file":"Black Crown F2 sneaky.py","name":"Black Crown"},
+        {"file":"claver_cat_F2_adaptive_trust.py","name":"Claver Cats"},
+        {"file":"Diana&Haru F2 pavlov.py","name":"Diana & Haru"},
+        {"file":"Ehsan and Abu F2 forgiving_trader.py","name":"Ehsan and Abu"},
+        {"file":"Fighting F2 Sleeper Agent.py","name":"Fighting"},
+        {"file":"Jobless F2 always_cooperate.py","name":"Jobless"},
+        {"file":"Shreya and Asmita F2 quadruply.py","name":"Shreya and Asmita"},
+        {"file":"UZB F2 RECIPROCAL.py","name":"UZB"}
+      ]
+    },
+    "wednesday": {
+      "name": "Wednesday Section 2",
+      "strategies": [
+      ]
+    }
+  }
 }
