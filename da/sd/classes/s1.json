@@ -1,20 +1,22 @@
 {
   "f1": [
-    {"file": "period2_team1.py", "name": "Team 1"},
-    {"file": "period2_team1.py", "name": "Team 1"},
-    {"file": "period2_team1.py", "name": "Team 1"},
-    {"file": "period2_team1.py", "name": "Team 1"},
-    {"file": "period2_team1.py", "name": "Team 1"},
-    {"file": "period2_team1.py", "name": "Team 1"},
-    {"file": "period2_team1.py", "name": "Team 1"}
+    {"file":"Catalyst F1 adaptive forgiver.py","name":"Catalyst"},
+    {"file":"Chanda & sishir F1 grim_trigger.py","name":"Chanda & Sishir"},
+    {"file":"Error404 F1 AdaptiveTrustShield.py","name":"Error 404"},
+    {"file":"GEN-Z F1 always_switch.py","name":"GEN-Z"},
+    {"file":"Pagal F1 Three strike Strategy .py","name":"Pagal"},
+    {"file":"SKY F1 Adaptive_Cooperation.py","name":"SKY"},
+    {"file":"Wij_and_Saba_F1_PavlovTrust.py","name":"Wij & Saba"},
+    {"file":"Tide Turners F1.py","name":"Tide Turners"}
   ],
   "f2": [
-    {"file": "period2_team1.py", "name": "Team 1"},
-    {"file": "period2_team1.py", "name": "Team 1"},
-    {"file": "period2_team1.py", "name": "Team 1"},
-    {"file": "period2_team1.py", "name": "Team 1"},
-    {"file": "period2_team1.py", "name": "Team 1"},
-    {"file": "period2_team1.py", "name": "Team 1"},
-    {"file": "period2_team1.py", "name": "Team 1"} 
+    {"file":"Black Crown F2 sneaky.py","name":"Black Crown"},
+    {"file":"claver_cat_F2_adaptive_trust.py","name":"Claver Cats"},
+    {"file":"Diana&Haru F2 pavlov.py","name":"Diana & Haru"},
+    {"file":"Ehsan and Abu F2 forgiving_trader.py","name":"Ehsan and Abu"},
+    {"file":"Fighting F2 Sleeper Agent.py","name":"Fighting"},
+    {"file":"Jobless F2 always_cooperate.py","name":"Jobless"},
+    {"file":"Shreya and Asmita F2 quadruply.py","name":"Shreya and Asmita"},
+    {"file":"UZB F2 RECIPROCAL.py","name":"UZB"}
   ]
 }
