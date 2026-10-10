@@ -9,3 +9,39 @@ body.gentle *{transition:none!important}body:fullscreen{overflow:auto;background
 /* Anchor the newest completed row; overflow disappears through the upper fade. */
 #history-rows{height:100%;min-height:0}.history-row{flex-shrink:0}
 @media(min-width:641px){.roster{max-height:470px;overflow:auto;scrollbar-width:thin;scrollbar-color:#405364 transparent}}
+
+/* Faction lineups and classroom controls. */
+.mission-bar{flex-wrap:wrap}.order-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:14px}
+#order-settings>p{clear:both}.order-column h3{color:var(--color);font:12px var(--mono)}
+.order-list{list-style:none;padding:0;margin:10px 0 0;max-height:330px;overflow:auto;display:grid;gap:6px}
+.order-item{display:flex;align-items:center;gap:7px;padding:8px;border:1px solid var(--line);border-radius:5px;background:#0c151f}
+.order-number{color:var(--muted);font:10px var(--mono);min-width:18px}.order-name{flex:1;min-width:0;overflow-wrap:anywhere;font:11px var(--mono)}
+.order-item button{font-size:14px;line-height:1;padding:7px 8px;min-width:29px}.pairing-bar{flex-wrap:wrap}
+#finish-tournament{border-color:#899464}#finish-tournament:disabled{opacity:.7}.settings-dialog #class-section{margin-top:6px}
+
+/* Light profiles use darker faction colors so the labels stay readable on white. */
+body[data-theme=light]{color-scheme:light;--bg:#eef3f8;--panel:#fff;--line:#bdcbd8;--text:#182d40;--muted:#465f75;--amber:#87530a;--f2:#09639e;--f2-rgb:9,99,158;--f1:#117347;--f1-rgb:17,115,71;background:radial-gradient(ellipse at 50% 25%,#d9e8f166,transparent 65%),var(--bg);color:var(--text)}
+body[data-theme=light][data-profile=solar]{--f2:#006e70;--f2-rgb:0,110,112;--f1:#8c5407;--f1-rgb:140,84,7}
+body[data-theme=light][data-profile=nebula]{--f2:#6244a8;--f2-rgb:98,68,168;--f1:#a23f37;--f1-rgb:162,63,55}
+body[data-theme=light][data-profile=contrast]{--f2:#075985;--f2-rgb:7,89,133;--f1:#775800;--f1-rgb:119,88,0}
+body[data-theme=light] .faction-panel,body[data-theme=light] .arena-panel,body[data-theme=light] .panel{background:linear-gradient(150deg,#fff,#f8fafc);box-shadow:0 4px 18px #1b426009}
+body[data-theme=light] .arena-panel:before{opacity:.6}body[data-theme=light] .pairing-bar{background:#fff}
+body[data-theme=light] button,body[data-theme=light] .import-button{background:#fff;color:var(--text);border-color:#9fb3c4}
+body[data-theme=light] button:hover:not(:disabled){background:#e8f0f7;border-color:var(--amber)}
+body[data-theme=light] .primary{background:#f3bd53;border-color:#a47723;color:#172536}body[data-theme=light] .primary:hover:not(:disabled){background:#ffd78a}
+body[data-theme=light] .danger{background:#fff0ee;border-color:#b57770;color:#982f29}body[data-theme=light] .quiet{background:transparent}
+body[data-theme=light] input,body[data-theme=light] select{background:#fff;color:var(--text);border-color:#aabac8}
+body[data-theme=light] .settings-dialog label{color:#334f67}body[data-theme=light] dialog{background:#fff;border-color:#9fb3c4;box-shadow:0 25px 100px #1a334f33}
+body[data-theme=light] dialog::backdrop{background:#52657566}body[data-theme=light] .expected-rounds{background:#eaf5ed;border-color:#9fbba7}
+body[data-theme=light] .decision-cell{background:linear-gradient(150deg,rgba(var(--color-rgb),.10),#fff);box-shadow:0 5px 22px rgba(var(--color-rgb),.12)}
+body[data-theme=light] .decision-cell.flash{background:rgba(var(--color-rgb),.16);box-shadow:0 0 28px rgba(var(--color-rgb),.22)}
+body[data-theme=light] .exchange-line:after{background:#fff;color:var(--muted)}body[data-theme=light] .decision-stage{border-top-color:#aabdcf}
+body[data-theme=light] .exchange-line{background:linear-gradient(90deg,rgba(var(--f2-rgb),.3),#86a1b477,rgba(var(--f1-rgb),.3))}
+body[data-theme=light] .history-decision{background:rgba(var(--color-rgb),.045);border-color:rgba(var(--color-rgb),.3)}
+body[data-theme=light] .chart-grid{stroke:#b4c5d4}body[data-theme=light] .round-dial circle{stroke:#bac8d4}
+body[data-theme=light] .matrix button{background:#f5f8fc;border-color:#c0cfdd;color:var(--muted)}
+body[data-theme=light] .matrix button.complete{background:#e8f4f0;border-color:#93b8aa;color:#1b5242}
+body[data-theme=light] .matrix button.current{background:#fff2d5;border-color:#a06a1f;color:#80530c;box-shadow:0 0 0 1px #a06a1f44}
+body[data-theme=light] .encounter-card,body[data-theme=light] .order-item{background:#f7f9fc}
+body[data-theme=light] .playback-controls .play-button{background:#dce8f3}
+@media(max-width:640px){.order-grid{grid-template-columns:1fr}.pairing-bar #trial-match{flex-basis:100%}}
