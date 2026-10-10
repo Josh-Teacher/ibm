@@ -1,1 +1,12 @@
-{"strategies":[{"file":"tft.py","name":"Tit for Tat"},{"file":"pulse.py","name":"Pulse"},{"file":"random.py","name":"Random"}]}
+{
+  "strategies":[
+    {"file":"Black Crown F2 sneaky.py","name":"Black Crown F2 sneaky"},
+    {"file":"claver_cat_F2_adaptive_trust.py","name":"claver_cat_F2_adaptive_trust"},
+    {"file":"Diana&Haru F2 pavlov.py","name":"Diana&Haru F2 pavlov"},
+    {"file":"Ehsan and Abu F2 forgiving_trader.py","name":"Ehsan and Abu F2 forgiving_trader"},
+    {"file":"Fighting F2 Sleeper Agent.py","name":"Fighting F2 Sleeper Agent"},
+    {"file":"Jobless F2 always_cooperate.py","name":"Jobless F2 always_cooperate"},
+    {"file":"Shreya and Asmita F2 quadruply.py","name":"Shreya and Asmita F2 quadruply"},
+    {"file":"UZB F2 RECIPROCAL.py","name":"UZB F2 RECIPROCAL"}
+  ]
+}
