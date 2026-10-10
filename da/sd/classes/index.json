@@ -1,0 +1,6 @@
+{
+  "classes": [
+    {"id":"class-a","name":"Class A","manifest":"class-a.json"},
+    {"id":"class-b","name":"Class B","manifest":"class-b.json"}
+  ]
+}
