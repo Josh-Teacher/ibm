@@ -1,12 +1,22 @@
 {
-  "strategies":[
-    {"file":"Catalyst F1 adaptive forgiver.py","name":"Catalyst"},
-    {"file":"Chanda & sishir F1 grim_trigger.py","name":"Chanda & Sishir"},
-    {"file":"Error404 F1 AdaptiveTrustShield.py","name":"Error 404"},
-    {"file":"GEN-Z F1 always_switch.py","name":"GEN-Z"},
-    {"file":"Pagal F1 Three strike Strategy .py","name":"Pagal"},
-    {"file":"SKY F1 Adaptive_Cooperation.py","name":"SKY"},
-    {"file":"Wij_and_Saba_F1_PavlovTrust.py","name":"Wij & Saba"},
-    {"file":"Tide Turners F1.py","name":"Tide Turners"}
-  ]
+  "classes": {
+    "monday": {
+      "name": "Monday Section 1",
+      "strategies": [
+        {"file":"Catalyst F1 adaptive forgiver.py","name":"Catalyst"},
+        {"file":"Chanda & sishir F1 grim_trigger.py","name":"Chanda & Sishir"},
+        {"file":"Error404 F1 AdaptiveTrustShield.py","name":"Error 404"},
+        {"file":"GEN-Z F1 always_switch.py","name":"GEN-Z"},
+        {"file":"Pagal F1 Three strike Strategy .py","name":"Pagal"},
+        {"file":"SKY F1 Adaptive_Cooperation.py","name":"SKY"},
+        {"file":"Wij_and_Saba_F1_PavlovTrust.py","name":"Wij & Saba"},
+        {"file":"Tide Turners F1.py","name":"Tide Turners"}
+      ]
+    },
+    "wednesday": {
+      "name": "Wednesday Section 2",
+      "strategies": [
+      ]
+    }
+  }
 }
