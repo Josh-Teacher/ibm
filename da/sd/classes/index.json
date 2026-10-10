@@ -1,6 +1,6 @@
 {
   "classes": [
-    {"id":"class-a","name":"Class A","manifest":"class-a.json"},
-    {"id":"class-b","name":"Class B","manifest":"class-b.json"}
+    {"id":"s1","name":"Monday Section 1","manifest":"s1.json"},
+    {"id":"s2","name":"Wednesday Section 2","manifest":"s2.json"}
   ]
 }
