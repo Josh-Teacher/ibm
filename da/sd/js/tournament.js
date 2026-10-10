@@ -1,6 +1,18 @@
 import {normalizeSettings} from './rules.js';
 
 const pair = (left, right, repeat, index) => ({ left, right, repeat, index });
+export function normalizeOrder(roster, input = {}) {
+  const result = {};
+  for (const faction of ['f2','f1']) {
+    const ids = roster.filter(s => s.faction === faction).map(s => s.id);
+    const order = input[faction] ?? ids;
+    if (!Array.isArray(order) || order.length !== ids.length || new Set(order).size !== ids.length || order.some(id => !ids.includes(id))) {
+      throw Error(`The ${faction.toUpperCase()} play order must contain every strategy exactly once.`);
+    }
+    result[faction] = [...order];
+  }
+  return result;
+}
 export function makeSchedule(roster, settings, queue = []) {
   const f1 = roster.filter(s => s.faction === 'f1'), f2 = roster.filter(s => s.faction === 'f2');
   const base = [];
@@ -27,12 +39,15 @@ export function makeSchedule(roster, settings, queue = []) {
 }
 
 export class Tournament {
-  constructor(roster, input, queue) {
+  constructor(roster, input, queue, order) {
     this.settings = normalizeSettings(input);
     this.roster = roster.map(s => ({...s}));
     for (const faction of ['f1','f2']) if (!roster.some(s => s.faction === faction)) throw Error(`Load at least one strategy in ${faction}/.`);
     if (roster.filter(s => s.faction === 'f1').length !== roster.filter(s => s.faction === 'f2').length) throw Error('Both factions must have the same number of strategies.');
     if (new Set(roster.map(s => s.id)).size !== roster.length) throw Error('Strategy IDs must be unique.');
+    this.order = normalizeOrder(this.roster, order);
+    this.section = {id:'all',name:'All strategies'};
+    this.trial = false;
     this.schedule = makeSchedule(this.roster, this.settings, queue);
     this.matches = []; this.alive = new Set(roster.map(s => s.id)); this.champion = null;
     this.pendingTie = null; this.winner = null;
@@ -44,7 +59,7 @@ export class Tournament {
     if (this.settings.format !== 'survival') return this.schedule[this.matches.length];
     const choose = (faction, id) => {
       if (this.champion?.faction === faction) return this.champion;
-      const candidates = this.roster.filter(s => s.faction === faction && this.alive.has(s.id));
+      const candidates = this.order[faction].filter(id => this.alive.has(id)).map(id => this.roster.find(s => s.id === id));
       return candidates.find(s => s.id === id) ?? candidates[0];
     };
     const left = choose('f2',leftId), right = choose('f1',rightId);
