@@ -1,0 +1,342 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Game Gallery</title>
+
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: #101820;
+    color: #eef3f5;
+    font: 14px system-ui, sans-serif;
+  }
+
+  header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #31404b;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  h1 { margin: 0; font-size: 22px; }
+  h2 { margin: 0; font-size: 17px; }
+  .muted { color: #9cabb7; font-size: 12px; }
+
+  main {
+    height: calc(100dvh - 70px);
+    padding: 16px;
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  aside, .viewer {
+    background: #192630;
+    border: 1px solid #31404b;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  aside {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .search-area { padding: 12px; }
+
+  input {
+    width: 100%;
+    padding: 11px;
+    background: #101820;
+    border: 1px solid #40515d;
+    border-radius: 6px;
+    color: white;
+    font: inherit;
+  }
+
+  #gameList {
+    padding: 5px 9px;
+    overflow-y: auto;
+  }
+
+  .game {
+    width: 100%;
+    padding: 12px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .game:hover { background: #293b46; }
+  .game.active { background: #245046; }
+  .game strong { display: block; margin-bottom: 4px; }
+
+  .viewer {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .toolbar {
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .actions { display: flex; gap: 6px; }
+
+  .actions button, .actions a {
+    padding: 9px 11px;
+    background: #30434e;
+    border: 0;
+    border-radius: 6px;
+    color: #eef3f5;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .actions button:hover, .actions a:hover {
+    background: #41606a;
+  }
+
+  .actions button:disabled { opacity: .4; }
+  .actions a[aria-disabled="true"] {
+    opacity: .4;
+    pointer-events: none;
+  }
+
+  .screen {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+    background: #090f15;
+  }
+
+  iframe {
+    display: block;
+    border: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+  }
+
+  iframe[hidden] { display: none; }
+
+  #empty {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    color: #9cabb7;
+    padding: 24px;
+  }
+
+  #empty[hidden] { display: none; }
+
+  footer {
+    padding: 11px 15px;
+    color: #91a4b2;
+    font-size: 12px;
+  }
+
+  @media (max-width: 750px) {
+    main {
+      height: auto;
+      grid-template-columns: 1fr;
+    }
+
+    aside { max-height: 190px; }
+    .viewer { min-height: 65vh; }
+    .screen { min-height: 50vh; }
+    .toolbar { flex-wrap: wrap; }
+    .actions { flex-wrap: wrap; }
+  }
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Student Game Gallery</h1>
+  <span id="count" class="muted"></span>
+</header>
+
+<main>
+  <aside>
+    <div class="search-area">
+      <input id="search" placeholder="Search games or students"
+             aria-label="Search games">
+    </div>
+    <nav id="gameList" aria-label="Available games"></nav>
+  </aside>
+
+  <section class="viewer">
+    <div class="toolbar">
+      <div>
+        <h2 id="title">Choose a Game</h2>
+        <span id="author" class="muted">Student projects</span>
+      </div>
+      <div class="actions">
+        <button id="restart" disabled>Restart</button>
+        <button id="fullscreen" disabled>Fullscreen</button>
+        <a id="open" href="#" target="_blank"
+           rel="noopener noreferrer"
+           aria-disabled="true">New Tab ↗</a>
+      </div>
+    </div>
+
+    <div class="screen" id="screen">
+      <div id="empty">
+        <p>Select a game from the list to begin.</p>
+      </div>
+      <iframe id="frame" title="Selected game" hidden
+        sandbox="allow-scripts allow-forms allow-pointer-lock"
+        allow="fullscreen; gamepad"
+        allowfullscreen></iframe>
+    </div>
+
+    <footer>Click inside the game to use its controls.</footer>
+  </section>
+</main>
+
+<script>
+  // ADD STUDENT GAME FILENAMES HERE
+  const GAME_FILES = [
+    "Jemima_Turbo Goal.html"
+  ];
+
+  const $ = id => document.getElementById(id);
+
+  function pretty(text) {
+    return text.replace(/[_-]/g, " ")
+      .replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  const games = GAME_FILES.map(file => {
+    const parts = file.replace(/\.html$/i, "").split("_");
+    return {
+      file,
+      student: pretty(parts.shift()),
+      name: pretty(parts.join("_"))
+    };
+  }).sort((a, b) =>
+    a.student.localeCompare(b.student)
+  );
+
+  let selected = null;
+
+  function gameUrl(game) {
+    return new URL(
+      encodeURIComponent(game.file),
+      document.baseURI
+    ).href;
+  }
+
+  function selectGame(game) {
+    selected = game;
+    $("title").textContent = game.name;
+    $("author").textContent = "Created by " + game.student;
+
+    $("empty").hidden = true;
+    $("frame").hidden = false;
+    $("frame").title = game.name + " by " + game.student;
+    $("frame").src = gameUrl(game);
+
+    $("restart").disabled = false;
+    $("fullscreen").disabled = false;
+    $("open").href = gameUrl(game);
+    $("open").removeAttribute("aria-disabled");
+
+    if (location.protocol.startsWith("http")) {
+      const url = new URL(location.href);
+      url.searchParams.set("game", game.file);
+      history.replaceState(null, "", url);
+    }
+
+    renderList();
+  }
+
+  function renderList() {
+    const query = $("search").value.toLowerCase();
+    const list = $("gameList");
+    list.replaceChildren();
+
+    const matches = games.filter(game =>
+      (game.student + " " + game.name)
+        .toLowerCase().includes(query)
+    );
+
+    for (const game of matches) {
+      const button = document.createElement("button");
+      button.className = "game" +
+        (selected?.file === game.file ? " active" : "");
+
+      const name = document.createElement("strong");
+      name.textContent = game.name;
+
+      const student = document.createElement("span");
+      student.className = "muted";
+      student.textContent = game.student;
+
+      button.append(name, student);
+      button.onclick = () => selectGame(game);
+      list.append(button);
+    }
+
+    if (!matches.length) {
+      const message = document.createElement("p");
+      message.className = "muted";
+      message.style.padding = "12px";
+      message.textContent = games.length
+        ? "No matching games."
+        : "No games registered yet.";
+      list.append(message);
+    }
+  }
+
+  $("restart").onclick = () => {
+    if (selected) $("frame").src = gameUrl(selected);
+  };
+
+  $("fullscreen").onclick = () => {
+    if (selected) $("screen").requestFullscreen();
+  };
+
+  $("open").onclick = event => {
+    if (!selected) event.preventDefault();
+  };
+
+  $("search").oninput = renderList;
+
+  $("count").textContent =
+    games.length + (games.length === 1 ? " game" : " games");
+
+  renderList();
+
+  const requested =
+    new URLSearchParams(location.search).get("game");
+
+  const initial = games.find(g => g.file === requested)
+    || games[0];
+
+  if (initial) selectGame(initial);
+</script>
+
+</body>
+</html>
