@@ -16,6 +16,12 @@
     "wednesday": {
       "name": "Wednesday Section 2",
       "strategies": [
+        {"file":"WED_Bubak_F2 _ledger_watch_ strategy.py","name":"Bubak"},
+        {"file":"WED_Devon_and_Lahiru_F2_DoubleShare_DoubleKeep.py","name":"Devon & Lahiru"},
+        {"file":"WED_Diana&Haru_F2_pavlov.py","name":"Diana & Haru"},
+        {"file":"WED_Khan_and_Wisal_F2_prober_strategy.py","name":"Khan & Wisal"},
+        {"file":"WED_Pratima_and_Prashna_F2_steady_cooperation_strategy.py","name":"Pratima & Prashna"},
+        {"file":"WED_Rakib_and_Zia_F2_pulse_reciprocity_strategy.py","name":"Rakib & Zia"}
       ]
     }
   }
