@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wife Rescue</title>
+<style>
+  :root {
+    --bg: #101722;
+    --panel: #192332;
+    --panel-2: #202d3e;
+    --line: #334258;
+    --text: #eef3f9;
+    --muted: #a8b5c6;
+    --blue: #3297ff;
+    --pink: #ff70b7;
+    --red: #ef4444;
+    --orange: #fb923c;
+    --purple: #a78bfa;
+    --green: #22c55e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    color: var(--text);
+    background: radial-gradient(ellipse at top, #1c2a3c 0%, var(--bg) 58%);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    min-height: 100vh;
+  }
+  .app { width: min(1040px, calc(100% - 28px)); margin: 22px auto 32px; }
+  .heading { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px; }
+  .brand { display:flex; align-items:center; gap:12px; }
+  .brand-mark { width:42px; height:42px; display:grid; place-items:center; border-radius:12px; background:#243b59; border:1px solid #436185; font-size:21px; }
+  h1 { margin:0; font-size:clamp(23px, 4vw, 31px); letter-spacing:-.8px; line-height:1.1; }
+  .subtitle { margin:4px 0 0; color:var(--muted); font-size:13px; }
+  .kbd-hint { color:var(--muted); font-size:12px; white-space:nowrap; }
+  .status-grid { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px; margin-bottom:12px; }
+  .stat { min-width:0; border:1px solid var(--line); border-radius:12px; padding:11px 13px; background:linear-gradient(180deg, rgba(34,48,67,.94), rgba(24,35,50,.96)); }
+  .stat-label { display:block; color:var(--muted); text-transform:uppercase; letter-spacing:.09em; font-size:10px; font-weight:800; margin-bottom:5px; }
+  .stat-value { font-size:18px; font-weight:800; line-height:1.15; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .stat-value.timer { font-variant-numeric:tabular-nums; letter-spacing:.04em; }
+  .stat-value.timer.urgent { color:#ff5e65; }
+  .game-panel { border:1px solid var(--line); border-radius:16px; background:rgba(23,33,47,.96); overflow:hidden; box-shadow:0 18px 60px rgba(0,0,0,.2); }
+  .mission-row { padding:13px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid var(--line); background:rgba(31,45,63,.55); }
+  .objective { font-size:14px; font-weight:750; }
+  .objective span { color:#8ebeff; }
+  .message { text-align:right; font-size:12px; color:#c5d0de; }
+  .message.warning { color:#ffc56f; }
+  .message.danger { color:#ff777d; }
+  .board-wrap { padding:16px 12px 10px; display:flex; justify-content:center; align-items:center; background:#151e2b; min-height:250px; }
+  canvas { display:block; width:800px; max-width:100%; height:auto; border-radius:6px; border:1px solid #586577; background:#e7ebef; image-rendering:pixelated; }
+  .legend { border-top:1px solid var(--line); padding:12px 16px 14px; display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:10px 17px; background:#182332; }
+  .legend-item { display:flex; align-items:center; gap:7px; color:#d5deea; font-size:11px; white-space:nowrap; }
+  .swatch { display:inline-block; width:15px; height:15px; flex:0 0 15px; }
+  .swatch.player { background:var(--blue); border-radius:50%; }
+  .swatch.wife { background:var(--pink); border-radius:50%; }
+  .swatch.guard { background:var(--red); border-radius:2px; }
+  .swatch.dog { background:var(--orange); border-radius:50%; box-shadow:0 0 0 3px #fb923c30; }
+  .swatch.camera { width:0; height:0; border-left:8px solid transparent; border-right:8px solid transparent; border-bottom:15px solid var(--purple); }
+  .swatch.stairs { background:var(--green); border-radius:2px; }
+  .swatch.wall { background:#353c46; border-radius:2px; }
+  .tip { color:var(--muted); font-size:12px; text-align:center; padding:10px 8px 0; }
+  .overlay { position:fixed; inset:0; z-index:20; display:flex; justify-content:center; align-items:center; padding:20px; background:rgba(7,11,18,.82); backdrop-filter:blur(7px); }
+  .overlay.hidden { display:none; }
+  .overlay.flash-screen { background:rgba(190,25,35,.57); animation:danger-flash .22s steps(2, start) 4; }
+  @keyframes danger-flash { 0%,100% { background:rgba(190,25,35,.24); } 50% { background:rgba(255,35,45,.73); } }
+  .modal { width:min(560px, 100%); max-height:90vh; overflow-y:auto; border-radius:18px; padding:25px; background:#1b2738; border:1px solid #465b76; box-shadow:0 24px 100px rgba(0,0,0,.5); }
+  .eyebrow { color:#8ebeff; text-transform:uppercase; font-weight:850; letter-spacing:.14em; font-size:10px; margin-bottom:8px; }
+  .modal h2 { margin:0 0 10px; font-size:clamp(25px, 6vw, 36px); line-height:1.05; letter-spacing:-.7px; }
+  .modal p { color:#c8d3e1; line-height:1.55; font-size:14px; margin:8px 0 14px; }
+  .rule-list { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:16px 0 19px; }
+  .rule { padding:11px 12px; border:1px solid #35475d; border-radius:11px; background:#202e41; font-size:12px; line-height:1.4; color:#d9e2ed; }
+  .rule b { display:block; font-size:12px; margin-bottom:3px; color:#fff; }
+  .start-button { border:0; cursor:pointer; color:#061324; background:#80bbff; font-size:15px; font-weight:900; border-radius:11px; padding:13px 18px; width:100%; transition:transform .12s ease, background .12s ease; }
+  .start-button:hover { background:#a5d0ff; transform:translateY(-1px); }
+  .secondary { text-align:center; color:var(--muted)!important; font-size:11px!important; margin:11px 0 0!important; }
+  .result-tag { display:inline-flex; padding:6px 10px; border:1px solid #456080; border-radius:999px; background:#233b56; color:#a9d0ff; font-weight:850; font-size:11px; margin-bottom:10px; }
+  .grade { font-size:66px; font-weight:950; letter-spacing:-4px; line-height:1; margin:5px 0 8px; color:#a9d0ff; }
+  .result-stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:17px 0; }
+  .result-stat { border:1px solid #35475d; background:#202e41; border-radius:11px; padding:12px; }
+  .result-stat small { display:block; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; font-size:10px; font-weight:800; margin-bottom:5px; }
+  .result-stat strong { display:block; font-size:16px; }
+  .flash-message { border-left:4px solid #ff6b73; background:rgba(76,13,20,.55); border-radius:4px 10px 10px 4px; padding:12px 14px; color:#fff; font-weight:800; margin:18px 0; }
+  @media (max-width:700px) {
+    .app { width:calc(100% - 16px); margin-top:12px; }
+    .heading { align-items:flex-start; }
+    .kbd-hint { display:none; }
+    .status-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); gap:7px; }
+    .stat { padding:9px 11px; }
+    .stat-value { font-size:16px; }
+    .mission-row { align-items:flex-start; flex-direction:column; gap:5px; }
+    .message { text-align:left; }
+    .board-wrap { padding:9px 5px; }
+    .legend { gap:9px 12px; padding:10px 8px; }
+    .legend-item { font-size:10px; }
+    .rule-list { grid-template-columns:1fr; gap:7px; }
+    .modal { padding:20px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="heading">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">◆</div>
+      <div><h1>Wife Rescue</h1><p class="subtitle">A deterministic stealth-and-strategy challenge</p></div>
+    </div>
+    <div class="kbd-hint">MOVE: ARROWS / W A S D&nbsp; · &nbsp;RESTART: R</div>
+  </header>
+
+  <section class="status-grid" aria-label="Mission status">
+    <div class="stat"><span class="stat-label">Countdown</span><span id="timer" class="stat-value timer">08:00</span></div>
+    <div class="stat"><span class="stat-label">Location</span><span id="floorLabel" class="stat-value">Floor 1 of 5</span></div>
+    <div class="stat"><span class="stat-label">Attempt</span><span id="attemptLabel" class="stat-value">—</span></div>
+    <div class="stat"><span class="stat-label">Mission status</span><span id="statusLabel" class="stat-value">READY</span></div>
+  </section>
+
+  <main class="game-panel">
+    <div class="mission-row">
+      <div class="objective">OBJECTIVE: <span id="objective">Reach the stairs</span></div>
+      <div id="message" class="message" aria-live="polite">Press Start when you are ready.</div>
+    </div>
+    <div class="board-wrap"><canvas id="gameCanvas" width="800" height="560" aria-label="Top-down stealth game map"></canvas></div>
+    <div class="legend" aria-label="Map legend">
+      <div class="legend-item"><span class="swatch player"></span>Player</div>
+      <div class="legend-item"><span class="swatch wife"></span>Wife</div>
+      <div class="legend-item"><span class="swatch guard"></span>Guard + yellow vision</div>
+      <div class="legend-item"><span class="swatch dog"></span>Dog + 1-tile scent</div>
+      <div class="legend-item"><span class="swatch camera"></span>Camera + purple cone</div>
+      <div class="legend-item"><span class="swatch stairs"></span>Stairs</div>
+      <div class="legend-item"><span class="swatch wall"></span>Wall</div>
+    </div>
+  </main>
+  <div class="tip">Danger zones stay visible. Dogs smell one tile away (up, down, left, or right), even through walls.</div>
+</div>
+
+<div id="screenOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="overlayTitle">
+  <div id="overlayCard" class="modal"></div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // The main map uses 40-pixel tiles. The roof is intentionally smaller.
+  const TILE = 40;
+  const RUN_MS = 8 * 60 * 1000;
+  const PLAYER_REPEAT_MS = 150;
+  const ENEMY_STEP_MS = 600;
+  const CAMERA_TURN_MS = 4000;
+  const CAMERA_COOLDOWN_MS = 10000;
+  const GUARD_ALERT_MS = 8000;
+  // Dogs smell only one orthogonal tile away; walls do not block scent.
+  const DOG_SCENT_RANGE = 1;
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const $ = (id) => document.getElementById(id);
+
+  const DIRS = {
+    up:    { x: 0, y: -1, angle: -Math.PI / 2 },
+    right: { x: 1, y: 0, angle: 0 },
+    down:  { x: 0, y: 1, angle: Math.PI / 2 },
+    left:  { x: -1, y: 0, angle: Math.PI }
+  };
+  const DIR_ORDER = ['up', 'right', 'down', 'left'];
+  const KEY_TO_DIR = {
+    ArrowUp: 'up', w: 'up', W: 'up',
+    ArrowRight: 'right', d: 'right', D: 'right',
+    ArrowDown: 'down', s: 'down', S: 'down',
+    ArrowLeft: 'left', a: 'left', A: 'left'
+  };
+
+  // Patrols are rectangles with fixed, adjacent tiles. Their lengths are 8, 10, or 12.
+  function rectLoop(x, y, w, h) {
+    const p = [];
+    for (let xx = x; xx < x + w; xx++) p.push({ x: xx, y });
+    for (let yy = y + 1; yy < y + h; yy++) p.push({ x: x + w - 1, y: yy });
+    for (let xx = x + w - 2; xx >= x; xx--) p.push({ x: xx, y: y + h - 1 });
+    for (let yy = y + h - 2; yy > y; yy--) p.push({ x, y: yy });
+    return p;
+  }
+  const dogLoop4 = (x, y) => rectLoop(x, y, 2, 2);
+  const dogLoop6 = (x, y) => rectLoop(x, y, 2, 3);
+
+  // A hand-made floor is created from room walls and door openings.
+  function floorConfig(name, width, height, start, stairs, walls, guards, dogs, cameras, extra = {}) {
+    return { name, width, height, start, stairs, walls, guards, dogs, cameras, ...extra };
+  }
+  const floors = [
+    floorConfig('Floor 1', 20, 14, {x:2,y:11}, {x:17,y:2},
+      { h: [{y:6,x1:1,x2:18,doors:[3,16]}], v: [{x:9,y1:1,y2:5,doors:[3]}] },
+      [{loop:rectLoop(13,8,4,3)}], [],
+      [{x:7,y:10,dir:'left'},{x:13,y:2,dir:'left'}]),
+
+    floorConfig('Floor 2', 20, 14, {x:2,y:12}, {x:17,y:2},
+      { h: [{y:4,x1:1,x2:18,doors:[4,15]},{y:9,x1:1,x2:18,doors:[3,17]}], v: [{x:12,y1:5,y2:8,doors:[7]}] },
+      [{loop:rectLoop(2,5,3,3)},{loop:rectLoop(8,5,3,4)},{loop:rectLoop(14,5,4,4)}], [],
+      [{x:5,y:2,dir:'left'},{x:15,y:11,dir:'left'}]),
+
+    floorConfig('Floor 3', 20, 14, {x:2,y:12}, {x:17,y:2},
+      { h: [{y:4,x1:1,x2:18,doors:[2,17]},{y:8,x1:1,x2:18,doors:[5,14]}], v: [{x:6,y1:5,y2:7,doors:[6]},{x:13,y1:1,y2:3,doors:[2]}] },
+      [{loop:rectLoop(2,5,3,3)},{loop:rectLoop(8,9,3,4)}],
+      [{loop:dogLoop4(11,10)},{loop:dogLoop4(15,5)},{loop:dogLoop6(10,1)},{loop:dogLoop6(16,10)}],
+      [{x:4,y:2,dir:'right'},{x:9,y:6,dir:'left'},{x:17,y:6,dir:'down'},{x:12,y:11,dir:'left'}]),
+
+    // Three sealed horizontal chokepoints create one sequence of rooms to the stairs.
+    floorConfig('Floor 4', 20, 14, {x:2,y:12}, {x:17,y:1},
+      { h: [{y:3,x1:1,x2:18,doors:[16]},{y:6,x1:1,x2:18,doors:[16]},{y:9,x1:1,x2:18,doors:[4]}], v: [] },
+      [{loop:rectLoop(9,10,3,3)},{loop:rectLoop(9,4,5,2)},{loop:rectLoop(8,1,6,2)}],
+      [{loop:dogLoop4(13,10)},{loop:dogLoop4(5,4)},{loop:dogLoop4(5,1)}],
+      [{x:6,y:11,dir:'left'},{x:6,y:4,dir:'right'},{x:16,y:2,dir:'right'}]),
+
+    floorConfig('Floor 5', 20, 14, {x:2,y:12}, {x:2,y:2},
+      { h: [{y:7,x1:1,x2:18,doors:[2,17]}], v: [{x:6,y1:1,y2:6,doors:[3]},{x:14,y1:8,y2:12,doors:[10]}] },
+      [{loop:rectLoop(4,8,3,3)},{loop:rectLoop(9,8,3,4)}],
+      [{loop:dogLoop4(6,10)},{loop:dogLoop6(12,8)}],
+      [{x:4,y:5,dir:'right'},{x:9,y:3,dir:'up'},{x:17,y:8,dir:'up'}],
+      { wifeStart:{x:17,y:10} }),
+
+    floorConfig('Roof', 12, 6, {x:1,y:4}, {x:10,y:4},
+      { h: [], v: [] },
+      [{loop:rectLoop(5,1,3,3)}], [], [], { helicopter:{x:10,y:4} })
+  ];
+
+  let state = 'ready';
+  let currentFloor = 0;
+  let grid = [];
+  let player = {x:2,y:11};
+  let wife = null;
+  let hasWife = false;
+  let guards = [];
+  let dogs = [];
+  let cameras = [];
+  let runStartedAt = 0;
+  let floorStartedAt = 0;
+  let nextEnemyMoveAt = 0;
+  let nextPlayerMoveAt = 0;
+  let remainingMs = RUN_MS;
+  let attemptCount = 0;
+  let bestFloorIndex = 0;
+  let lastMessageUntil = 0;
+  let lossReason = '';
+  let lossStartedAt = 0;
+  let winGrade = '';
+  const heldKeys = new Set();
+  let activeKey = null;
+
+  function buildGrid(cfg) {
+    const g = Array.from({length: cfg.height}, (_, y) =>
+      Array.from({length: cfg.width}, (_, x) =>
+        x === 0 || y === 0 || x === cfg.width - 1 || y === cfg.height - 1 ? '#' : '.'));
+    for (const wall of cfg.walls.h) {
+      for (let x = wall.x1; x <= wall.x2; x++) g[wall.y][x] = wall.doors.includes(x) ? 'D' : '#';
+    }
+    for (const wall of cfg.walls.v) {
+      for (let y = wall.y1; y <= wall.y2; y++) g[y][wall.x] = wall.doors.includes(y) ? 'D' : '#';
+    }
+    return g;
+  }
+  const inBounds = (p, g = grid) => p.x >= 0 && p.y >= 0 && p.y < g.length && p.x < g[0].length;
+  const walkable = (p, g = grid) => inBounds(p, g) && g[p.y][p.x] !== '#';
+  const sameTile = (a,b) => !!a && !!b && a.x === b.x && a.y === b.y;
+  const manhattan = (a,b) => Math.abs(a.x-b.x) + Math.abs(a.y-b.y);
+  function directionBetween(a, b) {
+    if (b.x > a.x) return 'right';
+    if (b.x < a.x) return 'left';
+    if (b.y > a.y) return 'down';
+    return 'up';
+  }
+  function rotateClockwise(dir, amount) {
+    return DIR_ORDER[(DIR_ORDER.indexOf(dir) + amount) % 4];
+  }
+
+  // Breadth-first search returns a shortest, wall-safe path (not including the start tile).
+  function findPath(start, target, g = grid) {
+    if (sameTile(start, target)) return [];
+    const key = p => `${p.x},${p.y}`;
+    const queue = [start];
+    const cameFrom = new Map([[key(start), null]]);
+    const deltas = [{x:0,y:-1},{x:1,y:0},{x:0,y:1},{x:-1,y:0}];
+    let found = false;
+    for (let i=0; i<queue.length && !found; i++) {
+      const here = queue[i];
+      for (const d of deltas) {
+        const next = {x:here.x+d.x,y:here.y+d.y};
+        const k = key(next);
+        if (!walkable(next, g) || cameFrom.has(k)) continue;
+        cameFrom.set(k, key(here));
+        if (sameTile(next, target)) { found = true; break; }
+        queue.push(next);
+      }
+    }
+    if (!found) return null;
+    const path = [];
+    let k = key(target);
+    while (k !== key(start)) {
+      const [x,y] = k.split(',').map(Number);
+      path.push({x,y});
+      k = cameFrom.get(k);
+      if (k == null) return null;
+    }
+    return path.reverse();
+  }
+
+  function loadFloor(index, now = performance.now()) {
+    currentFloor = index;
+    const cfg = floors[index];
+    grid = buildGrid(cfg);
+    player = {...cfg.start};
+    guards = cfg.guards.map(def => {
+      const loop = def.loop.map(p => ({...p}));
+      return { loop, idx:0, pos:{...loop[0]}, dir:directionBetween(loop[0], loop[1]), mode:'patrol', alertTarget:null, alertUntil:0, returnIndex:0 };
+    });
+    dogs = cfg.dogs.map(def => {
+      const loop = def.loop.map(p => ({...p}));
+      return { loop, idx:0, pos:{...loop[0]} };
+    });
+    cameras = cfg.cameras.map(def => ({...def, baseDir:def.dir, nextTriggerAt:0}));
+    if (index === 4) wife = {...cfg.wifeStart};
+    else if (index === 5 && hasWife) {
+      // Start the roof with her beside the player; after the first move she trails exactly one tile behind.
+      wife = {x:Math.min(cfg.start.x + 1, cfg.width - 2), y:cfg.start.y};
+    } else wife = null;
+    floorStartedAt = now;
+    nextEnemyMoveAt = now + ENEMY_STEP_MS;
+    resizeCanvas(cfg.width, cfg.height);
+    bestFloorIndex = Math.max(bestFloorIndex, index);
+    updateUI(now);
+    draw();
+  }
+  function resizeCanvas(width, height) {
+    canvas.width = width * TILE;
+    canvas.height = height * TILE;
+    canvas.style.width = `${width * TILE}px`;
+    canvas.style.maxWidth = '100%';
+  }
+
+  function setMessage(text, tone = '', duration = 2300, now = performance.now()) {
+    $('message').textContent = text;
+    $('message').className = `message${tone ? ` ${tone}` : ''}`;
+    lastMessageUntil = now + duration;
+  }
+  function startGame() {
+    attemptCount += 1;
+    state = 'playing';
+    hasWife = false;
+    lossReason = '';
+    winGrade = '';
+    remainingMs = RUN_MS;
+    runStartedAt = performance.now();
+    nextPlayerMoveAt = runStartedAt;
+    heldKeys.clear();
+    activeKey = null;
+    loadFloor(0, runStartedAt);
+    $('screenOverlay').className = 'overlay hidden';
+    setMessage('Patterns repeat every attempt. Watch the danger zones.', '', 4000, runStartedAt);
+    updateUI(runStartedAt);
+  }
+  function beginLose(reason, now = performance.now()) {
+    if (state !== 'playing') return;
+    state = 'flash';
+    lossReason = reason;
+    remainingMs = Math.max(0, RUN_MS - (now - runStartedAt));
+    lossStartedAt = now;
+    heldKeys.clear();
+    activeKey = null;
+    setMessage(reason, 'danger', 1000, now);
+    showOverlay('flash');
+    updateUI(now);
+  }
+  function finishLoss(now = performance.now()) {
+    if (state !== 'flash') return;
+    state = 'lost';
+    showOverlay('lost');
+    updateUI(now);
+  }
+  function winGame(now = performance.now()) {
+    if (state !== 'playing') return;
+    remainingMs = Math.max(0, RUN_MS - (now - runStartedAt));
+    state = 'won';
+    heldKeys.clear();
+    activeKey = null;
+    setMessage('Mission complete!', '', 999999, now);
+    if (attemptCount === 1 && remainingMs >= 180000) winGrade = 'S';
+    else if (attemptCount <= 3 && remainingMs >= 90000) winGrade = 'A';
+    else winGrade = 'B';
+    showOverlay('won');
+    updateUI(now);
+  }
+
+  function showOverlay(kind) {
+    const overlay = $('screenOverlay');
+    const card = $('overlayCard');
+    overlay.className = 'overlay';
+    if (kind === 'flash') {
+      overlay.classList.add('flash-screen');
+      card.innerHTML = `<div class="eyebrow">Mission compromised</div><h2 id="overlayTitle">You've been spotted.</h2><div class="flash-message">${escapeHTML(lossReason)}</div><p>The mission is ending. Reset to try the exact same patrol patterns again.</p>`;
+      return;
+    }
+    if (kind === 'lost') {
+      card.innerHTML = `
+        <div class="eyebrow">Run ${attemptCount} ended</div>
+        <h2 id="overlayTitle">Mission failed</h2>
+        <div class="flash-message">${escapeHTML(lossReason)}</div>
+        <p>${lossReason === 'The helicopter left.' ? 'The helicopter departed before you reached extraction.' : 'Study the guard routes, camera cones, and dog scent rings. The patterns will be identical next time.'}</p>
+        <div class="result-stats">
+          <div class="result-stat"><small>Best floor reached</small><strong>${escapeHTML(floors[bestFloorIndex].name)}</strong></div>
+          <div class="result-stat"><small>Attempts so far</small><strong>${attemptCount}</strong></div>
+        </div>
+        <button class="start-button" id="restartButton">Try again · R</button>
+        <p class="secondary">A new attempt resets the timer and starts on Floor 1.</p>`;
+      $('restartButton').addEventListener('click', startGame);
+      return;
+    }
+    if (kind === 'won') {
+      card.innerHTML = `
+        <div class="eyebrow">Extraction successful</div>
+        <div class="result-tag">MISSION COMPLETE</div>
+        <h2 id="overlayTitle">You rescued your wife.</h2>
+        <div class="grade">${winGrade}</div>
+        <p>${winGrade === 'S' ? 'Outstanding: first attempt, with at least three minutes remaining.' : winGrade === 'A' ? 'Excellent: completed within three attempts and with at least 1:30 remaining.' : 'You made it out. Every successful rescue counts.'}</p>
+        <div class="result-stats">
+          <div class="result-stat"><small>Time remaining</small><strong>${formatTime(remainingMs)}</strong></div>
+          <div class="result-stat"><small>Attempts so far</small><strong>${attemptCount}</strong></div>
+          <div class="result-stat"><small>Best floor reached</small><strong>${escapeHTML(floors[bestFloorIndex].name)}</strong></div>
+          <div class="result-stat"><small>Run grade</small><strong>${winGrade}</strong></div>
+        </div>
+        <button class="start-button" id="restartButton">Play again · R</button>
+        <p class="secondary">Patterns stay the same. Your route can improve.</p>`;
+      $('restartButton').addEventListener('click', startGame);
+      return;
+    }
+    // Start screen: all instructions are visible before the countdown begins.
+    card.innerHTML = `
+      <div class="eyebrow">A deterministic stealth challenge</div>
+      <h2 id="overlayTitle">Wife Rescue</h2>
+      <p>A mafia boss has kidnapped your wife because she chose you. She is being held on Floor 5. The helicopter on the roof leaves in <b>8 minutes</b>. Find her, then get to the helicopter together.</p>
+      <div class="rule-list">
+        <div class="rule"><b>Move</b>Arrow keys or W, A, S, D. One tile per tap; held keys repeat every 0.15 seconds.</div>
+        <div class="rule"><b>Guards</b>Red squares patrol fixed loops. Yellow zones show their vision; walls block their sight.</div>
+        <div class="rule"><b>Dogs</b>Orange tiles show a one-tile cross-shaped scent range. Dogs can smell through walls.</div>
+        <div class="rule"><b>Cameras</b>Purple cones rotate every 4 seconds. Spotted people draw nearby guards to the location.</div>
+        <div class="rule"><b>Route planning</b>Green tiles are stairs. Floors 1–3 have a risky shortcut and a safer longer route.</div>
+        <div class="rule"><b>Win / lose</b>Reach the helicopter with your wife. She is safe while captive; after rescue, the same danger zones can catch her too.</div>
+      </div>
+      <button class="start-button" id="startButton">Start mission</button>
+      <p class="secondary">Press Enter or click Start. Press R after winning or losing to restart.</p>`;
+    $('startButton').addEventListener('click', startGame);
+  }
+
+  function formatTime(ms) {
+    const seconds = Math.max(0, Math.ceil(ms / 1000));
+    const mm = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const ss = (seconds % 60).toString().padStart(2, '0');
+    return `${mm}:${ss}`;
+  }
+  function expireMessage(now) {
+    if (state === 'playing' && lastMessageUntil > 0 && now >= lastMessageUntil) {
+      $('message').textContent = 'Watch the patrol loops and danger zones.';
+      $('message').className = 'message';
+      lastMessageUntil = 0;
+    }
+  }
+
+  function updateUI(now = performance.now()) {
+    const liveMs = state === 'playing' ? Math.max(0, RUN_MS - (now - runStartedAt)) : remainingMs;
+    const timer = $('timer');
+    timer.textContent = formatTime(liveMs);
+    timer.classList.toggle('urgent', liveMs < 60000);
+    $('floorLabel').textContent = currentFloor === 5 ? 'Roof' : `Floor ${currentFloor + 1} of 5`;
+    $('attemptLabel').textContent = attemptCount ? String(attemptCount) : '—';
+    const statuses = {ready:'READY', playing:'ACTIVE', flash:'CAUGHT', lost:'FAILED', won:'COMPLETE'};
+    $('statusLabel').textContent = statuses[state] || 'READY';
+    let objective = 'Reach the stairs';
+    if (currentFloor === 4) objective = hasWife ? 'Escort your wife to the stairs' : 'Find your wife';
+    if (currentFloor === 5) objective = 'Get to the helicopter';
+    $('objective').textContent = objective;
+    if (state === 'ready') $('message').textContent = 'Press Start when you are ready.';
+  }
+  function escapeHTML(text) {
+    return String(text).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+
+  function canSee(source, target, dir, depth) {
+    const all = getConeCells(source, dir, depth, grid);
+    return all.some(p => sameTile(p, target));
+  }
+  function clearLine(a, b, g = grid) {
+    // Bresenham line: any intervening wall blocks vision; the target itself must be walkable too.
+    let x0 = a.x, y0 = a.y, x1 = b.x, y1 = b.y;
+    const dx = Math.abs(x1-x0), sx = x0 < x1 ? 1 : -1;
+    const dy = -Math.abs(y1-y0), sy = y0 < y1 ? 1 : -1;
+    let err = dx + dy;
+    while (true) {
+      if (!(x0 === a.x && y0 === a.y) && !(x0 === b.x && y0 === b.y) && g[y0][x0] === '#') return false;
+      if (x0 === x1 && y0 === y1) break;
+      const e2 = 2 * err;
+      if (e2 >= dy) { err += dy; x0 += sx; }
+      if (e2 <= dx) { err += dx; y0 += sy; }
+    }
+    return true;
+  }
+  function getConeCells(source, dir, depth, g = grid) {
+    const f = DIRS[dir];
+    const perp = {x:-f.y, y:f.x};
+    const cells = [];
+    for (let d=1; d<=depth; d++) {
+      const offsets = d === 1 ? [0] : [-1,0,1];
+      for (const side of offsets) {
+        const p = {x:source.x + f.x*d + perp.x*side, y:source.y + f.y*d + perp.y*side};
+        if (!walkable(p, g) || !clearLine(source,p,g)) continue;
+        cells.push(p);
+      }
+    }
+    return cells;
+  }
+  function visibleTarget(observer, target, depth) {
+    if (!target) return false;
+    const source = observer.pos || {x:observer.x, y:observer.y};
+    return getConeCells(source, observer.dir, depth, grid).some(p => sameTile(p,target));
+  }
+
+  function updateCameraDirections(now) {
+    const turns = Math.floor((now - floorStartedAt) / CAMERA_TURN_MS);
+    for (const camera of cameras) camera.dir = rotateClockwise(camera.baseDir, turns % 4);
+  }
+  function activeWifeTarget() {
+    // The captive is already known to the mafia. She becomes an active detection target only
+    // after rescue, when she starts following the player; otherwise cameras can end the run
+    // before the player can even reach her.
+    return wife && (currentFloor !== 4 || hasWife) ? wife : null;
+  }
+
+  function onCameraSpotted(camera, target, now, targetLabel = 'you') {
+    camera.nextTriggerAt = now + CAMERA_COOLDOWN_MS;
+    setMessage(targetLabel === 'your wife'
+      ? 'Camera spotted your wife! Guards are investigating her last seen tile.'
+      : 'Camera spotted you! Guards are investigating your last seen tile.', 'warning', 3200, now);
+    // Guards in an 8-tile Manhattan radius converge on the exact tile that was seen.
+    for (const guard of guards) {
+      if (manhattan(guard.pos, target) <= 8) {
+        guard.mode = 'alert';
+        guard.alertTarget = {...target};
+        guard.alertUntil = now + GUARD_ALERT_MS;
+      }
+    }
+  }
+
+  function checkHazards(now) {
+    if (state !== 'playing') return;
+    const wifeTarget = activeWifeTarget();
+    for (const guard of guards) {
+      // Explain the actual failure: a physical collision is different from visible cone detection.
+      if (sameTile(guard.pos, player)) { beginLose('A guard caught you by contact!', now); return; }
+      if (canSee(guard.pos, player, guard.dir, 3)) { beginLose('A guard saw you!', now); return; }
+      if (wifeTarget && sameTile(guard.pos, wifeTarget)) { beginLose('A guard caught your wife by contact!', now); return; }
+      if (wifeTarget && canSee(guard.pos, wifeTarget, guard.dir, 3)) { beginLose('A guard saw your wife!', now); return; }
+    }
+    for (const dog of dogs) {
+      if (manhattan(dog.pos, player) <= DOG_SCENT_RANGE) { beginLose('Dog smelled you!', now); return; }
+      if (wifeTarget && manhattan(dog.pos, wifeTarget) <= DOG_SCENT_RANGE) { beginLose('Dog smelled your wife!', now); return; }
+    }
+    for (const camera of cameras) {
+      if (now < camera.nextTriggerAt) continue;
+      const playerSeen = visibleTarget(camera, player, 4);
+      const wifeSeen = wifeTarget && visibleTarget(camera, wifeTarget, 4);
+      if (playerSeen || wifeSeen) {
+        onCameraSpotted(camera, playerSeen ? player : wifeTarget, now, playerSeen ? 'you' : 'your wife');
+        return;
+      }
+    }
+  }
+
+  function nearestLoopPoint(guard) {
+    let bestIndex = 0;
+    let bestPath = null;
+    for (let i=0; i<guard.loop.length; i++) {
+      const path = findPath(guard.pos, guard.loop[i], grid);
+      if (path && (bestPath === null || path.length < bestPath.length)) {
+        bestPath = path;
+        bestIndex = i;
+      }
+    }
+    return bestIndex;
+  }
+  function advanceToward(entity, target) {
+    const path = findPath(entity.pos, target, grid);
+    if (!path || path.length === 0) return false;
+    const next = path[0];
+    if (entity.dir) entity.dir = directionBetween(entity.pos, next);
+    entity.pos = next;
+    return true;
+  }
+  function tickEnemies(now) {
+    // Guards first: alert, return, or advance exactly one fixed patrol step.
+    for (const guard of guards) {
+      if (guard.mode === 'alert' && now >= guard.alertUntil) {
+        guard.mode = 'return';
+        guard.returnIndex = nearestLoopPoint(guard);
+      }
+      if (guard.mode === 'alert') {
+        if (!sameTile(guard.pos, guard.alertTarget)) advanceToward(guard, guard.alertTarget);
+      } else if (guard.mode === 'return') {
+        const target = guard.loop[guard.returnIndex];
+        if (sameTile(guard.pos, target)) {
+          guard.idx = guard.returnIndex;
+          guard.mode = 'patrol';
+          guard.dir = directionBetween(guard.loop[guard.idx], guard.loop[(guard.idx+1)%guard.loop.length]);
+        } else advanceToward(guard, target);
+      } else {
+        guard.idx = (guard.idx + 1) % guard.loop.length;
+        const next = guard.loop[guard.idx];
+        guard.dir = directionBetween(guard.pos, next);
+        guard.pos = {...next};
+      }
+    }
+    // Dogs move on their own fixed loops, even when the player is standing still.
+    for (const dog of dogs) {
+      dog.idx = (dog.idx + 1) % dog.loop.length;
+      dog.pos = {...dog.loop[dog.idx]};
+    }
+  }
+
+  function tryMove(dirName, now = performance.now()) {
+    if (state !== 'playing') return;
+    const d = DIRS[dirName];
+    if (!d) return;
+    const next = {x:player.x+d.x, y:player.y+d.y};
+    if (!walkable(next)) return;
+    const cfg = floors[currentFloor];
+    // Do not strand the mission by allowing the player to leave Floor 5 without her.
+    if (currentFloor === 4 && !hasWife && sameTile(next, cfg.stairs)) {
+      setMessage('Find your wife before taking the stairs.', 'warning', 1800, now);
+      return;
+    }
+    const previous = {...player};
+    player = next;
+    // Exact one-tile following: the wife moves into the tile the player just left.
+    if (hasWife && wife) wife = previous;
+    if (currentFloor === 4 && !hasWife && sameTile(player, wife)) {
+      hasWife = true;
+      wife = previous;
+      setMessage('You found your wife!', '', 2200, now);
+    }
+    if (currentFloor === 5 && sameTile(player, cfg.helicopter)) {
+      if (hasWife) winGame(now);
+      else setMessage('You need your wife to extract!', 'warning', 1800, now);
+      return;
+    }
+    if (sameTile(player, cfg.stairs)) {
+      if (currentFloor < 5) {
+        const nextFloor = currentFloor + 1;
+        loadFloor(nextFloor, now);
+        setMessage(nextFloor === 5 ? 'Roof reached' : `${floors[nextFloor].name} reached`, '', 2200, now);
+        return;
+      }
+    }
+    checkHazards(now);
+    updateUI(now);
+  }
+
+  function moveHeldKey(now) {
+    if (!activeKey || !heldKeys.has(activeKey) || now < nextPlayerMoveAt) return;
+    tryMove(KEY_TO_DIR[activeKey], now);
+    nextPlayerMoveAt = now + PLAYER_REPEAT_MS;
+  }
+
+  // Drawing helpers keep the canvas art simple and readable.
+  function drawTile(x, y, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x*TILE, y*TILE, TILE, TILE);
+  }
+  function drawConeCells(pos, dir, depth, color) {
+    for (const p of getConeCells(pos, dir, depth, grid)) {
+      ctx.fillStyle = color;
+      ctx.fillRect(p.x*TILE+2, p.y*TILE+2, TILE-4, TILE-4);
+    }
+  }
+  function drawDogRange(dog) {
+    const cX = (dog.pos.x + .5)*TILE;
+    const cY = (dog.pos.y + .5)*TILE;
+    ctx.fillStyle = 'rgba(251,146,60,0.075)';
+    for (let y=0; y<grid.length; y++) for (let x=0; x<grid[0].length; x++) {
+      if (manhattan(dog.pos,{x,y}) <= DOG_SCENT_RANGE) ctx.fillRect(x*TILE+1,y*TILE+1,TILE-2,TILE-2);
+    }
+    // Outline each tile in the one-step cross so the smaller scent range is easy to read.
+    ctx.strokeStyle = 'rgba(249,115,22,0.62)';
+    ctx.lineWidth = 2;
+    for (let y=0; y<grid.length; y++) for (let x=0; x<grid[0].length; x++) {
+      if (manhattan(dog.pos,{x,y}) <= DOG_SCENT_RANGE) ctx.strokeRect(x*TILE+2,y*TILE+2,TILE-4,TILE-4);
+    }
+  }
+  function drawStairs(p) {
+    drawTile(p.x,p.y,'#22c55e');
+    ctx.fillStyle = 'rgba(255,255,255,.85)';
+    ctx.fillRect(p.x*TILE+8,p.y*TILE+8,24,4);
+    ctx.fillRect(p.x*TILE+8,p.y*TILE+16,18,4);
+    ctx.fillRect(p.x*TILE+8,p.y*TILE+24,12,4);
+    ctx.fillStyle = '#14532d';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('S',p.x*TILE+34,p.y*TILE+13);
+  }
+  function drawHelicopterTile(p) {
+    drawTile(p.x,p.y,'#20b981');
+    const cx=(p.x+.5)*TILE, cy=(p.y+.5)*TILE;
+    ctx.strokeStyle='#073b2b'; ctx.lineWidth=2.6; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(cx-13,cy-10); ctx.lineTo(cx+13,cy-10); ctx.moveTo(cx,cy-10); ctx.lineTo(cx,cy+7); ctx.moveTo(cx-2,cy+7); ctx.lineTo(cx+10,cy+7); ctx.moveTo(cx+9,cy+7); ctx.lineTo(cx+13,cy+12); ctx.moveTo(cx-12,cy-14); ctx.lineTo(cx+12,cy-14); ctx.stroke();
+    ctx.fillStyle='#073b2b'; ctx.font='bold 9px sans-serif'; ctx.textAlign='center'; ctx.fillText('EXIT',cx,cy+25);
+  }
+  function drawWallsAndGrid() {
+    for (let y=0; y<grid.length; y++) for (let x=0; x<grid[0].length; x++) {
+      const tile=grid[y][x];
+      if (tile === '#') {
+        drawTile(x,y,'#353c46');
+        ctx.fillStyle='rgba(255,255,255,.045)'; ctx.fillRect(x*TILE+2,y*TILE+2,TILE-4,3);
+      } else if (tile === 'D') {
+        drawTile(x,y,'#916846');
+        ctx.fillStyle='#d4a778'; ctx.fillRect(x*TILE+5,y*TILE+5,TILE-10,TILE-10);
+        ctx.fillStyle='#553a26'; ctx.fillRect(x*TILE+TILE-12,y*TILE+TILE/2-2,3,4);
+      }
+      ctx.strokeStyle='rgba(24,34,45,.11)'; ctx.lineWidth=1;
+      ctx.strokeRect(x*TILE+.5,y*TILE+.5,TILE,TILE);
+    }
+  }
+  function drawPlayer(p, color, outline = '#ffffff') {
+    const cx=(p.x+.5)*TILE, cy=(p.y+.5)*TILE;
+    ctx.beginPath(); ctx.arc(cx,cy,12,0,Math.PI*2);
+    ctx.fillStyle=color; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle=outline; ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx-3,cy-4,3,0,Math.PI*2); ctx.fillStyle='rgba(255,255,255,.58)'; ctx.fill();
+  }
+  function drawGuard(g) {
+    const cx=(g.pos.x+.5)*TILE, cy=(g.pos.y+.5)*TILE;
+    ctx.fillStyle='#b91c1c'; ctx.fillRect(cx-11,cy-11,22,22);
+    // Orange border and an exclamation mark make a camera-alerted guard easy to recognize.
+    ctx.strokeStyle=g.mode==='alert' ? '#fb923c' : '#ffffff';
+    ctx.lineWidth=g.mode==='alert' ? 3 : 1.5; ctx.strokeRect(cx-11,cy-11,22,22);
+    const v=DIRS[g.dir];
+    ctx.beginPath(); ctx.moveTo(cx+v.x*3,cy+v.y*3); ctx.lineTo(cx+v.x*9,cy+v.y*9);
+    ctx.strokeStyle='#fee2e2'; ctx.lineWidth=2.5; ctx.stroke();
+    if (g.mode==='alert') { ctx.fillStyle='#7c2d12'; ctx.font='bold 12px sans-serif'; ctx.textAlign='center'; ctx.fillText('!',cx,cy-14); }
+  }
+  function drawDog(dog) {
+    const cx=(dog.pos.x+.5)*TILE, cy=(dog.pos.y+.5)*TILE;
+    ctx.beginPath(); ctx.arc(cx,cy,10,0,Math.PI*2); ctx.fillStyle='#f97316'; ctx.fill();
+    ctx.lineWidth=2; ctx.strokeStyle='#fff7ed'; ctx.stroke();
+    ctx.fillStyle='#7c2d12'; ctx.beginPath(); ctx.arc(cx+3,cy-2,2,0,Math.PI*2); ctx.fill();
+  }
+  function drawCamera(camera) {
+    const cx=(camera.x+.5)*TILE, cy=(camera.y+.5)*TILE;
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(DIRS[camera.dir].angle);
+    ctx.beginPath(); ctx.moveTo(13,0); ctx.lineTo(-9,-9); ctx.lineTo(-6,0); ctx.lineTo(-9,9); ctx.closePath();
+    ctx.fillStyle='#8b5cf6'; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle='#f5f3ff'; ctx.stroke();
+    ctx.restore();
+  }
+  function draw() {
+    const cfg=floors[currentFloor];
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    // Base tiles and stairs / extraction tile.
+    for (let y=0; y<grid.length; y++) for (let x=0; x<grid[0].length; x++) drawTile(x,y,'#e7ebef');
+    drawWallsAndGrid();
+    if (currentFloor===5) drawHelicopterTile(cfg.helicopter);
+    else drawStairs(cfg.stairs);
+
+    // Every danger field is drawn continuously, not only when an enemy moves.
+    for (const guard of guards) drawConeCells(guard.pos,guard.dir,3,'rgba(250,204,21,.28)');
+    for (const camera of cameras) drawConeCells(camera,camera.dir,4,'rgba(139,92,246,.25)');
+    for (const dog of dogs) drawDogRange(dog);
+    // Repaint solid walls so the view remains clear; scent outlines are intentionally redrawn over them.
+    for (let y=0; y<grid.length; y++) for (let x=0; x<grid[0].length; x++) {
+      if (grid[y][x] === '#') {
+        drawTile(x,y,'#353c46');
+        ctx.fillStyle='rgba(255,255,255,.045)'; ctx.fillRect(x*TILE+2,y*TILE+2,TILE-4,3);
+        ctx.strokeStyle='rgba(20,26,34,.25)'; ctx.lineWidth=1; ctx.strokeRect(x*TILE+.5,y*TILE+.5,TILE,TILE);
+      }
+    }
+    // Keep the smaller scent tiles visible even when they overlap solid walls.
+    for (const dog of dogs) {
+      ctx.strokeStyle='rgba(249,115,22,.75)'; ctx.lineWidth=2;
+      for (let y=0; y<grid.length; y++) for (let x=0; x<grid[0].length; x++) {
+        if (manhattan(dog.pos,{x,y}) <= DOG_SCENT_RANGE) ctx.strokeRect(x*TILE+2,y*TILE+2,TILE-4,TILE-4);
+      }
+    }
+    for (const camera of cameras) drawCamera(camera);
+    for (const dog of dogs) drawDog(dog);
+    for (const guard of guards) drawGuard(guard);
+    if (wife && (currentFloor===4 || (currentFloor===5 && hasWife))) drawPlayer(wife,'#ff70b7','#fff1f7');
+    drawPlayer(player,'#3297ff','#eff6ff');
+  }
+
+  // Input handling. preventDefault stops arrow keys from scrolling the web page.
+  window.addEventListener('keydown', (event) => {
+    if (KEY_TO_DIR[event.key]) {
+      event.preventDefault();
+      if (state !== 'playing' || event.repeat) return;
+      heldKeys.add(event.key);
+      activeKey = event.key;
+      tryMove(KEY_TO_DIR[event.key], performance.now());
+      nextPlayerMoveAt = performance.now() + PLAYER_REPEAT_MS;
+      return;
+    }
+    if (event.key === 'Enter' && state === 'ready') {
+      event.preventDefault(); startGame();
+    } else if ((event.key === 'r' || event.key === 'R') && (state === 'lost' || state === 'won')) {
+      event.preventDefault(); startGame();
+    }
+  }, {passive:false});
+  window.addEventListener('keyup', (event) => {
+    if (!KEY_TO_DIR[event.key]) return;
+    heldKeys.delete(event.key);
+    if (activeKey === event.key) {
+      const remaining = Array.from(heldKeys);
+      activeKey = remaining.length ? remaining[remaining.length-1] : null;
+      nextPlayerMoveAt = performance.now() + PLAYER_REPEAT_MS;
+    }
+  });
+  window.addEventListener('blur', () => { heldKeys.clear(); activeKey = null; });
+
+  function frame(now) {
+    if (state === 'playing') {
+      remainingMs = Math.max(0, RUN_MS - (now - runStartedAt));
+      if (remainingMs <= 0) {
+        beginLose('The helicopter left.', now);
+      } else {
+        updateCameraDirections(now);
+        moveHeldKey(now);
+        while (state === 'playing' && now >= nextEnemyMoveAt) {
+          tickEnemies(nextEnemyMoveAt);
+          nextEnemyMoveAt += ENEMY_STEP_MS;
+        }
+        checkHazards(now);
+        expireMessage(now);
+      }
+    } else if (state === 'flash' && now - lossStartedAt >= 1000) {
+      finishLoss(now);
+    }
+    updateUI(now);
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  // Render the first floor behind the start-screen overlay.
+  loadFloor(0, performance.now());
+  showOverlay('start');
+  updateUI(performance.now());
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
