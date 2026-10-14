@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore a wizard's fortress using Windows or Linux commands. A self-contained educational terminal game.">
+  <title>CLI Dungeon Crawl — ASCII Chalice</title>
+  <style>
+    :root { color-scheme: dark; --ink:#9bffa3; --paper:#070b08; --edge:#344539; --muted:#98aaa0; --accent:#ffd473; --terminal-size:16px; }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:clamp(12px,3vw,40px); min-height:100vh; background:#151916; color:var(--ink); font-family:Consolas,"Cascadia Mono","Liberation Mono",monospace; }
+    main { max-width:1200px; margin:0 auto; }
+    .game-heading { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:16px; }
+    h1 { font-size:clamp(17px,2vw,22px); margin:0; font-weight:500; color:#edf2ee; }
+    .edition { color:var(--muted); font-size:12px; }
+    #scoreboard { display:grid; grid-template-columns:110px 170px minmax(0,1fr); border:1px solid var(--edge); border-bottom:none; background:#1c251e; }
+    .stat { padding:12px 16px; min-width:0; }
+    .stat+.stat { border-left:1px solid var(--edge); }
+    .stat-label { display:block; color:var(--muted); font-size:11px; letter-spacing:.06em; margin-bottom:5px; }
+    .stat-value { display:block; font-size:18px; font-variant-numeric:tabular-nums; color:#e9f3eb; }
+    #location { font-size:14px; overflow-wrap:anywhere; }
+    #timer.urgent { color:#ff9696; }
+    #cli-window { border:1px solid var(--edge); background:var(--paper); box-shadow:0 14px 50px #0005; display:flex; flex-direction:column; }
+    #title-bar { display:flex; align-items:center; justify-content:space-between; gap:10px; background:#c6cdc8; padding:8px 12px; color:#17211a; font-size:12px; }
+    #window-title { font-weight:bold; }
+    #attempt-status { font-size:11px; }
+    #terminal { height:clamp(360px,68vh,750px); overflow-y:auto; padding:clamp(12px,2vw,22px); scrollbar-color:var(--edge) var(--paper); cursor:text; }
+    #terminal,#output,#prompt,#command-input { font-size:var(--terminal-size); line-height:1.5; color:var(--ink); }
+    #output { white-space:pre-wrap; overflow-wrap:anywhere; }
+    #output>div { margin-bottom:6px; }
+    .command-echo { color:var(--muted); margin-top:14px; }
+    .notice { color:var(--accent); }
+    .error { color:#ffb0a5; }
+    .success { color:#baffb3; }
+    .ending { font-weight:bold; color:var(--accent); margin-top:18px; }
+    #input-line { display:flex; align-items:baseline; gap:8px; margin-top:12px; }
+    #prompt { flex:none; white-space:pre-wrap; overflow-wrap:anywhere; max-width:75%; }
+    #command-input { flex:1; width:0; min-width:36px; border:none; outline:none; border-radius:0; padding:0; color:var(--ink); background:transparent; font:inherit; caret-color:var(--accent); }
+    #command-input:focus-visible { outline:1px dashed var(--edge); outline-offset:3px; }
+    .keyboard-note { color:var(--muted); font-size:12px; line-height:1.7; margin-top:12px; }
+    .sr-only { position:absolute; width:1px; height:1px; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+    .chalice { color:#ffd473; font-size:clamp(7px,1.1vw,11px); line-height:1; white-space:pre; overflow:hidden; margin:16px 0; letter-spacing:0; }
+    body.linux { --ink:#f4e5fa; --paper:#240d2d; --edge:#654373; --muted:#c1a6cc; --accent:#f0bc7e; background:#211829; }
+    body.linux #scoreboard { background:#302039; }
+    body.linux #title-bar { background:#47334f; color:#f5ecf8; }
+    body.linux #cli-window { border-radius:0 0 7px 7px; }
+    body.linux #prompt { color:#a9eaa1; }
+    @media (max-width:640px) {
+      :root { --terminal-size:14px; }
+      .edition { display:none; }
+      #scoreboard { grid-template-columns:90px minmax(0,1fr); }
+      .path-stat { grid-column:1/-1; border-top:1px solid var(--edge); }
+      .stat.path-stat { border-left:none; }
+      .stat { padding:10px 12px; }
+      #input-line { flex-wrap:wrap; gap:4px; }
+      #prompt { max-width:100%; font-size:12px; }
+      #command-input { min-width:120px; }
+    }
+    @media (prefers-reduced-motion:reduce) { * { scroll-behavior:auto; } }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="game-heading"><h1>CLI Dungeon Crawl</h1><span class="edition">The ASCII Chalice</span></div>
+    <div id="scoreboard" aria-label="Attempt scoreboard">
+      <div class="stat"><span class="stat-label">SCORE</span><span class="stat-value" id="score">0</span></div>
+      <div class="stat"><span class="stat-label">WIZARD ARRIVES IN</span><span class="stat-value" id="timer">—</span></div>
+      <div class="stat path-stat"><span class="stat-label">CURRENT LOCATION</span><span class="stat-value" id="location">Choose a terminal</span></div>
+    </div>
+    <div id="cli-window">
+      <div id="title-bar"><span id="window-title">CLI Dungeon Crawl</span><span id="attempt-status">Choose a terminal</span></div>
+      <div id="terminal" aria-label="Dungeon terminal">
+        <div id="output" role="log" aria-live="polite" aria-relevant="additions"></div>
+        <div id="input-line"><span id="prompt" aria-hidden="true">terminal&gt;</span><label for="command-input" class="sr-only">Terminal command</label><input id="command-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" autofocus aria-label="Terminal command"></div>
+      </div>
+    </div>
+    <p class="keyboard-note">Enter: run command · Tab: complete · ↑ / ↓: command history · help: available commands · man: command details · restart: new attempt</p>
+  </main>
+  <!-- EDITABLE SETTINGS. Durations are in seconds. No save or remote service is used. -->
+  <script id="game-config" type="application/json">
+{
+  "startingSeconds": 900,
+  "keyUses": 1,
+  "timeRewards": {
+    "bell": 300,
+    "key": 300,
+    "containment": 300,
+    "sandglass": 300,
+    "schedule": 180,
+    "decoy": 300
+  },
+  "timeCosts": {
+    "bellNoise": 60
+  },
+  "startingCommands": [
+    "cd",
+    "list",
+    "read",
+    "clear",
+    "help",
+    "manual",
+    "restart",
+    "echo"
+  ],
+  "maxOutputBlocks": 700,
+  "trapMessages": {
+    "bell": "The broken clapper rings the emergency alarm. The wizard arrives early and files you under Lost Property. Apparently adventurers are not covered by his insurance.",
+    "copyCurse": "The copied curse climbs out of its second vessel and into you. Congratulations: you have become the backup copy. Unfortunately, the restoration process is fatal.",
+    "deleteCurse": "Deleting the vessel releases its curse. Your command was valid; your life expectancy was not. The wizard has marked this as a successful cleanup.",
+    "vault": "The uncontained curse wakes the sentinel. It stamps VISITOR DENIED on the nearest available surface: you. The waiting-room reviews were unusually accurate.",
+    "tripwire": "The wire disappears. The ceiling follows. The wizard's structural warranty explicitly excludes command-line enthusiasts.",
+    "cell": "The inspection cell locks from the outside and alerts the wizard. He finds you moments later, regardless of the time remaining. Customer service has exceeded expectations.",
+    "timeout": "The wizard finds you before you find the Chalice. He checks his watch, checks your command history, and adds another scorch mark to the entrance."
+  }
+}
+  </script>
+  <!-- ORIGINAL FORTRESS SCAFFOLD, with room descriptions, learning notes, and object rules. -->
+  <script id="world-data" type="application/json">
+{
+  "name": "C:\\",
+  "type": "dir",
+  "attributeFlags": {},
+  "children": [
+    {
+      "name": "FortressLore.txt",
+      "type": "file",
+      "content": "Legends speak of a fortress ruled by a brilliant, maniacal CLI Wizard. Within its depths lies a relic said to grant eternal command-line mastery: the ASCII Chalice. Many have ventured here; the wizard maintains a disturbingly detailed spreadsheet of those who did not return.\n\nThis is not your first attempt. The wizard patrols the fortress in real time. Moving his patrol bell, breaking a gate seal, and containing a curse can delay him. Read the notices: there is enough help in these walls for a careful beginner to buy more time.\n\nFind and read the hidden treasure to win. Finding it immediately ends the attempt. There are no checkpoints. External notes are welcome.",
+      "attributeFlags": {
+        "hidden": false,
+        "readOnly": true
+      },
+      "id": "FortressLore",
+      "points": 2,
+      "mutable": false
+    },
+    {
+      "name": "README.md",
+      "type": "file",
+      "content": "# CLI Dungeon Crawl\n\nFind the legendary ASCII Chalice before the wizard finds you.\n\nDirectories are rooms. Files are objects. Use {{list}} to list this room, {{read}} to read an object, and cd to move. Entering a room displays its description; files are listed only when you ask. Hidden rooms and objects need {{listAll}}.\n\nStart with help. Use man <command> for details. New tools become available when you read the appropriate notes or search their contents. Help always reflects what you currently know. The man and restart commands are game helpers in both terminal modes.\n\nTab completes available commands and known filenames. Up/Down recall commands. Quote paths containing spaces. {{caseRule}}\n\nThe clock starts with {{startingTime}} and keeps running while you read, think, or switch tabs. Read Gatehouse.info in the Entrance Grounds early: its patrol-bell procedure buys time. Other useful objects can delay the wizard too; every time reward is awarded once.\n\nReading objects and discovering rooms earn points once. Successful puzzle actions earn 2 points each. The Chalice earns an additional 10 points and ends the attempt. Invalid syntax has no additional penalty. Valid dangerous actions can kill you.\n\nUse restart to try again, or restart choose to select another terminal. The game changes only its syntax and terminal styling between Windows and Linux. Your commands affect only this virtual fortress.",
+      "attributeFlags": {
+        "hidden": false,
+        "readOnly": true
+      },
+      "id": "README",
+      "points": 1,
+      "mutable": false
+    },
+    {
+      "name": "EntranceGrounds",
+      "type": "dir",
+      "attributeFlags": {},
+      "children": [
+        {
+          "name": "Gatehouse.info",
+          "type": "file",
+          "content": "GATEHOUSE PATROL NOTICE\n\nThe wizard listens for PatrolBell.alarm before starting his next round. The ivy-covered {{sidePath}} has soft ground: relocating the bell there sends him to inspect that path and buys {{bellTime}}.\n\nMoving preserves a file and changes its location. The tool is {{move}} <source> <destination>.\nExample here: {{move}} PatrolBell.alarm {{sidePath}}\n\nNever DELETE the bell. Its broken clapper will sound the emergency alarm. Copying it causes a smaller, noisy resonance.\n\nRoom descriptions can be checked without entering: {{roomInfo}}. These descriptive annotations are part of the game, alongside the normal directory information.",
+          "attributeFlags": {
+            "hidden": false,
+            "readOnly": true
+          },
+          "id": "Gatehouse",
+          "points": 2,
+          "mutable": false,
+          "learns": [
+            "move"
+          ]
+        },
+        {
+          "name": "SidePath",
+          "type": "dir",
+          "attributeFlags": {
+            "hidden": true
+          },
+          "children": [
+            {
+              "name": "DiscardedNote.txt",
+              "type": "file",
+              "content": "A weathered note: The Chalice has been moved. The Stone Key opens the library gate. After that, the Tome of Records is your best guide. The armory's useless sword remembers a numbered entry.\n\nSEARCH TRAINING\n{{search}} <pattern> <file> finds matching lines in a text file. You do not have to print a whole book. Use man {{search}} for options.\n\nAn InspectionCell lies down this path. It locks from the outside and alerts the wizard immediately. No amount of extra time will save someone who enters. This is a warning, not a challenge.",
+              "attributeFlags": {
+                "hidden": false,
+                "readOnly": false
+              },
+              "id": "DiscardedNote",
+              "points": 3,
+              "mutable": false,
+              "learns": [
+                "search"
+              ]
+            },
+            {
+              "id": "WatchSchedule",
+              "name": "WatchSchedule.txt",
+              "type": "file",
+              "content": "Under the ivy you find the wizard's actual patrol schedule. His routes have not changed in decades. Reading it lets you time your movements and buys {{scheduleTime}} once. Do not enter the InspectionCell: it calls him immediately.",
+              "points": 3,
+              "mutable": false,
+              "attributeFlags": {
+                "hidden": true,
+                "readOnly": true
+              },
+              "timeReward": "schedule"
+            },
+            {
+              "id": "InspectionCell",
+              "name": "InspectionCell",
+              "type": "dir",
+              "attributeFlags": {},
+              "description": "The inspection door slams shut. The inside handle is painted on. A reassuring sign reads: CUSTOMER SERVICE WILL BE WITH YOU SHORTLY.",
+              "children": [],
+              "trap": "cell"
+            }
+          ],
+          "id": "SidePath",
+          "description": "Ivy covers an old service path. A weathered notice marks a sealed inspection cell. The ground here is soft enough to silence a bell."
+        },
+        {
+          "name": "OuterWalls",
+          "type": "dir",
+          "attributeFlags": {},
+          "children": [
+            {
+              "name": "CrumblingTower.look",
+              "type": "file",
+              "content": "From the crumbling tower you glimpse the Inner Keep and a storehouse hidden by overgrowth. The outdoor hourglass bracket is empty. A faded inscription says: return the sand to the walls, and the patrol will lose its place.\n\nA book of records waits in the keep. Scan its numbered entries using {{search}} <pattern> <file>. Example: {{search}} 83 OldRecords.tome\n\nDo not assume that an open doorway is safe. The library's Vault sentinel attacks visitors until the cursed book is safely contained.",
+              "attributeFlags": {
+                "hidden": false,
+                "readOnly": true
+              },
+              "id": "CrumblingTower",
+              "points": 2,
+              "mutable": false,
+              "learns": [
+                "search"
+              ]
+            },
+            {
+              "name": "StorageRoom",
+              "type": "dir",
+              "attributeFlags": {
+                "hidden": true
+              },
+              "children": [
+                {
+                  "name": "StoneKey.key",
+                  "type": "file",
+                  "content": "An ancient stone key with mysterious engravings. It belongs to north.gate in the Inner Keep. Place it in that room using a file move. From this storehouse, the destination is {{keyDestination}}.\n\nThe stone is brittle. Its opening charge is limited, shared even by copies, and consumed only by a successful gate opening. When its last charge is spent, the key and its impressions crumble. Invalid commands consume nothing. Breaking the seal also delays the wizard by {{keyTime}}.",
+                  "attributeFlags": {
+                    "hidden": false,
+                    "readOnly": false
+                  },
+                  "id": "StoneKey",
+                  "points": 3,
+                  "mutable": true,
+                  "limitedUses": true
+                },
+                {
+                  "id": "Sandglass",
+                  "name": "Sandglass.hourglass",
+                  "type": "file",
+                  "content": "A stopped hourglass belongs in the bracket on the Outer Walls. Move it into that room to force the wizard to repeat a patrol, gaining {{sandglassTime}}. From this storehouse, the destination is .. . A magical timer reward works once; copies cannot duplicate it.",
+                  "points": 3,
+                  "mutable": true,
+                  "attributeFlags": {
+                    "hidden": false,
+                    "readOnly": false
+                  }
+                },
+                {
+                  "id": "MaintenanceManual",
+                  "name": "MaintenanceManual.txt",
+                  "type": "file",
+                  "content": "FORTRESS FILE MAINTENANCE\n\n{{copy}} <source> <destination> duplicates a file; {{move}} changes its location. A destination can be a room path or a new filename. Copies share the original object's magical identity: they do not multiply discovery points, charges, or time rewards.\n\n{{renameLesson}}\n\n{{remove}} <file> removes a file. Some fixtures are protected. Other objects are deliberately dangerous: deleting a patrol bell, a cursed book, or a supporting trap wire is lethal.\n\n{{attributeLesson}}\n\nAll these are a supported subset of real command tools. Pipes, redirection, recursive deletion, and arbitrary room creation are outside this simulation. man explains the supported syntax.\n\n{{cosmeticLesson}}",
+                  "points": 2,
+                  "mutable": false,
+                  "attributeFlags": {
+                    "hidden": false,
+                    "readOnly": true
+                  },
+                  "learns": [
+                    "copy",
+                    "move",
+                    "rename",
+                    "remove",
+                    "attributes",
+                    "inspect",
+                    "permissions",
+                    "color",
+                    "title"
+                  ]
+                }
+              ],
+              "id": "StorageRoom",
+              "description": "Dust blankets a stone key and a stopped hourglass. A maintenance manual lies under an empty toolbox."
+            },
+            {
+              "name": "InnerKeep",
+              "type": "dir",
+              "attributeFlags": {},
+              "children": [
+                {
+                  "name": "GreatHall.info",
+                  "type": "file",
+                  "content": "The Great Hall echoes with the wizard's footsteps. north.gate guards the Forbidden Library; move the Stone Key into this room to break its seal.\n\nThe hidden armory holds a rusty sword. Its inscription points to a numbered record in OldRecords.tome. The records describe how to contain a cursed object without destroying it.\n\nA shadow door beyond the library cannot be opened by guessing a path. Every locked part of a path must be open before a command can access anything behind it.",
+                  "attributeFlags": {
+                    "hidden": false,
+                    "readOnly": true
+                  },
+                  "id": "GreatHall",
+                  "points": 2,
+                  "mutable": false
+                },
+                {
+                  "name": "OldRecords.tome",
+                  "type": "file",
+                  "content": "FORTRESS ARCHIVE — 100 ENTRIES\n\nSearch a number or word with {{search}} <pattern> OldRecords.tome. A rusted sword in the armory may help you choose a number.\n\n1. Ancient fortress archives - Year 1562\n2. Weather patterns in the northern region\n3. List of supplies for the eastern wing\n4. Inventory of magical artifacts (incomplete)\n5. Staff rotation schedules\n6. Notes on dimensional portal experiments\n7. Visitor logs from neighboring kingdoms\n8. Maintenance requests for the western tower\n9. List of forbidden tomes in the library\n10. Records of astronomical observations\n11. Transcripts from council meetings\n12. Catalog of rare herbs in the garden\n13. Correspondence with foreign mages\n14. Training regimen for apprentices\n15. Meal plans for the winter solstice\n16. Budget allocations for the year\n17. Security protocols for the inner sanctum\n18. Blueprint modifications for the eastern corridor\n19. List of approved visitors\n20. Incident reports from the alchemy lab\n21. Inventory of kitchen supplies\n22. Maintenance schedule for the water system\n23. Archive access permissions\n24. Records of magical anomalies\n25. List of banned substances\n26. Notes on recent strange occurrences\n27. Guard rotation assignments\n28. Inventory of the armory\n29. Repairs needed for the south wall\n30. Schedule for magical barrier reinforcement\n31. List of books recently added to the library\n32. Visitor logs for the past month\n33. Experiment notes from the wizard's study\n34. Supply requisition forms\n35. Staff complaints and resolutions\n36. Calendar of celestial events\n37. Inventory of potion ingredients\n38. Notes on strange sounds from the basement\n39. List of rooms requiring cleaning\n40. Maintenance log for the main gate\n41. Record of recent thefts\n42. Apprentice evaluation reports\n43. List of rooms needing new furniture\n44. Magical energy consumption metrics\n45. Library book return log\n46. Minutes from the last council meeting\n47. Inventory of candles and torches\n48. Notes on structural integrity concerns\n49. List of approved research projects\n50. Visitor testimonials and feedback\n51. Record of strange dreams reported by staff\n52. Inventory of medical supplies\n53. List of areas restricted to apprentices\n54. Notes on mysterious disappearances\n55. Schedule for weekly meetings\n56. Inventory of cleaning supplies\n57. List of reprimanded staff members\n58. Notes on increased magical interference\n59. Maintenance requests for the library\n60. Record of power fluctuations in the east wing\n61. Inventory of writing materials\n62. Strange symbols appearing on walls report\n63. List of completed renovations\n64. Notes on unexplained footprints\n65. Schedule for magic practice sessions\n66. Inventory of rare metals\n67. List of staff birthdays and celebrations\n68. Notes on peculiar weather patterns near the fortress\n69. Maintenance log for the kitchen\n70. Record of magical accidents this year\n71. Inventory of preserved specimens\n72. List of rooms with reported hauntings\n73. Notes on secret passages discovered recently\n74. Secret library access codes - outdated\n75. Inventory of arcane tools\n76. List of failed experiments and outcomes\n77. Notes on strange markings found in the basement\n78. Maintenance schedule for waste disposal\n79. Record of visitors who never left\n80. Inventory of enchanted items\n81. List of broken furniture awaiting repair\n82. Notes on whispers heard in empty rooms\n83. *CONTAINMENT PROTOCOL* Do NOT copy or delete CursedBook.tome. Move the original into the Vault directory without entering the Vault first: {{move}} CursedBook.tome Vault. The stone plinth suppresses its curse, makes the sentinel safe, and unlocks the hidden ReadingChamber. The containment pulse distracts the wizard for {{containmentTime}}.\n84. Inventory of magical crystals\n85. List of staff with special access privileges\n86. Notes on flickering lights in the west corridor\n87. Maintenance log for the heating system\n88. Record of unusual temperature fluctuations\n89. Inventory of ceremonial objects\n90. List of approved research methods\n91. Notes on increased rat activity in the cellars\n92. Schedule for magical barrier inspections\n93. Inventory of preserved food\n94. List of unresolved phenomena\n95. Notes on staff reporting hearing their names called\n96. Maintenance requests for the apprentice quarters\n97. Record of missing items never recovered\n98. Inventory of imported spices\n99. List of areas due for magical cleansing\n100. Final notes: The wizard claims to have retired. Security patrols continue. Never trust a wizard's press release.",
+                  "attributeFlags": {
+                    "hidden": false,
+                    "readOnly": true
+                  },
+                  "id": "OldRecords",
+                  "points": 4,
+                  "mutable": false,
+                  "learns": [
+                    "search",
+                    "tree"
+                  ]
+                },
+                {
+                  "name": "ForbiddenLibrary",
+                  "type": "dir",
+                  "attributeFlags": {
+                    "locked": true
+                  },
+                  "children": [
+                    {
+                      "name": "CursedBook.tome",
+                      "type": "file",
+                      "content": "A cursed book anchors the shadow seal. A clasp bears three warning labels:\n\nDO NOT COPY: a second vessel lets the curse occupy the nearest reader.\nDO NOT DELETE OR OVERWRITE: destroying the vessel releases the curse into the room.\nDO NOT ENTER THE VAULT WHILE THIS BOOK IS UNCONTAINED: the sentinel is still active.\n\nThe safe containment protocol is in the old fortress records. Search for the entry remembered by the armory's Sword of Elim. The reading chamber stays inaccessible until the curse is contained. Leave the book in its containment room; removing it reactivates the curse and locks the chamber again.",
+                      "attributeFlags": {
+                        "hidden": false,
+                        "readOnly": false
+                      },
+                      "id": "CursedBook",
+                      "points": 4,
+                      "mutable": true
+                    },
+                    {
+                      "name": "Vault",
+                      "type": "dir",
+                      "attributeFlags": {},
+                      "children": [
+                        {
+                          "name": "StoneSentinel.dat",
+                          "type": "file",
+                          "content": "A towering stone sentinel stands with empty hands. It once held the ASCII Chalice, but the Chalice was moved to a hidden reading chamber. The statue is safe now that the cursed book rests on its containment plinth.\n\nAn inscription explains PatrolDecoy.txt: copy a decoy into the Inner Keep and the wizard will spend {{decoyTime}} reviewing a very convincing fictional patrol report. From here: {{copy}} PatrolDecoy.txt {{decoyDestination}}\n\nA copy keeps its source. Use man {{copy}} for details.",
+                          "attributeFlags": {
+                            "hidden": false,
+                            "readOnly": true
+                          },
+                          "id": "StoneSentinel",
+                          "points": 3,
+                          "mutable": false,
+                          "learns": [
+                            "copy"
+                          ]
+                        },
+                        {
+                          "id": "PatrolDecoy",
+                          "name": "PatrolDecoy.txt",
+                          "type": "file",
+                          "content": "A convincing but entirely fictional patrol report. Copy it to the Inner Keep to distract the wizard for {{decoyTime}}. Its copying instructions are engraved on StoneSentinel.dat. Repeated copies cannot distract him again.",
+                          "points": 2,
+                          "mutable": true,
+                          "attributeFlags": {
+                            "hidden": false,
+                            "readOnly": false
+                          }
+                        }
+                      ],
+                      "id": "Vault",
+                      "description": "The stone sentinel rests. Its containment plinth now holds the cursed book. The statue's empty hands confirm that the Chalice was moved elsewhere."
+                    },
+                    {
+                      "name": "ReadingChamber",
+                      "type": "dir",
+                      "attributeFlags": {
+                        "hidden": true,
+                        "locked": true
+                      },
+                      "children": [
+                        {
+                          "name": "Treasure.txt",
+                          "type": "file",
+                          "content": "You have discovered the ASCII Chalice! Its gold is real; its promise of effortless command-line mastery is, regrettably, marketing.",
+                          "attributeFlags": {
+                            "hidden": false,
+                            "readOnly": false
+                          },
+                          "id": "Treasure",
+                          "points": 4,
+                          "mutable": false,
+                          "treasure": true
+                        }
+                      ],
+                      "id": "ReadingChamber",
+                      "description": "The shadow seal is gone. A small reading chamber hides behind the shelves. A golden light falls across its only remaining text."
+                    },
+                    {
+                      "id": "shadow",
+                      "name": "shadow.door",
+                      "type": "file",
+                      "content": "A hidden ReadingChamber is sealed by the aura of CursedBook.tome. The old records explain containment. The nearby Vault is dangerous until the original book has been moved onto its plinth. Copying or destroying the book releases the curse.",
+                      "points": 3,
+                      "mutable": false,
+                      "attributeFlags": {
+                        "hidden": false,
+                        "readOnly": true
+                      }
+                    }
+                  ],
+                  "visibleWhenLocked": false,
+                  "id": "ForbiddenLibrary",
+                  "description": "Rows of forbidden books lean toward you. A cursed tome anchors a shadow across a hidden doorway. The Vault stands open, but its sentinel has not been deactivated."
+                },
+                {
+                  "name": "Armory",
+                  "type": "dir",
+                  "attributeFlags": {
+                    "hidden": true
+                  },
+                  "children": [
+                    {
+                      "name": "Weapon.box",
+                      "type": "file",
+                      "content": "Inside is an ancient rusty sword, too corroded to be useful. An inscription reads:\n\n                  ~Sword of Elim~\nForged in the 83rd year; its true strength lies in the records.\n\nBeside the box, Tripwire.trap holds the ceiling in place. Deleting that wire, or moving it out of the armory, would be a very short engineering lesson.\n\nThe normal deletion tool is {{remove}} <file>. It removes a file rather than moving it somewhere else. Read an object's warnings before using it.",
+                      "attributeFlags": {
+                        "hidden": false,
+                        "readOnly": true
+                      },
+                      "id": "Weapon",
+                      "points": 3,
+                      "mutable": false,
+                      "learns": [
+                        "remove"
+                      ]
+                    },
+                    {
+                      "id": "Tripwire",
+                      "name": "Tripwire.trap",
+                      "type": "file",
+                      "content": "This taut wire supports the armory's cracked ceiling. DO NOT DELETE, OVERWRITE, OR MOVE IT OUT OF THE ARMORY. Removing its support triggers a lethal collapse. The wizard's building inspector was also the wizard.",
+                      "points": 3,
+                      "mutable": true,
+                      "attributeFlags": {
+                        "hidden": false,
+                        "readOnly": false
+                      }
+                    }
+                  ],
+                  "id": "Armory",
+                  "description": "An ancient weapons box rests beside a taut ceiling wire. The wizard evidently economized on structural engineering."
+                },
+                {
+                  "id": "north",
+                  "name": "north.gate",
+                  "type": "file",
+                  "content": "A locked stone gate guards the ForbiddenLibrary directory. The Stone Key must be relocated into the Inner Keep to engage its engravings. Breaking this seal spends one key charge and delays the wizard by {{keyTime}}. Reading or deleting a gate is not the same as opening it.",
+                  "points": 3,
+                  "mutable": false,
+                  "attributeFlags": {
+                    "hidden": false,
+                    "readOnly": true
+                  }
+                }
+              ],
+              "id": "InnerKeep",
+              "description": "The Great Hall echoes with the wizard's footsteps. A stone gate seals the Forbidden Library. Somewhere behind the paneling is an old armory."
+            }
+          ],
+          "id": "OuterWalls",
+          "description": "The walls surround a crumbling tower. You can make out the Inner Keep and a storehouse concealed by trees. An outdoor bracket once held an hourglass."
+        },
+        {
+          "id": "PatrolBell",
+          "name": "PatrolBell.alarm",
+          "type": "file",
+          "content": "A heavy bell marks the wizard's patrol rounds. Move it onto the soft ground in {{sidePath}} to delay him by {{bellTime}}. Gatehouse.info teaches the procedure. Deleting or overwriting it rings the emergency alarm and ends the attempt. Copying it, or moving it onto harder ground elsewhere, creates a noisy echo that costs {{bellNoiseTime}} once.",
+          "points": 3,
+          "mutable": true,
+          "attributeFlags": {
+            "hidden": false,
+            "readOnly": false
+          }
+        }
+      ],
+      "id": "EntranceGrounds",
+      "description": "The gate creaks behind you. A patrol bell hangs beside the gatehouse. The Outer Walls rise ahead; an overgrown path may offer quieter passage."
+    }
+  ],
+  "id": "Fortress",
+  "description": "You stand outside the wizard's fortress. You have tried this before. The scorch marks are probably yours. Somewhere inside waits the ASCII Chalice. The wizard is on patrol; you have {{startingTime}} before he finds you unless you delay him."
+}
+  </script>
+  <script>
+'use strict';
+
+// Terminal, history, and filesystem retain the original game's structure.
+// All world content and balance settings are in the two JSON blocks above.
+const CONFIG = JSON.parse(document.getElementById('game-config').textContent);
+const WORLD_TEMPLATE = JSON.parse(document.getElementById('world-data').textContent);
+const outputEl = document.getElementById('output');
+const inputEl = document.getElementById('command-input');
+const promptEl = document.getElementById('prompt');
+const terminalEl = document.getElementById('terminal');
+let fileSystem = null;
+let currentDirectory = null;
+let fileIndex = new Map();
+let currentOS = null;
+let gameState = null;
+let timerHandle = null;
+let chaliceFrame = null;
+let pendingConfirmation = null;
+let copySerial = 0;
+const commandHistory = [];
+let historyIndex = 0;
+let historyDraft = '';
+
+const isWindows = () => currentOS === 'windows';
+const separator = () => isWindows() ? '\\' : '/';
+const sameName = (a, b) => isWindows() ? a.toLowerCase() === b.toLowerCase() : a === b;
+const formatClock = (seconds) => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`;
+const duration = (seconds) => seconds % 60 === 0 ? `${seconds / 60} minute${seconds === 60 ? '' : 's'}` : `${seconds} seconds`;
+
+function print(text, className = '') {
+  const line = document.createElement('div');
+  line.textContent = String(text);
+  if (className) line.className = className;
+  outputEl.appendChild(line);
+  while (outputEl.children.length > CONFIG.maxOutputBlocks) outputEl.removeChild(outputEl.firstElementChild);
+  terminalEl.scrollTop = terminalEl.scrollHeight;
+}
+
+function pathOf(node) {
+  const parts = [];
+  for (let n = node; n && n !== fileSystem; n = n.parent) parts.unshift(n.name);
+  const root = isWindows() ? 'C:\\' : '/';
+  return root + parts.join(separator());
+}
+
+function remainingSeconds() {
+  if (!gameState) return 0;
+  if (gameState.phase !== 'playing') return gameState.finalSeconds ?? 0;
+  return Math.max(0, Math.ceil((gameState.deadline - Date.now()) / 1000));
+}
+
+function updatePrompt() {
+  promptEl.textContent = !currentOS ? 'terminal>' : isWindows() ? `${pathOf(currentDirectory)}>` : `adventurer@fortress:${pathOf(currentDirectory)}$`;
+}
+
+function updateScoreboard() {
+  document.getElementById('score').textContent = String(gameState?.score ?? 0);
+  const timer = document.getElementById('timer');
+  timer.textContent = gameState ? formatClock(remainingSeconds()) : '—';
+  timer.classList.toggle('urgent', gameState?.phase === 'playing' && remainingSeconds() <= 180);
+  document.getElementById('location').textContent = currentDirectory ? pathOf(currentDirectory) : 'Choose a terminal';
+  document.getElementById('attempt-status').textContent = !gameState ? 'Choose a terminal' : ({playing:'Exploring', won:'Victory', lost:'Attempt ended'})[gameState.phase];
+  updatePrompt();
+}
+
+function attachParent(node, parent) {
+  // Non-enumerable parent links fix the original circular-JSON copy bug.
+  Object.defineProperty(node, 'parent', {value:parent, writable:true, configurable:true, enumerable:false});
+}
+
+function indexFiles(node, parent = null) {
+  attachParent(node, parent);
+  node.originId = node.originId || node.id;
+  node.mode = node.type === 'dir' ? 0o755 : node.attributeFlags.readOnly ? 0o444 : 0o644;
+  if (!isWindows() && node.attributeFlags.hidden && !node.name.startsWith('.')) node.name = '.' + node.name;
+  fileIndex.set(node.id, node);
+  for (const child of node.children || []) indexFiles(child, node);
+}
+
+function template(text) {
+  const win = isWindows();
+  const names = {list:win?'dir':'ls', listAll:win?'dir /a':'ls -a', read:win?'type':'cat', move:win?'move':'mv', copy:win?'copy':'cp', remove:win?'del':'rm', search:win?'findstr':'grep'};
+  const replacements = {
+    ...names,
+    sidePath:fileIndex.get('SidePath')?.name ?? (win?'SidePath':'.SidePath'),
+    keyDestination:`..${separator()}InnerKeep`,
+    decoyDestination:`..${separator()}..`,
+    roomInfo:win?'dir /q .':'ls -ld .',
+    startingTime:duration(CONFIG.startingSeconds),
+    caseRule:win?'Windows command and path names are case-insensitive.':'Linux command and path names are case-sensitive. Hidden names begin with a dot.',
+    renameLesson:win?'rename <oldname> <newname> (or ren) changes a filename in its existing directory. Example: rename Spare.txt Notes.txt.':'mv also renames files. Example: mv Spare.txt Notes.txt. Moving and renaming both preserve the source object.',
+    attributeLesson:win?'attrib <file> displays attributes. attrib -r <file> clears read-only; +r sets it. -h/+h clear/set Hidden. These do not unlock magic gates. Some fortress fixtures remain protected.':'stat <path> displays metadata. chmod u+w <file> adds owner write permission; u-w removes it. File write permission is different from the directory permission needed to remove a file. Changing permissions does not unlock magic gates. Some fortress fixtures remain protected.',
+    cosmeticLesson:win?'color 0A sets green text on black; color 0F sets white. title <text> changes the window title. Both are cosmetic.':'The purple terminal uses Linux syntax. echo <text> prints text. Cosmetic changes never alter the dungeon.'
+  };
+  for (const [key, value] of Object.entries(CONFIG.timeRewards)) replacements[key+'Time'] = duration(value);
+  replacements.bellNoiseTime = duration(CONFIG.timeCosts.bellNoise);
+  return text.replace(/\{\{(\w+)\}\}/g, (_, key) => replacements[key] ?? `[${key}]`);
+}
+
+function markDirectoryVisited(directory) {
+  const firstVisit = !gameState.visitedDirectories.has(directory.id);
+  currentDirectory = directory;
+  if (firstVisit) {
+    gameState.visitedDirectories.add(directory.id);
+    gameState.score += 1;
+    print(template(directory.description));
+    print('[+1 point: new room]', 'notice');
+  }
+  updateScoreboard();
+  if (directory.id === 'Vault' && !gameState.flags.contained) endGame('lost', CONFIG.trapMessages.vault);
+  if (directory.trap === 'cell') endGame('lost', CONFIG.trapMessages.cell);
+}
+
+function startGame(os) {
+  stopAnimation();
+  if (timerHandle !== null) clearInterval(timerHandle);
+  pendingConfirmation = null;
+  currentOS = os;
+  copySerial = 0;
+  commandHistory.length = 0;
+  historyIndex = 0;
+  historyDraft = '';
+  outputEl.textContent = '';
+  document.body.classList.toggle('linux', !isWindows());
+  document.documentElement.style.removeProperty('--ink');
+  document.documentElement.style.removeProperty('--paper');
+  document.getElementById('window-title').textContent = isWindows() ? 'CMD.exe — CLI Dungeon Crawl' : 'bash — adventurer@fortress';
+  fileSystem = JSON.parse(JSON.stringify(WORLD_TEMPLATE));
+  fileIndex = new Map();
+  indexFiles(fileSystem);
+  currentDirectory = fileSystem;
+  const commands = new Set(CONFIG.startingCommands);
+  if (!isWindows()) commands.add('pwd');
+  gameState = {
+    phase:'playing', score:0, deadline:Date.now() + CONFIG.startingSeconds * 1000,
+    visitedDirectories:new Set(), readObjects:new Set(), learnedCommands:commands,
+    actions:new Set(), knownEntries:new Set(), uses:{StoneKey:CONFIG.keyUses},
+    flags:{gateOpen:false, contained:false}, warnings:new Set(), finalSeconds:null,
+    shadowDoor:JSON.parse(JSON.stringify(fileIndex.get('shadow')))
+  };
+  print(isWindows() ? 'Microsoft Windows [simulated CMD terminal]' : 'GNU/Linux [simulated bash terminal]');
+  print('Welcome back, adventurer. Find the ASCII Chalice before the wizard finds you.');
+  print('Type help for your starting commands, then read README.md. Learn more tools from the fortress notes.');
+  print('Tab completes names; ↑/↓ recall commands. man and restart are shared game helpers.', 'notice');
+  markDirectoryVisited(fileSystem);
+  timerHandle = setInterval(tickClock, 250);
+  inputEl.value = '';
+  inputEl.focus();
+}
+
+function chooseTerminal() {
+  stopAnimation();
+  if (timerHandle !== null) clearInterval(timerHandle);
+  timerHandle = null;
+  currentOS = null;
+  currentDirectory = null;
+  gameState = null;
+  pendingConfirmation = null;
+  commandHistory.length = 0;
+  historyIndex = 0;
+  document.body.classList.remove('linux');
+  document.documentElement.style.removeProperty('--ink');
+  document.documentElement.style.removeProperty('--paper');
+  document.getElementById('window-title').textContent = 'CLI Dungeon Crawl';
+  outputEl.textContent = '';
+  print('CLI DUNGEON CRAWL — THE ASCII CHALICE', 'ending');
+  print('A wizard. A fortress. A suspiciously familiar set of scorch marks.');
+  print('Choose your terminal by typing windows or linux, then press Enter.\n\n  1  Windows — CMD syntax\n  2  Linux   — bash syntax');
+  print('Both terminals explore the same dungeon with the same rules. Your clock starts after this choice.', 'notice');
+  updateScoreboard();
+  inputEl.value = '';
+  inputEl.focus();
+}
+
+function tickClock() {
+  if (gameState?.phase !== 'playing') return;
+  if (remainingSeconds() <= 0) {
+    endGame('lost', CONFIG.trapMessages.timeout);
+    return;
+  }
+  for (const threshold of [180, 60]) {
+    if (remainingSeconds() <= threshold && !gameState.warnings.has(threshold)) {
+      gameState.warnings.add(threshold);
+      print(`[The wizard's footsteps are closer. ${formatClock(remainingSeconds())} remains.]`, 'notice');
+    }
+  }
+  updateScoreboard();
+}
+
+function endGame(result, explanation) {
+  if (gameState?.phase !== 'playing') return;
+  const seconds = remainingSeconds();
+  gameState.finalSeconds = seconds;
+  gameState.phase = result;
+  pendingConfirmation = null;
+  if (timerHandle !== null) clearInterval(timerHandle);
+  timerHandle = null;
+  print(result === 'won' ? '\nVICTORY — THE ASCII CHALICE IS YOURS!' : '\nATTEMPT ENDED', 'ending');
+  print(explanation, result === 'won' ? 'success' : 'error');
+  print(`Final score: ${gameState.score}   |   Time remaining: ${formatClock(seconds)}`, 'ending');
+  print('The attempt is over. Type restart for a fresh attempt, or restart choose to change terminals.');
+  updateScoreboard();
+  if (result === 'won') renderChalice();
+}
+
+function awardAction(key, label, reward = null, score = 2) {
+  if (gameState.actions.has(key)) return false;
+  gameState.actions.add(key);
+  gameState.score += score;
+  if (reward) gameState.deadline += CONFIG.timeRewards[reward] * 1000;
+  print(`[${score ? '+'+score+' points; ' : ''}${label}${reward ? '; +'+duration(CONFIG.timeRewards[reward]) : ''}]`, 'notice');
+  updateScoreboard();
+  return true;
+}
+
+function bellNoise() {
+  if (gameState.actions.has('bellNoise')) return;
+  gameState.actions.add('bellNoise');
+  gameState.deadline -= CONFIG.timeCosts.bellNoise * 1000;
+  print(`[The bell echoes across the stone. The wizard changes direction: −${duration(CONFIG.timeCosts.bellNoise)}.]`, 'notice');
+  tickClock();
+}
+
+class PathError extends Error {
+  constructor(code, path) { super(code); this.code = code; this.path = path; }
+}
+
+function findEntryInDir(dir, name) {
+  return dir.children?.find(child => sameName(child.name, name)) ?? null;
+}
+
+function navigateToPath(path) {
+  if (!path) return currentDirectory;
+  let normalized = isWindows() ? path.replace(/\\/g, '/') : path;
+  let node = currentDirectory;
+  if (isWindows() && /^[a-z]:/i.test(normalized)) {
+    if (normalized[0].toLowerCase() !== 'c') throw new PathError('ENOENT', path);
+    normalized = normalized.slice(2);
+    if (normalized.startsWith('/')) node = fileSystem;
+  } else if (normalized.startsWith('/')) node = fileSystem;
+  for (const part of normalized.split('/').filter(Boolean)) {
+    if (node.attributeFlags?.locked) throw new PathError('EACCES', path);
+    if (node.type !== 'dir') throw new PathError('ENOTDIR', path);
+    if (part === '.') continue;
+    if (part === '..') { node = node.parent ?? fileSystem; continue; }
+    const child = findEntryInDir(node, part);
+    if (!child) throw new PathError('ENOENT', path);
+    node = child;
+    // Check every component, not only the final directory.
+    if (node.attributeFlags?.locked) throw new PathError('EACCES', path);
+  }
+  if (node.attributeFlags?.locked) throw new PathError('EACCES', path);
+  return node;
+}
+
+function reportPathError(cmd, err, path) {
+  const reasons = {ENOENT:'No such file or directory', ENOTDIR:'Not a directory', EISDIR:'Is a directory', EACCES:'Permission denied', EEXIST:'File exists', EINVAL:'Invalid argument'};
+  if (isWindows()) print(err.code === 'EACCES' ? 'Access is denied.' : err.code === 'EEXIST' ? 'A file with that name already exists.' : err.code === 'EISDIR' ? 'The requested operation requires a file.' : 'The system cannot find the path specified.', 'error');
+  else print(`${cmd}: ${JSON.stringify(path)}: ${reasons[err.code] ?? err.message}`, 'error');
+}
+
+function parseInput(input) {
+  const words = [];
+  let word = '', quote = null, active = false;
+  for (let i = 0; i < input.length; i++) {
+    const ch = input[i];
+    if (quote) {
+      if (ch === quote) { quote = null; continue; }
+      if (!isWindows() && quote === '"' && ch === '\\' && /[\\"$`]/.test(input[i+1] ?? '')) word += input[++i];
+      else word += ch;
+      continue;
+    }
+    if (ch === '"' || (!isWindows() && ch === "'")) { quote = ch; active = true; continue; }
+    if (!isWindows() && ch === '\\') {
+      if (i + 1 >= input.length) throw new Error('Unfinished escape; complete the command on one line.');
+      word += input[++i]; active = true; continue;
+    }
+    if (/\s/.test(ch)) {
+      if (active) { words.push(word); word = ''; active = false; }
+    } else {
+      if ('|><;&'.includes(ch)) throw new Error('Pipes, redirection, and chained commands are not supported in this simulation.');
+      word += ch; active = true;
+    }
+  }
+  if (quote) throw new Error('Unmatched quotation mark. Quote the complete filename or path.');
+  if (active) words.push(word);
+  const command = words.shift() ?? '';
+  return {cmd:isWindows()?command.toLowerCase():command, args:words};
+}
+
+function commandDefinitions() {
+  const win = isWindows();
+  return [
+    {op:'cd', name:'cd', aliases:win?['chdir']:[], usage:win?'cd [/d] [path]':'cd [path]', description:'Change directory; cd .. moves to the parent.', detail:win?'With no path, cd prints the current directory. /d is accepted for this single simulated C: drive.':'With no path, cd returns to the fortress root (your simulated home). Paths and command names are case-sensitive.', example:win?'cd EntranceGrounds\ncd ..\ncd C:\\EntranceGrounds\\OuterWalls':'cd EntranceGrounds\ncd ..\ncd /EntranceGrounds/OuterWalls', handler:handleCd},
+    {op:'list', name:win?'dir':'ls', aliases:[], usage:win?'dir [/a | /a:h | /a:d] [/b] [/q] [path]':'ls [-aAdlF] [path]', description:'List directory contents; hidden entries need an option.', detail:win?'/a includes hidden files and directories. /a:h filters hidden entries; /a:d filters directories. /b uses bare names. /q adds owner information and a room-description annotation. Without options, files and directories are both listed.':'-a includes dot-prefixed hidden names and . / ..; -A omits . / ... -l uses long metadata. -d shows the directory itself, not its contents. -F appends / to directory names. ls -ld . includes the game\'s room-description annotation.', example:win?'dir\ndir /a\ndir /q .':'ls\nls -a\nls -ld .', handler:handleDir},
+    {op:'read', name:win?'type':'cat', aliases:[], usage:win?'type <file> [file ...]':'cat [--] <file> [file ...]', description:'Read one or more file objects.', detail:'Reads text, awards an object\'s discovery points once, and learns any tools described by that object. Metadata alone does not count as reading. Finding the treasure ends the attempt immediately.', example:win?'type README.md':'cat README.md', handler:handleType},
+    {op:'pwd', name:'pwd', aliases:[], usage:'pwd', description:'Print the current working directory.', detail:'An absolute path starts at /. Relative paths start in your current directory. Windows cd with no argument provides the analogous path display.', example:'pwd', handler:handlePwd, linuxOnly:true},
+    {op:'clear', name:win?'cls':'clear', aliases:[], usage:win?'cls':'clear', description:'Clear terminal output without resetting the attempt.', detail:'Clearing output does not change time, score, known commands, or the filesystem.', example:win?'cls':'clear', handler:handleCls},
+    {op:'help', name:'help', aliases:[], usage:'help [command]', description:'List all currently available commands, or show command help.', detail:'New commands appear after you read or search the appropriate notes. Unlearned tools are unavailable. help and man are shared game helpers.', example:win?'help\nhelp dir':'help\nhelp ls', handler:handleHelp},
+    {op:'manual', name:'man', aliases:[], usage:'man <command>', description:'Read a detailed manual for an available command.', detail:'This game provides man in both environments; it is not a native CMD command. Command options are documented as a supported subset, not a complete operating-system shell.', example:win?'man dir':'man ls', handler:handleMan},
+    {op:'restart', name:'restart', aliases:[], usage:'restart [windows | linux | choose]', description:'Reset the entire attempt, optionally selecting another terminal.', detail:'There are no checkpoints, saves, or restores. restart resets score, clock, files, locks, learned commands, discoveries, and charges. With no argument it keeps your current terminal choice.', example:'restart\nrestart choose', handler:handleRestart},
+    {op:'echo', name:'echo', aliases:[], usage:'echo [text]', description:'Print a line of text.', detail:'This simulation prints text only. Output redirection and shell variables are not supported.', example:'echo Take notes!', handler:args=>print(args.join(' '))},
+    {op:'move', name:win?'move':'mv', aliases:[], usage:win?'move [/y] <source> <destination>':'mv [-i | -n] [--] <source> <destination>', description:'Move a file to a directory or rename it.', detail:'The source is removed from its former location; the object itself is preserved. An existing destination directory keeps the filename. A new destination filename renames it. Only designated objects and your copies are movable; rooms are fixed. Windows prompts before overwriting unless /y is used; Linux overwrites mutable files unless -i/-n is used. Magical consequences belong to specific objects.', example:win?'move Note.txt ..\nmove Note.txt Renamed.txt':'mv Note.txt ..\nmv Note.txt Renamed.txt', handler:args=>handleTransfer(args, false)},
+    {op:'copy', name:win?'copy':'cp', aliases:[], usage:win?'copy [/y] <source> <destination>':'cp [-i | -n] [--] <source> <destination>', description:'Copy a file while preserving its source.', detail:'Copies retain their object\'s discovery identity and shared magical charges. Copying ordinary notes is allowed. Copies cannot multiply points or timer rewards. Recursive directory copying is outside this game. Overwrite behavior matches the supported move behavior.', example:win?'copy README.md Notes.txt':'cp README.md Notes.txt', handler:args=>handleTransfer(args, true)},
+    {op:'rename', name:'rename', aliases:['ren'], usage:'rename <oldname> <newname>', description:'Rename a file in its current directory.', detail:'Use names, not destination paths. Existing files cannot be replaced by rename. Use move for relocation. Linux mv also performs renaming.', example:'rename Note.txt Notes.txt', handler:handleRename, windowsOnly:true},
+    {op:'remove', name:win?'del':'rm', aliases:win?['erase']:[], usage:win?'del <file>':'rm [-f] [--] <file>', description:'Remove a file; read object warnings before deletion.', detail:win?'Read-only files must have that attribute cleared before normal deletion. Protected fixtures remain protected. Recursive deletion and wildcards are outside this simulation.':'File removal depends on the containing directory, not the file\'s write bit. In this game, designated objects and your copies can be removed; protected fixtures cannot. -f ignores a missing file. Recursive deletion and wildcard removal are outside this simulation.', example:win?'del Spare.txt':'rm Spare.txt', handler:handleDel},
+    {op:'search', name:win?'findstr':'grep', aliases:[], usage:win?'findstr [/i] [/n] [/l | /r] <pattern> <file>':'grep [-i] [-n] [-F] [--] <pattern> <file>', description:'Search file text and print matching lines.', detail:win?'/i ignores case; /n prints line numbers; /l matches literal text. /r is the default basic regex mode. /c:"words with spaces" selects one phrase. Supports ., *, anchors, and character classes.':'-i ignores case; -n prints line numbers; -F matches a literal string. The default supports basic regex patterns. Quote a pattern containing spaces. A successful match counts as discovering the object and can teach its commands; no match earns nothing.', example:win?'findstr /n 83 OldRecords.tome':'grep -n 83 OldRecords.tome', handler:handleFindstr},
+    {op:'attributes', name:'attrib', aliases:[], usage:'attrib [[+|-]h] [[+|-]r] <file>', description:'Display or change Hidden and Read-only attributes.', detail:'Without flags, shows attributes. +h/-h set/clear Hidden; +r/-r set/clear Read-only. Options apply to files here, not rooms. Invalid flags fail without changing attributes. -elim is not a real option and is not implemented. Attributes do not unlock magical connections.', example:'attrib Note.txt\nattrib -r Note.txt', handler:handleAttrib, windowsOnly:true},
+    {op:'inspect', name:'stat', aliases:[], usage:'stat <path>', description:'Display file or directory metadata.', detail:'Displays type, size, and permission bits. A directory also receives a clearly labeled room-description annotation. It does not read a file\'s contents or award its discovery points.', example:'stat .\nstat Note.txt', handler:handleStat, linuxOnly:true},
+    {op:'permissions', name:'chmod', aliases:[], usage:'chmod <octal-mode | symbolic-mode> <file>', description:'Change permissions on a movable file or copy.', detail:'Supports three/four-digit octal modes and symbolic clauses such as u+w, u-r, or a+r. r=read, w=write, x=execute; u=owner, g=group, o=others, a=all. Removing a file\'s write bit does not prevent removing it from a writable directory. Locked connections and protected fixtures are separate game rules.', example:'chmod u+w Spare.txt\nchmod 644 Spare.txt', handler:handleChmod, linuxOnly:true},
+    {op:'tree', name:'tree', aliases:[], usage:win?'tree [/f] [path]':'tree [-a] [path]', description:'Display the accessible structure of rooms already visited.', detail:'Fortress visibility restricts recursive access to rooms you have actually entered. This is the game\'s visibility limit, not a general rule of real tree. Hidden entries stay hidden unless requested and already discovered. Windows /f includes read files; Linux -a includes known hidden entries. This command never reveals an unexplored dungeon map.', example:'tree', handler:handleTree},
+    {op:'color', name:'color', aliases:[], usage:'color [two hexadecimal digits]', description:'Set CMD foreground and background colors.', detail:'The first digit sets the background, the second the text. Valid digits are 0–9 and A–F. Equal colors are rejected to keep text visible. color alone restores defaults. This is cosmetic and costs no extra time.', example:'color 0A\ncolor 0F', handler:handleColor, windowsOnly:true},
+    {op:'title', name:'title', aliases:[], usage:'title <text>', description:'Set the terminal window title.', detail:'A cosmetic change; it does not affect rooms, score, or time.', example:'title My fortress investigation', handler:args=>{if(!args.length)usage('title');else document.getElementById('window-title').textContent=args.join(' ');}, windowsOnly:true}
+  ].filter(def => !(def.windowsOnly && !win) && !(def.linuxOnly && win));
+}
+
+function availableDefinitions() { return commandDefinitions().filter(def=>gameState.learnedCommands.has(def.op)); }
+function definition(name) { return commandDefinitions().find(def=>def.name===name || def.aliases.includes(name)); }
+function usage(name) { const d=definition(name); print(`Usage: ${d?.usage ?? name}\nUse man ${d?.name ?? name} for details.`, 'error'); }
+
+function handleHelp(args = []) {
+  if (args.length) { if(args.length!==1)usage('help');else handleMan(args); return; }
+  print('AVAILABLE COMMANDS');
+  for (const def of availableDefinitions()) print(`${[def.name,...def.aliases].join(' / ').padEnd(24)} ${def.description}`);
+  print('Tools are learned from readable notes. man <command> gives usage and examples.', 'notice');
+}
+
+function handleMan(args) {
+  if (args.length !== 1) return usage('man');
+  const name = isWindows() ? args[0].toLowerCase() : args[0];
+  const def = definition(name);
+  if (!def || !gameState.learnedCommands.has(def.op)) { print(`No manual entry for ${args[0]}.`, 'error'); return; }
+  print(`${def.name.toUpperCase()}\n\nNAME\n  ${def.name} — ${def.description}\n\nSYNOPSIS\n  ${def.usage}\n\nDESCRIPTION\n  ${def.detail}\n\nEXAMPLES\n  ${def.example.replace(/\n/g,'\n  ')}`);
+}
+
+function learnCommands(node) {
+  const names = [];
+  for (const op of node.learns || []) {
+    const def = commandDefinitions().find(d=>d.op===op);
+    if (def && !gameState.learnedCommands.has(op)) { gameState.learnedCommands.add(op); names.push(def.name); }
+  }
+  if (names.length) print(`[Commands learned: ${names.join(', ')}. They now appear in help and have man pages.]`, 'notice');
+}
+
+function discoverObject(node) {
+  gameState.knownEntries.add(node.id);
+  if (!gameState.readObjects.has(node.originId)) {
+    gameState.readObjects.add(node.originId);
+    gameState.score += node.points;
+    print(`[+${node.points} point${node.points===1?'':'s'}: object discovered]`, 'notice');
+  }
+  learnCommands(node);
+  if (node.timeReward) awardAction(`read:${node.originId}`, 'Patrol schedule understood', node.timeReward, 0);
+  if (node.treasure) {
+    gameState.score += 10;
+    print('[+10 points: ASCII Chalice found]', 'notice');
+    endGame('won', 'You leave the fortress with the Chalice. For once, the wizard is the one typing an error message.');
+  }
+  updateScoreboard();
+}
+
+function requireFile(path) {
+  const node = navigateToPath(path);
+  if (node.type !== 'file') throw new PathError('EISDIR', path);
+  if (!isWindows() && !(node.mode & 0o400)) throw new PathError('EACCES', path);
+  return node;
+}
+
+function handleCd(args) {
+  if (isWindows() && args[0]?.toLowerCase()==='/d') args=args.slice(1);
+  if (args.length > 1) return usage('cd');
+  if (!args.length && isWindows()) { print(pathOf(currentDirectory)); return; }
+  const path = args[0] ?? '/';
+  try {
+    const dir = navigateToPath(path);
+    if (dir.type !== 'dir') throw new PathError('ENOTDIR', path);
+    markDirectoryVisited(dir);
+  } catch (err) { reportPathError('cd', err, path); }
+}
+
+function modeString(node) {
+  let out = node.type === 'dir' ? 'd' : '-';
+  for (const shift of [6,3,0]) {
+    const bits = (node.mode >> shift) & 7;
+    out += (bits&4?'r':'-')+(bits&2?'w':'-')+(bits&1?'x':'-');
+  }
+  return out;
+}
+
+function entryVisible(node, showHidden = false) {
+  if (node.attributeFlags.locked && node.visibleWhenLocked === false) return false;
+  return showHidden || !(isWindows() ? node.attributeFlags.hidden : node.name.startsWith('.'));
+}
+
+function fileSize(node) { return node.type === 'dir' ? 0 : new TextEncoder().encode(template(node.content)).length; }
+
+function handleDir(args) {
+  let hidden=false, onlyHidden=false, onlyDirs=false, bare=false, owner=false, long=false, directoryOnly=false, classify=false, almost=false;
+  const paths=[];
+  for (const arg of args) {
+    if (isWindows() && arg.startsWith('/')) {
+      switch(arg.toLowerCase()) {
+        case '/a': hidden=true; break;
+        case '/a:h': case '/ah': hidden=true; onlyHidden=true; break;
+        case '/a:d': case '/ad': hidden=true; onlyDirs=true; break;
+        case '/b': bare=true; break;
+        case '/q': owner=true; break;
+        default: print(`dir: ${arg} is not supported here.`, 'error'); usage('dir'); return;
+      }
+    } else if (!isWindows() && arg.startsWith('-') && arg!=='-') {
+      if (arg==='--') { paths.push(...args.slice(args.indexOf(arg)+1)); break; }
+      for (const flag of arg.slice(1)) {
+        if(flag==='a')hidden=true; else if(flag==='A'){hidden=true;almost=true;} else if(flag==='l')long=true; else if(flag==='d')directoryOnly=true; else if(flag==='F')classify=true;
+        else { print(`ls: option -${flag} is not supported here.`, 'error'); usage('ls'); return; }
+      }
+    } else paths.push(arg);
+  }
+  if (paths.length>1) return usage(isWindows()?'dir':'ls');
+  const path=paths[0]??'.';
+  try {
+    let node, items;
+    const globIndex = path.search(/[?*]/);
+    if (globIndex>=0) {
+      const normalized=isWindows()?path.replace(/\\/g,'/'):path;
+      const slash=normalized.lastIndexOf('/');
+      const prefix=slash<0?'.':normalized.slice(0,slash)||'/';
+      const pattern=normalized.slice(slash+1);
+      node=navigateToPath(prefix);
+      if(node.type!=='dir')throw new PathError('ENOTDIR',path);
+      const re=new RegExp('^'+pattern.replace(/[.+^${}()|[\]\\]/g,'\\$&').replace(/\*/g,'.*').replace(/\?/g,'.')+'$',isWindows()?'i':'');
+      items=node.children.filter(child=>re.test(child.name));
+    } else {
+      node=navigateToPath(path);
+      items=node.type==='dir'&&!directoryOnly?node.children:[node];
+    }
+    items=items.filter(n=>entryVisible(n,hidden) && (!onlyHidden||n.attributeFlags.hidden) && (!onlyDirs||n.type==='dir'));
+    items.sort((a,b)=>(isWindows()&&a.type!==b.type?(a.type==='dir'?-1:1):a.name.localeCompare(b.name)));
+    if(isWindows()&&!bare)print(` Directory of ${pathOf(node.type==='dir'?node:node.parent)}\n`);
+    if(!isWindows()&&hidden&&!almost&&node.type==='dir'&&!directoryOnly&&globIndex<0) {
+      print(long?`${modeString(node)} adventurer fortress      0 .\n${modeString(node.parent??node)} adventurer fortress      0 ..`:'.\n..');
+    }
+    for(const item of items) {
+      gameState.knownEntries.add(item.id);
+      if(isWindows())print(bare?item.name:` ${item.type==='dir'?'<DIR>':String(fileSize(item)).padStart(5)} ${owner?'adventurer  ':''}${item.name}`);
+      else print(long?`${modeString(item)} adventurer fortress ${String(fileSize(item)).padStart(6)} ${item.name}${classify&&item.type==='dir'?'/':''}`:`${item.name}${classify&&item.type==='dir'?'/':''}`);
+    }
+    if(!items.length)print(isWindows()?'File Not Found.':'');
+    if(node.type==='dir' && (owner||directoryOnly&&long))print(`[Room description: ${template(node.description)}]`, 'notice');
+  }catch(err){reportPathError(isWindows()?'dir':'ls',err,path);}
+}
+
+function handleType(args) {
+  if (!isWindows() && args[0]==='--') args=args.slice(1);
+  if(!args.length)return usage(isWindows()?'type':'cat');
+  for(const path of args) {
+    if(gameState.phase!=='playing')break;
+    try {
+      const node=requireFile(path);
+      print(template(node.content));
+      if(node.limitedUses)print(`[Opening charges remaining: ${gameState.uses[node.originId]??0}]`, 'notice');
+      discoverObject(node);
+    }catch(err){reportPathError(isWindows()?'type':'cat',err,path);}
+  }
+}
+
+function handlePwd(args) { if(args.length)usage('pwd');else print(pathOf(currentDirectory)); }
+function handleCls(args) { if(args.length)usage(isWindows()?'cls':'clear');else outputEl.textContent=''; }
+
+function resolveDestination(path, source) {
+  try {
+    const node=navigateToPath(path);
+    return node.type==='dir'?{dir:node,name:source.name,existing:findEntryInDir(node,source.name)}:{dir:node.parent,name:node.name,existing:node};
+  }catch(err){if(err.code!=='ENOENT')throw err;}
+  const normalized=isWindows()?path.replace(/\\/g,'/'):path;
+  if(normalized.endsWith('/'))throw new PathError('ENOENT',path);
+  const index=normalized.lastIndexOf('/');
+  const name=normalized.slice(index+1);
+  let prefix=index<0?'.':normalized.slice(0,index)||'/';
+  if(isWindows()&&index<0&&/^[a-z]:/i.test(name))throw new PathError('EINVAL',path);
+  const dir=navigateToPath(prefix);
+  if(dir.type!=='dir')throw new PathError('ENOTDIR',path);
+  if(!name || name==='.' || name==='..' || /[\x00-\x1f]/.test(name) || isWindows()&&/[<>:"|?*]/.test(name))throw new PathError('EINVAL',path);
+  return {dir,name,existing:findEntryInDir(dir,name)};
+}
+
+function canMutate(node, action) {
+  if(node.type!=='file'||!node.mutable)throw new PathError('EACCES',node.name);
+  if(isWindows()&&node.attributeFlags.readOnly&&action!=='attributes')throw new PathError('EACCES',node.name);
+}
+
+function detachFile(node) {
+  if(node.parent)node.parent.children=node.parent.children.filter(child=>child!==node);
+  fileIndex.delete(node.id);
+}
+
+function destructiveEffect(node) {
+  if(node.originId==='CursedBook')endGame('lost',CONFIG.trapMessages.deleteCurse);
+  else if(node.originId==='PatrolBell')endGame('lost',CONFIG.trapMessages.bell);
+  else if(node.originId==='Tripwire')endGame('lost',CONFIG.trapMessages.tripwire);
+}
+
+function afterTransfer(node, targetDir, copied) {
+  if(node.originId==='CursedBook'&&copied){endGame('lost',CONFIG.trapMessages.copyCurse);return;}
+  if(node.originId==='Tripwire'&&!copied&&targetDir.id!=='Armory'){endGame('lost',CONFIG.trapMessages.tripwire);return;}
+  if(node.originId==='PatrolBell') {
+    if(!copied&&targetDir.id==='SidePath')awardAction('relocateBell','Patrol bell relocated','bell');
+    else bellNoise();
+  }
+  if(gameState.phase!=='playing')return;
+  if(!copied&&node.originId==='Sandglass'&&targetDir.id==='OuterWalls')awardAction('restoreSandglass','Patrol sandglass restored','sandglass');
+  if(!copied&&node.originId==='StoneKey'&&targetDir.id==='InnerKeep'&&!gameState.flags.gateOpen) {
+    if((gameState.uses.StoneKey??0)<=0){print('The key has no remaining charge.','notice');return;}
+    gameState.uses.StoneKey-=1;
+    gameState.flags.gateOpen=true;
+    fileIndex.get('ForbiddenLibrary').attributeFlags.locked=false;
+    const gate=fileIndex.get('north'); if(gate)detachFile(gate);
+    print('The stone engravings engage north.gate. The seal breaks; ForbiddenLibrary is now accessible.');
+    awardAction('unlockLibrary','Library gate opened','key');
+    if(gameState.uses.StoneKey===0) {
+      for(const n of [...fileIndex.values()])if(n.type==='file'&&n.originId==='StoneKey')detachFile(n);
+      print('The last opening charge is spent. The Stone Key and all its copied impressions crumble.', 'notice');
+    }else print(`[Opening charges remaining: ${gameState.uses.StoneKey}]`, 'notice');
+  }
+  if(!copied&&node.originId==='CursedBook'&&targetDir.id==='Vault') {
+    gameState.flags.contained=true;
+    fileIndex.get('ReadingChamber').attributeFlags.locked=false;
+    const gate=fileIndex.get('shadow'); if(gate)detachFile(gate);
+    print('The Vault\'s containment plinth absorbs the curse. Its sentinel falls silent. The hidden ReadingChamber is unlocked; use an all-entry listing to find its name.');
+    awardAction('containCurse','Cursed book contained','containment');
+  }
+  if(!copied&&node.originId==='CursedBook'&&targetDir.id!=='Vault'&&gameState.flags.contained) {
+    gameState.flags.contained=false;
+    fileIndex.get('ReadingChamber').attributeFlags.locked=true;
+    const door=JSON.parse(JSON.stringify(gameState.shadowDoor));
+    attachParent(door,fileIndex.get('ForbiddenLibrary'));
+    door.parent.children.push(door);
+    fileIndex.set(door.id,door);
+    print('Removing the book from its containment plinth reactivates the curse. The shadow door seals again and the sentinel awakens.', 'notice');
+  }
+  if(copied&&node.originId==='PatrolDecoy'&&targetDir.id==='InnerKeep')awardAction('copyDecoy','Wizard distracted by a decoy report','decoy');
+}
+
+function handleTransfer(args, copied) {
+  const name=isWindows()?(copied?'copy':'move'):(copied?'cp':'mv');
+  let interactive=isWindows(), noClobber=false;
+  if(isWindows()&&args[0]?.toLowerCase()==='/y'){interactive=false;args=args.slice(1);}
+  if(!isWindows()) {
+    while(args[0]?.startsWith('-')) {
+      const flag=args.shift();
+      if(flag==='--')break;
+      if(flag==='-i')interactive=true;else if(flag==='-n')noClobber=true;else {usage(name);return;}
+    }
+  }
+  if(args.length!==2)return usage(name);
+  const [src,dest]=args;
+  try {
+    const source=requireFile(src);
+    if(!copied)canMutate(source,'move');
+    const target=resolveDestination(dest,source);
+    if(target.existing===source){print(`${name}: source and destination are the same file.`, 'error');return;}
+    if(target.existing) {
+      if(noClobber)return;
+      canMutate(target.existing,'overwrite');
+      if(interactive) {
+        pendingConfirmation={run:()=>performTransfer(source,target,copied,src,dest)};
+        print(`Overwrite ${pathOf(target.existing)}? Type y or n.`, 'notice');
+        return;
+      }
+    }
+    performTransfer(source,target,copied,src,dest);
+  }catch(err){reportPathError(name,err,err.path??src);}
+}
+
+function performTransfer(source,target,copied,src,dest) {
+  if(target.existing) {
+    detachFile(target.existing);
+    destructiveEffect(target.existing);
+    if(gameState.phase!=='playing')return;
+  }
+  let node=source;
+  if(copied) {
+    node=JSON.parse(JSON.stringify(source));
+    node.id=`copy-${++copySerial}`;
+    node.mutable=true;
+    attachParent(node,target.dir);
+    fileIndex.set(node.id,node);
+  }else source.parent.children=source.parent.children.filter(n=>n!==source);
+  node.name=target.name;
+  node.attributeFlags.hidden=isWindows()?node.attributeFlags.hidden:node.name.startsWith('.');
+  node.parent=target.dir;
+  target.dir.children.push(node);
+  gameState.knownEntries.add(node.id);
+  print(isWindows()?`${copied?'Copied':'Moved'} ${src} to ${dest}`:'');
+  afterTransfer(node,target.dir,copied);
+  updateScoreboard();
+}
+
+function handleRename(args) {
+  if(args.length!==2||args.some(arg=>/[\\/:]/.test(arg)))return usage('rename');
+  try {
+    const node=requireFile(args[0]); canMutate(node,'move');
+    if(findEntryInDir(currentDirectory,args[1])&& !sameName(args[0],args[1]))throw new PathError('EEXIST',args[1]);
+    if(/[<>:"|?*\x00-\x1f]/.test(args[1])||['.','..',''].includes(args[1]))throw new PathError('EINVAL',args[1]);
+    node.name=args[1];
+  }catch(err){reportPathError('rename',err,err.path??args[0]);}
+}
+
+function handleDel(args) {
+  let force=false;
+  if(!isWindows()&&args[0]==='-f'){force=true;args=args.slice(1);}
+  if(!isWindows()&&args[0]==='--')args=args.slice(1);
+  if(args.length!==1)return usage(isWindows()?'del':'rm');
+  try {
+    // Deletion does not require the file's read or write permission on Linux.
+    const node=navigateToPath(args[0]);
+    if(node.type!=='file')throw new PathError('EISDIR',args[0]);
+    canMutate(node,'delete');
+    const remove=()=>{detachFile(node);print(isWindows()?`Deleted ${args[0]}`:'');destructiveEffect(node);};
+    if(!isWindows()&&!force&&!(node.mode&0o200)) {
+      pendingConfirmation={run:remove};
+      print(`rm: remove write-protected regular file ${JSON.stringify(args[0])}? Type y or n.`, 'notice');
+    }else remove();
+  }catch(err){if(!(force&&err.code==='ENOENT'))reportPathError(isWindows()?'del':'rm',err,args[0]);}
+}
+
+function handleFindstr(args) {
+  const name=isWindows()?'findstr':'grep';
+  let ignoreCase=false, numbered=false, literal=false;
+  let pattern=null;
+  const paths=[];
+  for(let i=0;i<args.length;i++) {
+    const arg=args[i];
+    if(isWindows()&&arg.startsWith('/')) {
+      if(arg.toLowerCase()==='/i')ignoreCase=true;else if(arg.toLowerCase()==='/n')numbered=true;else if(arg.toLowerCase()==='/l')literal=true;else if(arg.toLowerCase()==='/r')literal=false;else if(arg.toLowerCase().startsWith('/c:')){pattern=arg.slice(3);literal=true;}else return usage(name);
+    }else if(!isWindows()&&arg.startsWith('-')&&pattern===null) {
+      if(arg==='--'){pattern=args[++i]??null;continue;}
+      for(const flag of arg.slice(1))if(flag==='i')ignoreCase=true;else if(flag==='n')numbered=true;else if(flag==='F')literal=true;else return usage(name);
+    }else if(pattern===null)pattern=arg;else paths.push(arg);
+  }
+  if(pattern===null||paths.length!==1)return usage(name);
+  try {
+    const node=requireFile(paths[0]);
+    // Keep basic regex operators; ERE-only punctuation is literal here.
+    let regex;
+    if(!literal) {
+      // Escape ERE punctuation without losing literal meaning.
+      let basic='';
+      for(let i=0;i<pattern.length;i++) {
+        if(pattern[i]==='\\'&&i+1<pattern.length){const next=pattern[++i];basic+=/[+?|(){}]/.test(next)?next:'\\'+next;}
+        else basic+=/[+?|(){}]/.test(pattern[i])?'\\'+pattern[i]:pattern[i];
+      }
+      regex=new RegExp(basic,ignoreCase?'i':'');
+    }
+    const content=template(node.content);
+    const needle=ignoreCase?pattern.toLowerCase():pattern;
+    const matches=content.split('\n').map((line,index)=>({line,index})).filter(({line})=>literal?(ignoreCase?line.toLowerCase():line).includes(needle):regex.test(line));
+    if(matches.length) {
+      print(matches.map(({line,index})=>numbered?`${index+1}:${line}`:line).join('\n'));
+      discoverObject(node);
+    }
+  }catch(err){if(err instanceof SyntaxError){print(`${name}: invalid regular expression.`, 'error');usage(name);}else reportPathError(name,err,paths[0]);}
+}
+
+function handleAttrib(args) {
+  if(!args.length)return usage('attrib');
+  const path=args[args.length-1],flags=args.slice(0,-1);
+  if(flags.some(flag=>!/^[-+][hr]$/i.test(flag)))return usage('attrib');
+  try {
+    const node=navigateToPath(path);
+    if(node.type!=='file')throw new PathError('EACCES',path);
+    if(flags.length&&!node.mutable)throw new PathError('EACCES',path);
+    for(const flag of flags)node.attributeFlags[flag[1].toLowerCase()==='h'?'hidden':'readOnly']=flag[0]==='+';
+    print(`${node.attributeFlags.readOnly?'R':' '} ${node.attributeFlags.hidden?'H':' '} ${pathOf(node)}`);
+  }catch(err){reportPathError('attrib',err,path);}
+}
+
+function handleStat(args) {
+  if(args.length!==1)return usage('stat');
+  try {
+    const node=navigateToPath(args[0]);
+    print(`  File: ${pathOf(node)}\n  Size: ${fileSize(node)}\t${node.type==='dir'?'directory':'regular file'}\nAccess: (${node.mode.toString(8).padStart(4,'0')}/${modeString(node)})\n   Uid: adventurer   Gid: fortress`);
+    if(node.type==='dir')print(`[Room description: ${template(node.description)}]`, 'notice');
+  }catch(err){reportPathError('stat',err,args[0]);}
+}
+
+function handleChmod(args) {
+  if(args.length!==2)return usage('chmod');
+  try {
+    const node=navigateToPath(args[1]); canMutate(node,'attributes');
+    let mode=node.mode;
+    if(/^[0-7]{3}$/.test(args[0])||/^0[0-7]{3}$/.test(args[0]))mode=parseInt(args[0],8);
+    else {
+      for(const clause of args[0].split(',')) {
+        const match=clause.match(/^([ugoa]+)([+\-=])([rwx]*)$/);
+        if(!match || !match[3]&&match[2]!=='='){usage('chmod');return;}
+        const bits=(match[3].includes('r')?4:0)|(match[3].includes('w')?2:0)|(match[3].includes('x')?1:0);
+        const owners=match[1].includes('a')?'ugo':match[1];
+        for(const [owner,shift] of [['u',6],['g',3],['o',0]])if(owners.includes(owner)) {
+          const mask=bits<<shift;
+          mode=match[2]==='+'?mode|mask:match[2]==='-'?mode&~mask:(mode&~(7<<shift))|mask;
+        }
+      }
+    }
+    node.mode=mode;
+  }catch(err){reportPathError('chmod',err,args[1]);}
+}
+
+function handleTree(args) {
+  let all=false,files=!isWindows();
+  if(isWindows()&&args[0]?.toLowerCase()==='/f'){files=true;args=args.slice(1);}
+  else if(!isWindows()&&args[0]==='-a'){all=true;args=args.slice(1);}
+  if(args.length>1)return usage('tree');
+  const path=args[0]??'.';
+  try {
+    const root=navigateToPath(path);
+    if(root.type!=='dir')throw new PathError('ENOTDIR',path);
+    print('[Fortress visibility: only entered rooms and read files are accessible recursively.]', 'notice');
+    print(pathOf(root));
+    function branch(dir,prefix='') {
+      const entries=dir.children.filter(n=>entryVisible(n,all)&& (n.type==='dir'?gameState.visitedDirectories.has(n.id):files&&gameState.readObjects.has(n.originId)));
+      entries.forEach((n,index)=>{
+        const last=index===entries.length-1;
+        print(prefix+(last?'└── ':'├── ')+n.name);
+        if(n.type==='dir')branch(n,prefix+(last?'    ':'│   '));
+      });
+    }
+    branch(root);
+  }catch(err){reportPathError('tree',err,path);}
+}
+
+function handleColor(args) {
+  if(args.length>1 || args.length===1&&!/^[\da-f]{2}$/i.test(args[0]))return usage('color');
+  if(!args.length){document.documentElement.style.removeProperty('--ink');document.documentElement.style.removeProperty('--paper');return;}
+  if(args[0][0].toLowerCase()===args[0][1].toLowerCase()){print('Foreground and background colors must differ.', 'error');return;}
+  const colors=['#000000','#0000aa','#00aa00','#00aaaa','#aa0000','#aa00aa','#aa5500','#aaaaaa','#555555','#5555ff','#55ff55','#55ffff','#ff5555','#ff55ff','#ffff55','#ffffff'];
+  document.documentElement.style.setProperty('--paper',colors[parseInt(args[0][0],16)]);
+  document.documentElement.style.setProperty('--ink',colors[parseInt(args[0][1],16)]);
+}
+
+function handleRestart(args) {
+  if(args.length>1)return usage('restart');
+  const choice=args[0]?.toLowerCase();
+  if(!choice)startGame(currentOS);else if(choice==='choose')chooseTerminal();else if(['windows','linux'].includes(choice))startGame(choice);else usage('restart');
+}
+
+function handleCommand(line) {
+  if(!line.trim())return;
+  if(!currentOS) {
+    const choice=line.trim().toLowerCase();
+    if(choice==='windows'||choice==='1')startGame('windows');else if(choice==='linux'||choice==='2')startGame('linux');else print('Enter windows (1) or linux (2) to choose your terminal.', 'notice');
+    return;
+  }
+  tickClock();
+  if(pendingConfirmation&&gameState.phase==='playing') {
+    if(/^(y|yes)$/i.test(line.trim())){const action=pendingConfirmation.run;pendingConfirmation=null;action();}
+    else if(/^(n|no)$/i.test(line.trim())){pendingConfirmation=null;print('Not overwritten.');}
+    else if(/^restart(?:\s|$)/i.test(line.trim())){pendingConfirmation=null;handleRestart(line.trim().split(/\s+/).slice(1));}
+    else print('Type y or n to answer the overwrite prompt.', 'notice');
+    return;
+  }
+  let parsed;
+  try{parsed=parseInput(line);}catch(err){print(err.message,'error');return;}
+  const {cmd,args}=parsed;
+  const def=definition(cmd);
+  if(!def || !gameState.learnedCommands.has(def.op)) {
+    print(isWindows()?`'${cmd}' is not recognized as an internal or external command,\noperable program or batch file.`:`bash: ${cmd}: command not found`, 'error');
+    if(def)print('[This tool has not been learned. Look for instructions in readable files.]', 'notice');
+    return;
+  }
+  if(gameState.phase!=='playing'&&!['help','manual','restart'].includes(def.op)) {
+    print('This attempt has ended. Type restart to begin again.', 'notice');return;
+  }
+  if(isWindows()&&args.length===1&&args[0]==='/?'||!isWindows()&&args.length===1&&args[0]==='--help'){handleMan([def.name]);return;}
+  def.handler(args);
+}
+
+function completeInput() {
+  const text=inputEl.value;
+  if(inputEl.selectionStart!==text.length)return;
+  if(!currentOS) {
+    const matches=['windows','linux'].filter(n=>n.startsWith(text.toLowerCase()));
+    if(matches.length===1)inputEl.value=matches[0];
+    return;
+  }
+  if(pendingConfirmation)return;
+  const tokens=text.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g)||[];
+  if(!/\s/.test(text)) {
+    const names=availableDefinitions().flatMap(d=>[d.name,...d.aliases]);
+    const partial=isWindows()?text.toLowerCase():text;
+    const matches=names.filter(n=>n.startsWith(partial));
+    if(matches.length===1)inputEl.value=matches[0]+' ';
+    else if(matches.length>1)print(matches.join('  '));
+    return;
+  }
+  const raw=/\s$/.test(text)?'':tokens[tokens.length-1]??'';
+  const quote=raw.startsWith('"')?'"':!isWindows()&&raw.startsWith("'")?"'":'';
+  const clean=quote?raw.slice(1).replace(new RegExp(quote+'$'),''):raw;
+  const normalized=isWindows()?clean.replace(/\\/g,'/'):clean;
+  const slash=normalized.lastIndexOf('/');
+  const prefix=slash<0?'':normalized.slice(0,slash+1);
+  const partial=normalized.slice(slash+1);
+  try {
+    const dir=navigateToPath(prefix||'.');
+    if(dir.type!=='dir')return;
+    const matches=dir.children.filter(n=>!(n.attributeFlags.locked&&n.visibleWhenLocked===false))
+      .filter(n=>entryVisible(n)||gameState.knownEntries.has(n.id))
+      .filter(n=>isWindows()?n.name.toLowerCase().startsWith(partial.toLowerCase()):n.name.startsWith(partial));
+    if(matches.length===1) {
+      const node=matches[0];
+      let result=(isWindows()?prefix.replace(/\//g,'\\'):prefix)+node.name+(node.type==='dir'?separator():'');
+      if(quote||/\s/.test(result))result='"'+result+'"';
+      inputEl.value=text.slice(0,text.length-raw.length)+result;
+    }else if(matches.length>1)print(matches.map(n=>n.name).join('  '));
+  }catch(_){/* Completion cannot reveal or pass a locked connection. */}
+}
+
+inputEl.addEventListener('keydown', e=>{
+  if(e.key==='Enter') {
+    e.preventDefault();
+    const line=inputEl.value;
+    inputEl.value='';
+    if(!line.trim())return;
+    print(`${promptEl.textContent} ${line}`, 'command-echo');
+    commandHistory.push(line);
+    if(commandHistory.length>100)commandHistory.shift();
+    historyIndex=commandHistory.length;
+    historyDraft='';
+    handleCommand(line);
+    terminalEl.scrollTop=terminalEl.scrollHeight;
+  }else if(e.key==='Tab'){e.preventDefault();completeInput();}
+  else if(e.key==='ArrowUp'){
+    e.preventDefault();
+    if(historyIndex===commandHistory.length)historyDraft=inputEl.value;
+    if(historyIndex>0)inputEl.value=commandHistory[--historyIndex];
+  }else if(e.key==='ArrowDown'){
+    e.preventDefault();
+    if(historyIndex<commandHistory.length-1)inputEl.value=commandHistory[++historyIndex];
+    else {historyIndex=commandHistory.length;inputEl.value=historyDraft;}
+  }else if(e.key==='Escape'){inputEl.value='';}
+});
+terminalEl.addEventListener('click',()=>{if(!window.getSelection()?.toString())inputEl.focus();});
+
+// Dependency-free terminal rendering of the original lathed ASCII Chalice.
+function stopAnimation() {
+  if(chaliceFrame!==null)cancelAnimationFrame(chaliceFrame);
+  chaliceFrame=null;
+}
+
+function renderChalice() {
+  const pre=document.createElement('pre');
+  pre.className='chalice';
+  pre.setAttribute('aria-label','A rotating ASCII rendering of the golden Chalice');
+  outputEl.appendChild(pre);
+  const width=64,height=30,chars=' .,:;i1tfLCG08@';
+  const profile=[[0,0.04],[0.04,1],[0.12,.82],[.2,.92],[.3,.5],[.6,.4],[.9,.5],[1.1,.7],[1.3,.9],[1.5,1],[1.7,1.1],[1.75,1.2],[1.8,1.1],[1.85,1.2],[1.9,1.1],[1.95,1.2],[2,1]];
+  const points=[];
+  for(let p=0;p<profile.length-1;p++) {
+    const [y0,r0]=profile[p],[y1,r1]=profile[p+1];
+    for(let t=0;t<6;t++)for(let a=0;a<96;a++) {
+      const y=y0+(y1-y0)*t/6,r=r0+(r1-r0)*t/6,angle=a*Math.PI/48;
+      const slope=(r1-r0)/(y1-y0);
+      points.push([r*Math.cos(angle),y-1,r*Math.sin(angle),Math.cos(angle),-slope,Math.sin(angle)]);
+    }
+  }
+  for(const sign of [-1,1])for(let step=0;step<=70;step++) {
+    const t=step/70,u=1-t;
+    const x=sign*(u*u*u*.6+3*u*u*t*1.4+3*u*t*t*1.4+t*t*t*.9);
+    const y=u*u*u*.7+3*u*u*t*.9+3*u*t*t*1.4+t*t*t*1.5-1;
+    for(let ring=0;ring<16;ring++) {
+      const a=ring*Math.PI/8;
+      points.push([x+.09*Math.cos(a),y,.09*Math.sin(a),Math.cos(a),0,Math.sin(a)]);
+    }
+  }
+  let start=null;
+  const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+  function frame(time) {
+    if(gameState?.phase!=='won')return;
+    if(start===null)start=time;
+    const angle=reduced ? 0.5 : (time-start)*.0004;
+    const c=Math.cos(angle),s=Math.sin(angle),tilt=.3,ct=Math.cos(tilt),st=Math.sin(tilt);
+    const buffer=Array(width*height).fill(' '),depth=Array(width*height).fill(-Infinity);
+    for(const [x,y,z,nx,ny,nz] of points) {
+      const xx=x*c+z*s,zz=z*c-x*s,yy=y*ct-zz*st,zf=y*st+zz*ct;
+      const scale=1/(4-zf),col=Math.round(width/2+xx*scale*66),row=Math.round(height/2-yy*scale*29);
+      if(col<0||col>=width||row<0||row>=height)continue;
+      const index=row*width+col;
+      if(zf<=depth[index])continue;
+      depth[index]=zf;
+      const rx=nx*c+nz*s,rz=nz*c-nx*s,ry=ny*ct-rz*st,normalZ=ny*st+rz*ct;
+      const length=Math.hypot(rx,ry,normalZ)||1;
+      const light=Math.max(0,Math.min(1,.28+(rx*.25+ry*.45+normalZ*.8)/length*.7));
+      buffer[index]=chars[Math.max(1,Math.floor(light*(chars.length-1)))];
+    }
+    pre.textContent=Array.from({length:height},(_,row)=>buffer.slice(row*width,(row+1)*width).join('')).join('\n');
+    if(!reduced)chaliceFrame=requestAnimationFrame(frame);
+  }
+  frame(0);
+  terminalEl.scrollTop=terminalEl.scrollHeight;
+}
+
+chooseTerminal();
+
+  </script>
+</body>
+</html>
