@@ -1,0 +1,820 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shadow of Murder</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080b11;color:#e7eaf0;font-family:Arial,sans-serif}
+#wrap{max-width:1100px;margin:auto;padding:14px}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+h1{margin:5px 0;color:#c5cbd8;letter-spacing:3px;font-size:clamp(20px,4vw,30px)}
+button{background:#252e3d;color:white;border:1px solid #64748b;padding:9px 13px;border-radius:5px;cursor:pointer}
+button:hover{background:#39465a}
+#hud{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+.stat{background:#151b25;padding:9px;border:1px solid #303a4a;border-radius:5px;font-size:13px}
+.bar{height:8px;background:#303746;margin-top:6px;border-radius:5px;overflow:hidden}
+.fill{height:100%;width:100%;transition:width .1s}
+#health{background:#e34c57}#stamina{background:#36c8a0}
+canvas{display:block;width:100%;height:auto;border:1px solid #394354;background:#111724;image-rendering:auto}
+#message{text-align:center;min-height:30px;padding:10px;color:#d7b975}
+#controls,#shop{background:#131923;padding:12px;margin-top:10px;border:1px solid #303a4a;border-radius:6px;line-height:1.7;font-size:13px}
+#shop button{margin:4px}
+.muted{color:#a6b0c0}
+@media(max-width:520px){#hud{grid-template-columns:repeat(2,minmax(0,1fr))}#wrap{padding:7px}}
+</style>
+</head>
+<body>
+<div id="wrap">
+<header>
+<h1>SHADOW OF MURDER</h1>
+<div>
+<button onclick="togglePause()">Pause (P)</button>
+<button onclick="restartRun()">Restart (R)</button>
+</div>
+</header>
+
+<div id="hud">
+<div class="stat">HEALTH <b id="healthText">100</b>
+<div class="bar"><div id="health" class="fill"></div></div>
+</div>
+<div class="stat">STAMINA <b id="staminaText">100</b>
+<div class="bar"><div id="stamina" class="fill"></div></div>
+</div>
+<div class="stat">LEVEL <b id="levelText">1 / 5</b><br>Lives: <b id="livesText">♥ ♥ ♥</b></div>
+<div class="stat">SCORE <b id="scoreText">0</b><br>Coins: <b id="coinsText">0</b></div>
+</div>
+
+<canvas id="game" width="960" height="540"></canvas>
+<div id="message">Press PLAY to begin your journey.</div>
+
+<div id="shop">
+<b>FIELD UPGRADES</b>
+<span class="muted"> — Spend coins for temporary combat advantages.</span><br>
+<button onclick="buyUpgrade('power')">1. Power Strike — 30 coins</button>
+<button onclick="buyUpgrade('stun')">2. Extended Stun — 40 coins</button>
+<button onclick="buyUpgrade('guard')">3. Perfect Guard — 35 coins</button>
+<div id="upgradeText" class="muted">No upgrades active.</div>
+</div>
+
+<div id="controls">
+<b>CONTROLS</b><br>
+← / → Move · ↑ Jump · Shift Run · Left click Attack · Q Block · Ctrl Dodge · P Pause · R Restart<br>
+Defeat enemies for coins and bonus points, or avoid them to save your health. Reach the exit to advance. The final boss must be defeated to win.
+</div>
+</div>
+
+<script>
+"use strict";
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const W = canvas.width, H = canvas.height;
+const $ = id => document.getElementById(id);
+
+const keys = {};
+let mouseAttack = false;
+let state = "title";
+let level = 1, score = 0, coins = 0, lives = 3;
+let camera = 0, lastTime = 0, levelTime = 0;
+let player, enemies = [], hazards = [], platforms = [], particles = [];
+let exitX = 0, worldWidth = 1900, message = "";
+let upgrades = {power:0, stun:0, guard:0};
+let attackCooldown = 0, attackTime = 0, dodgeTime = 0;
+let blockTime = 0, invincible = 0, deathTimer = 0;
+let bossDefeated = false, completed = [false,false,false,false,false];
+let levelCoins = 0;
+
+const levelNames = [
+  "The Forgotten Battlefield",
+  "The Falling Ruins",
+  "The Spike Passage",
+  "The Collapsing Fortress",
+  "The Dark King's Domain"
+];
+
+function newPlayer(){
+  return {
+    x:65,y:330,w:28,h:48,vx:0,vy:0,
+    hp:100,stamina:100,ground:false,face:1,
+    attack:0,block:false,dead:false
+  };
+}
+
+function makeEnemy(x,type="warrior",hp=45){
+  return {
+    x,y:0,w:type==="boss"?68: type==="brute"?38:28,
+    h:type==="boss"?88:44,
+    vx:0,vy:0,hp,maxHp:hp,type,
+    alive:true,ground:false,face:-1,
+    cooldown:0.5+Math.random(),
+    windup:0,stun:0,attackAnim:0,
+    hitFlash:0,projectileTimer:0
+  };
+}
+
+function buildLevel(n){
+  level=n;
+  levelTime=0;camera=0;bossDefeated=false;levelCoins=0;
+  player=newPlayer();
+  enemies=[];hazards=[];platforms=[];particles=[];
+  upgrades={power:0,stun:0,guard:0};
+  attackCooldown=0;attackTime=0;dodgeTime=0;blockTime=0;invincible=0;
+
+  worldWidth=1900+n*100;
+  exitX=worldWidth-100;
+
+  // Main battlefield floor.
+  platforms.push({x:0,y:470,w:worldWidth,h:70});
+  // Platforms and gaps are placed so each level has a distinct layout.
+  if(n>=2) platforms.push({x:330,y:385,w:150,h:18});
+  if(n>=3) platforms.push({x:670,y:350,w:155,h:18});
+  if(n>=4) platforms.push({x:1030,y:385,w:170,h:18});
+  if(n===5) platforms.push({x:1370,y:350,w:190,h:18});
+
+  // Raised stones create small jumping challenges.
+  platforms.push({x:220,y:430,w:65,h:40});
+  platforms.push({x:560,y:420,w:90,h:50});
+  platforms.push({x:900,y:430,w:75,h:40});
+  platforms.push({x:1260,y:415,w:95,h:55});
+
+  // Gaps in the main floor.
+  if(n>=2){
+    platforms=platforms.filter(p=>
+      !(p.y===470 && p.x<570 && p.x+p.w>480) &&
+      !(p.y===470 && p.x<1150 && p.x+p.w>1060)
+    );
+    platforms.push({x:0,y:470,w:480,h:70});
+    platforms.push({x:570,y:470,w:490,h:70});
+    platforms.push({x:1150,y:470,w:worldWidth-1150,h:70});
+  }
+
+  // Optional enemies. They can be avoided.
+  const count=3+n;
+  for(let i=0;i<count;i++){
+    let x=280+i*(worldWidth-500)/count;
+    let type="warrior",hp=35+n*8;
+    if(n>=2 && i%3===1)type="archer";
+    if(n>=3 && i%3===2){type="brute";hp=65+n*10;}
+    if(n>=4 && i%4===3){type="stalker";hp=55+n*8;}
+    enemies.push(makeEnemy(x,type,hp));
+  }
+
+  // Level five ends with a boss. It is required to win.
+  if(n===5){
+    enemies.push(makeEnemy(worldWidth-300,"boss",420));
+  }
+
+  // Spikes, falling rocks, and collapsing platforms.
+  if(n>=3){
+    hazards.push({type:"spikes",x:740,y:450,w:90,h:20});
+  }
+  if(n>=2){
+    hazards.push({type:"rock",x:510,y:95,w:27,h:27,vy:0,active:false,timer:1.5});
+    hazards.push({type:"rock",x:980,y:65,w:27,h:27,vy:0,active:false,timer:2.4});
+  }
+  if(n>=4){
+    hazards.push({type:"spikes",x:1390,y:450,w:100,h:20});
+    hazards.push({type:"collapse",x:1530,y:450,w:100,h:20,timer:0,active:false});
+  }
+
+  player.x=65;player.y=370;
+  updateMessage("Level "+n+": "+levelNames[n-1]);
+}
+
+function updateMessage(s){
+  message=s;
+  $("message").textContent=s;
+}
+
+function startGame(){
+  score=0;coins=0;lives=3;
+  buildLevel(1);
+  state="playing";
+  updateMessage("Level 1 — Explore, fight, and reach the exit.");
+}
+
+function restartRun(){
+  if(state==="title"){startGame();return;}
+  if(!confirm("Restart the run from Level 1? Your current score and coins will be lost."))return;
+  startGame();
+}
+
+function togglePause(){
+  if(state==="playing"){
+    state="paused";updateMessage("PAUSED — Press P to resume.");
+  }else if(state==="paused"){
+    state="playing";updateMessage("Back to the battlefield.");
+  }else if(state==="title"){
+    startGame();
+  }
+}
+
+function buyUpgrade(type){
+  if(state!=="playing"){updateMessage("Start the game before buying upgrades.");return;}
+  const prices={power:30,stun:40,guard:35};
+  const labels={power:"Power Strike",stun:"Extended Stun",guard:"Perfect Guard"};
+  if(coins<prices[type]){
+    updateMessage("Not enough coins for "+labels[type]+".");
+    return;
+  }
+  coins-=prices[type];
+  upgrades[type]=Math.max(upgrades[type],12);
+  updateMessage(labels[type]+" activated for 12 seconds!");
+  updateHUD();
+}
+
+function updateHUD(){
+  if(!player)return;
+  $("healthText").textContent=Math.ceil(Math.max(0,player.hp));
+  $("staminaText").textContent=Math.ceil(player.stamina);
+  $("health").style.width=Math.max(0,player.hp)+"%";
+  $("stamina").style.width=player.stamina+"%";
+  $("levelText").textContent=level+" / 5";
+  $("livesText").textContent="♥ ".repeat(Math.max(0,lives))+"♡ ".repeat(3-Math.max(0,lives));
+  $("scoreText").textContent=score;
+  $("coinsText").textContent=coins;
+  let active=[];
+  if(upgrades.power>0)active.push("Power Strike "+Math.ceil(upgrades.power)+"s");
+  if(upgrades.stun>0)active.push("Extended Stun "+Math.ceil(upgrades.stun)+"s");
+  if(upgrades.guard>0)active.push("Perfect Guard "+Math.ceil(upgrades.guard)+"s");
+  $("upgradeText").textContent=active.length?active.join(" · "):"No upgrades active.";
+}
+
+function rects(a,b){
+  return a.x<b.x+b.w && a.x+a.w>b.x &&
+         a.y<b.y+b.h && a.y+a.h>b.y;
+}
+
+function hurtPlayer(amount){
+  if(invincible>0||dodgeTime>0||player.dead)return;
+  if(player.block){
+    amount*=0.45;
+  }
+  player.hp-=amount;
+  invincible=0.55;
+  burst(player.x+player.w/2,player.y+20,"#ed5364",7);
+  if(player.hp<=0){
+    lives--;
+    player.hp=0;
+    player.dead=true;
+    deathTimer=0.9;
+    updateMessage(lives>0?"You fell in battle. Life lost!":"GAME OVER");
+  }
+}
+
+function loseLifeFromFall(){
+  if(player.dead)return;
+  lives--;
+  player.dead=true;player.hp=0;deathTimer=0.9;
+  updateMessage(lives>0?"You fell into the darkness. Life lost!":"GAME OVER");
+}
+
+function respawn(){
+  if(lives<=0){
+    state="gameover";
+    updateMessage("GAME OVER — Score: "+score+". Press R to try again.");
+    return;
+  }
+  // Respawn in the current level. Run score and coins are retained.
+  const keepLevel=level;
+  buildLevel(keepLevel);
+  player.hp=100;
+  player.stamina=100;
+  updateMessage("Respawned. You have "+lives+" lives left.");
+}
+
+function burst(x,y,color,count=8){
+  for(let i=0;i<count;i++){
+    particles.push({
+      x,y,vx:(Math.random()-.5)*180,
+      vy:(Math.random()-.7)*180,
+      life:.3+Math.random()*.5,color
+    });
+  }
+}
+
+function attack(){
+  if(state!=="playing"||player.dead||attackCooldown>0||dodgeTime>0)return;
+  attackCooldown=.38;
+  attackTime=.17;
+  player.attack=.17;
+  const range=player.face===1?58:58;
+  const box={
+    x:player.face===1?player.x+player.w:player.x-range,
+    y:player.y+7,w:range,h:player.h-10
+  };
+  let hit=false;
+  for(const e of enemies){
+    if(!e.alive||e.stun>0)continue;
+    if(rects(box,e)){
+      let dmg=25+(upgrades.power>0?25:0);
+      e.hp-=dmg;e.hitFlash=.15;hit=true;
+      burst(e.x+e.w/2,e.y+e.h/2,"#e5d4a0",9);
+      if(e.hp<=0)defeatEnemy(e);
+    }
+  }
+  if(hit)score+=2;
+}
+
+function defeatEnemy(e){
+  e.alive=false;
+  const reward=e.type==="boss"?250:e.type==="brute"?35:20;
+  score+=reward;
+  const rewardCoins=e.type==="boss"?60:e.type==="brute"?12:8;
+  coins+=rewardCoins;
+  burst(e.x+e.w/2,e.y+e.h/2,"#f1c75b",18);
+  updateMessage(e.type==="boss"?"The Dark King has fallen!":"Enemy defeated! +"+reward+" points, +"+rewardCoins+" coins.");
+  if(e.type==="boss")bossDefeated=true;
+}
+
+function perfectBlock(){
+  for(const e of enemies){
+    if(!e.alive||e.windup<=0)continue;
+    const close=Math.abs((e.x+e.w/2)-(player.x+player.w/2))<85;
+    if(close){
+      e.stun=upgrades.stun>0?2.3:1.4;
+      e.windup=0;e.cooldown=1.1;
+      score+=10;
+      burst(e.x+e.w/2,e.y+15,"#6bdfff",12);
+      updateMessage("PERFECT BLOCK! Enemy stunned. +10 points");
+      return true;
+    }
+  }
+  return false;
+}
+
+function update(dt){
+  if(state!=="playing")return;
+  levelTime+=dt;
+  attackCooldown=Math.max(0,attackCooldown-dt);
+  attackTime=Math.max(0,attackTime-dt);
+  dodgeTime=Math.max(0,dodgeTime-dt);
+  blockTime=Math.max(0,blockTime-dt);
+  invincible=Math.max(0,invincible-dt);
+
+  for(const k of Object.keys(upgrades))upgrades[k]=Math.max(0,upgrades[k]-dt);
+
+  if(player.dead){
+    deathTimer-=dt;
+    if(deathTimer<=0)respawn();
+    updateHUD();return;
+  }
+
+  const p=player;
+  const left=keys.ArrowLeft||keys.KeyA;
+  const right=keys.ArrowRight||keys.KeyD;
+  const jump=keys.ArrowUp||keys.KeyW||keys.Space;
+
+  p.block=!!keys.KeyQ&&dodgeTime<=0;
+  if(p.block)blockTime+=dt;
+  p.stamina=Math.min(100,p.stamina+22*dt);
+
+  if(dodgeTime>0){
+    p.vx=p.face*420;
+  }else{
+    const speed=(keys.ShiftLeft||keys.ShiftRight)?245:165;
+    p.vx=(left?-1:0)+(right?1:0);
+    if(p.vx!==0){p.face=Math.sign(p.vx);p.vx*=speed;}
+    if(p.block)p.vx*=.4;
+  }
+
+  if(jump&&p.ground&&!p.block&&dodgeTime<=0){
+    p.vy=-410;p.ground=false;
+  }
+
+  // Gravity and horizontal movement.
+  p.vy+=1050*dt;
+  p.x+=p.vx*dt;
+  p.x=Math.max(0,Math.min(worldWidth-p.w,p.x));
+  p.y+=p.vy*dt;
+  p.ground=false;
+
+  for(const plat of platforms){
+    if(rects(p,plat)&&p.vy>=0){
+      const oldY=p.y-p.vy*dt;
+      if(oldY+p.h<=plat.y+8){
+        p.y=plat.y-p.h;p.vy=0;p.ground=true;
+      }
+    }
+  }
+
+  if(p.y>H+150){loseLifeFromFall();return;}
+
+  // Start a dodge on Ctrl. A dodge has a short recovery period.
+  if(keys.ControlLeft||keys.ControlRight){
+    if(dodgeTime<=0&&p.stamina>=25&&!p.block){
+      dodgeTime=.23;p.stamina-=25;
+      burst(p.x+p.w/2,p.y+p.h/2,"#8c9bc2",4);
+    }
+  }
+
+  if(mouseAttack){attack();mouseAttack=false;}
+
+  // Enemy AI.
+  for(const e of enemies){
+    if(!e.alive)continue;
+    e.cooldown-=dt;
+    e.stun=Math.max(0,e.stun-dt);
+    e.hitFlash=Math.max(0,e.hitFlash-dt);
+    e.attackAnim=Math.max(0,e.attackAnim-dt);
+    e.windup=Math.max(0,e.windup-dt);
+    e.projectileTimer=Math.max(0,e.projectileTimer-dt);
+
+    if(e.stun>0)continue;
+
+    const dx=(p.x+p.w/2)-(e.x+e.w/2);
+    const dist=Math.abs(dx);
+    e.face=dx>0?1:-1;
+
+    if(e.type==="archer"){
+      if(dist<430&&dist>155&&e.cooldown<=0){
+        e.windup=.65;e.cooldown=2.0;
+        e.attackAnim=.65;
+      }
+      if(dist<140)e.x-=Math.sign(dx)*65*dt;
+      else if(dist>270)e.x+=Math.sign(dx)*35*dt;
+    }else{
+      if(dist>42)e.x+=Math.sign(dx)*(e.type==="stalker"?105:e.type==="boss"?60:55)*dt;
+      if(dist<65&&e.cooldown<=0){
+        e.windup=e.type==="boss"?.8:e.type==="brute"?.75:.5;
+        e.cooldown=e.type==="boss"?1.7:1.3;
+        e.attackAnim=e.windup;
+      }
+    }
+
+    // Resolve enemy feet against platforms.
+    e.vy+=1000*dt;e.y+=e.vy*dt;e.ground=false;
+    for(const plat of platforms){
+      if(rects(e,plat)&&e.vy>=0){
+        const oldY=e.y-e.vy*dt;
+        if(oldY+e.h<=plat.y+8){
+          e.y=plat.y-e.h;e.vy=0;e.ground=true;
+        }
+      }
+    }
+    if(e.y>H+100){e.alive=false;continue;}
+
+    // Enemy attack hits at the end of its telegraphed wind-up.
+    if(e.attackAnim>0&&e.windup<=0&&e.cooldown>0){
+      e.attackAnim=0;
+      if(e.type==="archer"){
+        // A simple arrow travels toward the player.
+        projectiles.push({
+          x:e.x+e.w/2,y:e.y+17,vx:e.face*300,
+          w:18,h:5,life:2
+        });
+      }else if(dist<100){
+        const blockSuccess=p.block&&perfectBlock();
+        if(!blockSuccess){
+          const dmg=e.type==="boss"?28:e.type==="brute"?24:15;
+          hurtPlayer(dmg);
+        }
+      }
+    }
+  }
+
+  // Update arrows fired by archers.
+  for(let i=projectiles.length-1;i>=0;i--){
+    const a=projectiles[i];
+    a.x+=a.vx*dt;a.life-=dt;
+    if(a.life<=0||a.x<camera-100||a.x>camera+W+100){
+      projectiles.splice(i,1);continue;
+    }
+    if(rects(a,p)){
+      if(p.block){
+        if(!perfectBlock())hurtPlayer(6);
+      }else hurtPlayer(13);
+      projectiles.splice(i,1);
+    }
+  }
+
+  // Environmental hazards.
+  for(const h of hazards){
+    if(h.type==="rock"){
+      if(!h.active){
+        h.timer-=dt;
+        if(h.timer<=0){
+          h.active=true;h.vy=0;
+        }
+      }else{
+        h.vy+=850*dt;h.y+=h.vy*dt;
+        if(rects(p,h))hurtPlayer(22);
+        if(h.y>H){h.y=65;h.vy=0;h.active=false;h.timer=2.5;}
+      }
+    }else if(h.type==="spikes"){
+      if(rects(p,h))hurtPlayer(25);
+    }else if(h.type==="collapse"){
+      if(rects(p,h)){
+        h.timer+=dt;
+        if(h.timer>0.7)h.active=true;
+      }
+    }
+  }
+
+  // Remove collapsed platforms.
+  hazards=hazards.filter(h=>{
+    if(h.type==="collapse"&&h.active){
+      platforms=platforms.filter(pl=>!(pl.x===h.x&&pl.y===h.y));
+      return false;
+    }
+    return true;
+  });
+
+  // Keep the camera following the player.
+  camera=Math.max(0,Math.min(worldWidth-W,p.x-W*.36));
+
+  // Particles.
+  for(let i=particles.length-1;i>=0;i--){
+    const b=particles[i];b.x+=b.vx*dt;b.y+=b.vy*dt;
+    b.vy+=200*dt;b.life-=dt;
+    if(b.life<=0)particles.splice(i,1);
+  }
+
+  // Exit rule. The boss is mandatory in the final level.
+  if(p.x+p.w>=exitX&&(level<5||bossDefeated)){
+    score+=Math.max(0,Math.floor(300-levelTime*2));
+    completed[level-1]=true;
+    if(level<5){
+      state="levelcomplete";
+      updateMessage("LEVEL "+level+" COMPLETE!");
+    }else{
+      state="victory";
+      updateMessage("VICTORY! The Dark King has been defeated.");
+    }
+  }
+
+  updateHUD();
+}
+
+let projectiles=[];
+
+function drawBackground(){
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,"#101727");
+  grad.addColorStop(1,"#252532");
+  ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+
+  // Moon.
+  ctx.fillStyle="#b9c1ce";ctx.beginPath();
+  ctx.arc(770-camera*.04,95,37,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#182033";ctx.beginPath();
+  ctx.arc(785-camera*.04,84,35,0,Math.PI*2);ctx.fill();
+
+  // Distant ruined towers.
+  for(let i=0;i<12;i++){
+    const x=((i*205-camera*.18)%(W+250)+W+250)%(W+250)-80;
+    const y=270+(i%3)*28;
+    ctx.fillStyle=i%2?"#171d2b":"#1c2332";
+    ctx.fillRect(x,y,45,200);
+    ctx.fillRect(x-8,y,61,12);
+    ctx.fillRect(x+8,y-23,9,25);
+  }
+
+  // Fog bands.
+  ctx.fillStyle="rgba(100,112,140,.07)";
+  for(let i=0;i<5;i++){
+    ctx.fillRect(0,310+i*28,W,9);
+  }
+}
+
+function draw(){
+  drawBackground();
+  ctx.save();
+  ctx.translate(-camera,0);
+
+  // Platforms and ground.
+  for(const pl of platforms){
+    ctx.fillStyle=pl.y===470?"#30323c":"#494852";
+    ctx.fillRect(pl.x,pl.y,pl.w,pl.h);
+    ctx.fillStyle="#696674";
+    ctx.fillRect(pl.x,pl.y,pl.w,4);
+    for(let x=pl.x+15;x<pl.x+pl.w;x+=47){
+      ctx.fillStyle="#292d37";
+      ctx.fillRect(x,pl.y+10,18,5);
+    }
+  }
+
+  // Hazards.
+  for(const h of hazards){
+    if(h.type==="spikes"){
+      ctx.fillStyle="#aab0bd";
+      for(let x=h.x;x<h.x+h.w;x+=18){
+        ctx.beginPath();ctx.moveTo(x,h.y+h.h);
+        ctx.lineTo(x+9,h.y);ctx.lineTo(x+18,h.y+h.h);
+        ctx.fill();
+      }
+    }else if(h.type==="rock"){
+      ctx.fillStyle="#716c72";
+      ctx.beginPath();ctx.arc(h.x+h.w/2,h.y+h.h/2,h.w/2,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle="#a59aa1";ctx.fillRect(h.x+6,h.y+5,7,4);
+    }else{
+      ctx.fillStyle="#625363";ctx.fillRect(h.x,h.y,h.w,h.h);
+    }
+  }
+
+  // Exit gate.
+  ctx.fillStyle="#10141d";
+  ctx.fillRect(exitX,350,54,120);
+  ctx.strokeStyle=(level===5&&!bossDefeated)?"#733a48":"#4bc4a4";
+  ctx.lineWidth=4;ctx.strokeRect(exitX,350,54,120);
+  ctx.fillStyle="#d7dce7";ctx.font="12px Arial";
+  ctx.fillText(level===5&&!bossDefeated?"LOCKED":"EXIT",exitX+5,340);
+
+  // Coins are dropped by enemies, represented by reward particles.
+
+  // Enemies.
+  for(const e of enemies){
+    if(!e.alive)continue;
+    const boss=e.type==="boss";
+    ctx.save();
+    if(e.hitFlash>0)ctx.globalAlpha=.55;
+    ctx.fillStyle=boss?"#6d2446":e.type==="archer"?"#6c7c99":e.type==="brute"?"#70504a":e.type==="stalker"?"#493d75":"#3b4658";
+    ctx.fillRect(e.x,e.y,e.w,e.h);
+    ctx.fillStyle="#171a25";
+    ctx.fillRect(e.x+4,e.y+8,e.w-8,12);
+    ctx.fillStyle="#e75d72";
+    ctx.fillRect(e.x+7,e.y+12,5,4);
+    ctx.fillRect(e.x+e.w-12,e.y+12,5,4);
+    ctx.fillStyle="#171923";
+    ctx.fillRect(e.x+4,e.y+e.h-5,8,8);
+    ctx.fillRect(e.x+e.w-12,e.y+e.h-5,8,8);
+
+    // Enemy health bar.
+    ctx.fillStyle="#29232e";ctx.fillRect(e.x,e.y-12,e.w,5);
+    ctx.fillStyle=boss?"#ef4968":"#d65361";
+    ctx.fillRect(e.x,e.y-12,e.w*Math.max(0,e.hp/e.maxHp),5);
+
+    if(e.windup>0){
+      ctx.strokeStyle="#f6b65b";ctx.lineWidth=3;
+      ctx.beginPath();ctx.arc(e.x+e.w/2,e.y+e.h/2,e.w*.8,0,Math.PI*2);ctx.stroke();
+    }
+    if(e.stun>0){
+      ctx.fillStyle="#74dfff";ctx.font="17px Arial";
+      ctx.fillText("✦",e.x+e.w/2-6,e.y-18);
+    }
+    if(boss){
+      ctx.fillStyle="#f3d4dc";ctx.font="bold 16px Arial";
+      ctx.fillText("DARK KING",e.x-5,e.y-24);
+    }
+    ctx.restore();
+  }
+
+  // Arrows.
+  for(const a of projectiles){
+    ctx.fillStyle="#e4d7b7";ctx.fillRect(a.x,a.y,a.w,a.h);
+  }
+
+  // Player.
+  if(player){
+    const p=player;
+    ctx.save();
+    if(invincible>0&&Math.floor(invincible*18)%2===0)ctx.globalAlpha=.45;
+
+    // Cape.
+    ctx.fillStyle="#642b42";
+    ctx.beginPath();
+    ctx.moveTo(p.x+7,p.y+15);
+    ctx.lineTo(p.x-5,p.y+43);
+    ctx.lineTo(p.x+18,p.y+39);
+    ctx.lineTo(p.x+22,p.y+16);
+    ctx.fill();
+
+    // Body and head.
+    ctx.fillStyle="#9ca6b8";ctx.fillRect(p.x+8,p.y+15,15,24);
+    ctx.fillStyle="#d0c7bc";ctx.beginPath();
+    ctx.arc(p.x+15,p.y+9,9,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle="#202633";ctx.fillRect(p.x+6,p.y+6,20,6);
+    ctx.fillStyle="#151923";
+    ctx.fillRect(p.x+7,p.y+37,8,12);
+    ctx.fillRect(p.x+17,p.y+37,8,12);
+
+    // Sword.
+    const sx=p.face===1?p.x+25:p.x-12;
+    ctx.save();
+    if(p.attack>0){
+      ctx.strokeStyle="#fff0bd";ctx.lineWidth=4;
+      ctx.beginPath();
+      ctx.arc(p.x+p.w/2+p.face*13,p.y+24,36,
+        p.face===1?-1.1:.2,p.face===1?1.1:2.9);
+      ctx.stroke();
+    }
+    ctx.fillStyle="#cbd3e1";
+    ctx.fillRect(p.attack>0?sx+(p.face===1?8:-8):sx,p.y+19,25,4);
+    ctx.fillStyle="#a77d50";
+    ctx.fillRect(p.face===1?sx-2:sx+18,p.y+16,5,10);
+    ctx.restore();
+
+    if(p.block){
+      ctx.strokeStyle="#62bce8";ctx.lineWidth=4;
+      ctx.beginPath();ctx.arc(p.x+p.w/2,p.y+23,32,-1.1,1.1);ctx.stroke();
+    }
+    if(dodgeTime>0){
+      ctx.strokeStyle="rgba(147,178,231,.7)";ctx.lineWidth=3;
+      ctx.beginPath();ctx.moveTo(p.x-20,p.y+20);ctx.lineTo(p.x-5,p.y+20);ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // Particle effects.
+  for(const b of particles){
+    ctx.globalAlpha=Math.max(0,b.life);
+    ctx.fillStyle=b.color;
+    ctx.fillRect(b.x,b.y,4,4);
+  }
+  ctx.globalAlpha=1;
+  ctx.restore();
+
+  // Overlay states.
+  if(state!=="playing"){
+    ctx.fillStyle="rgba(5,8,14,.72)";
+    ctx.fillRect(0,0,W,H);
+    ctx.textAlign="center";
+    ctx.fillStyle="#e7eaf0";
+    ctx.font="bold 34px Arial";
+    let title="SHADOW OF MURDER";
+    if(state==="paused")title="PAUSED";
+    if(state==="gameover")title="GAME OVER";
+    if(state==="victory")title="VICTORY!";
+    if(state==="levelcomplete")title="LEVEL COMPLETE";
+    ctx.fillText(title,W/2,H/2-35);
+    ctx.font="16px Arial";ctx.fillStyle="#c5cbd8";
+    let subtitle="A dark battlefield awaits.";
+    if(state==="title")subtitle="Press PLAY to begin";
+    if(state==="paused")subtitle="Press P to resume";
+    if(state==="levelcomplete")subtitle="Press ENTER for the next level";
+    if(state==="gameover")subtitle="Press R or click Restart to try again";
+    if(state==="victory")subtitle="The Dark King has fallen. Press R to play again.";
+    ctx.fillText(subtitle,W/2,H/2+8);
+    if(state==="title"){
+      ctx.fillStyle="#c5b178";ctx.font="14px Arial";
+      ctx.fillText("FIGHT · SURVIVE · CONQUER",W/2,H/2+42);
+    }
+    ctx.textAlign="left";
+  }
+}
+
+function frame(now){
+  const dt=Math.min(.033,(now-lastTime)/1000||0);
+  lastTime=now;
+  update(dt);
+  draw();
+  requestAnimationFrame(frame);
+}
+
+window.addEventListener("keydown",e=>{
+  if(["ArrowLeft","ArrowRight","ArrowUp","Space","ControlLeft","ControlRight"].includes(e.code))e.preventDefault();
+  if(keys[e.code])return;
+  keys[e.code]=true;
+
+  if(e.code==="KeyP")togglePause();
+  if(e.code==="KeyR")restartRun();
+  if(e.code==="KeyQ"&&state==="playing"){
+    player.block=true;
+    // A perfect block is checked against enemy attack timing.
+    if(perfectBlock())player.stamina=Math.min(100,player.stamina+8);
+  }
+  if(e.code==="Enter"&&state==="levelcomplete"){
+    buildLevel(level+1);
+    state="playing";
+  }
+  if(e.code==="Enter"&&state==="title")startGame();
+});
+
+window.addEventListener("keyup",e=>{
+  keys[e.code]=false;
+  if(e.code==="KeyQ"&&player)player.block=false;
+});
+
+canvas.addEventListener("mousedown",e=>{
+  if(e.button===0){
+    if(state==="title")startGame();
+    else if(state==="playing")mouseAttack=true;
+  }
+});
+
+canvas.addEventListener("contextmenu",e=>e.preventDefault());
+
+canvas.addEventListener("touchstart",e=>{
+  // Touch controls: tap the canvas to attack.
+  if(state==="title")startGame();
+  else if(state==="playing")mouseAttack=true;
+  e.preventDefault();
+},{passive:false});
+
+// Start screen has a functional PLAY interaction.
+canvas.addEventListener("click",()=>{
+  if(state==="title")startGame();
+});
+
+// Initial title-screen scene.
+buildLevel(1);
+state="title";
+updateMessage("Press PLAY or click the battlefield to begin.");
+updateHUD();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
