@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Santa's Present Catcher</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+        body {
+            background: #090d16;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            color: #fff;
+        }
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            background: linear-gradient(to bottom, #0b132b, #1c2541);
+            border: 4px solid #4cc9f0;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        }
+        canvas {
+            display: block;
+            background: transparent;
+        }
+        /* UI Overlays */
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        .hud-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+        .hud-group {
+            display: flex;
+            gap: 20px;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 10px 20px;
+            border-radius: 24px;
+            border: 1px solid rgba(76, 201, 240, 0.4);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .screen-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(9, 13, 22, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+            z-index: 10;
+            text-align: center;
+            padding: 30px;
+        }
+        h1 {
+            font-size: 46px;
+            color: #4cc9f0;
+            margin-bottom: 12px;
+            text-shadow: 0 0 15px rgba(76, 201, 240, 0.6);
+        }
+        p {
+            font-size: 18px;
+            color: #94a3b8;
+            margin-bottom: 25px;
+            max-width: 520px;
+            line-height: 1.6;
+        }
+        .btn {
+            background: linear-gradient(135deg, #f72585, #b5179e);
+            color: white;
+            border: none;
+            padding: 14px 36px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(247, 37, 133, 0.5);
+            transition: all 0.2s ease;
+        }
+        .btn:hover {
+            transform: scale(1.06);
+            background: linear-gradient(135deg, #ff4d9e, #f72585);
+            box-shadow: 0 6px 25px rgba(247, 37, 133, 0.7);
+        }
+        .instructions {
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 18px 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-size: 14px;
+            text-align: left;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+        .instructions span {
+            color: #4cc9f0;
+            font-weight: bold;
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- Game Canvas -->
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+        <!-- HUD Layer -->
+        <div class="ui-layer">
+            <div class="hud-top">
+                <div class="hud-group">
+                    <div>Score: <span id="scoreDisplay">0</span></div>
+                    <div>Combo: <span id="comboDisplay">1x</span></div>
+                </div>
+                <div class="hud-group">
+                    <div>Time: <span id="timerDisplay">90</span>s</div>
+                    <div>Lives: <span id="livesDisplay">❤️❤️❤️</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="startScreen" class="screen-overlay">
+            <h1>🎅 Santa's Present Catcher 🎁</h1>
+            <p>A sudden winter windstorm scattered Santa's gifts across the night sky! Help our cute elf catch presents, dodge frosty ice blocks, and grab glowing Magic Bells to save Christmas!</p>
+            <div class="instructions">
+                • <span>Move:</span> Left / Right Arrow Keys<br>
+                • <span>Win Condition:</span> Reach <span>250 Points</span> or survive for <span>90 Seconds</span>.<br>
+                • <span>Hazards:</span> Missing gifts or catching ice blocks costs <span>1 Life</span> (Ice blocks also reset your combo!).<br>
+                • <span>Power-Up:</span> Catch glowing red <span>🔔 Magic Bells</span> to instantly clear all ice blocks!
+            </div>
+            <button class="btn" id="startBtn">Start Game</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen" class="screen-overlay hidden">
+            <h1 id="gameOverTitle">Game Over</h1>
+            <p id="gameOverMessage">You ran out of lives!</p>
+            <div class="hud-group" style="margin-bottom: 25px; font-size: 20px;">
+                Final Score: <span id="finalScore">0</span>
+            </div>
+            <button class="btn" id="restartBtn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // UI Elements
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const startBtn = document.getElementById('startBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const comboDisplay = document.getElementById('comboDisplay');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const livesDisplay = document.getElementById('livesDisplay');
+        const finalScore = document.getElementById('finalScore');
+        const gameOverTitle = document.getElementById('gameOverTitle');
+        const gameOverMessage = document.getElementById('gameOverMessage');
+
+        // Game State Variables
+        let gameRunning = false;
+        let score = 0;
+        let combo = 1;
+        let lives = 3;
+        let timeLeft = 90;
+        let gameTimer = null;
+        let spawnTimer = null;
+        let difficultyTimer = null;
+        let spawnInterval = 1000;
+        let fallSpeedMultiplier = 1.0;
+
+        // Player (Elf)
+        const player = {
+            x: 350,
+            y: 500,
+            width: 90,
+            height: 70,
+            speed: 9,
+        };
+
+        // Input Tracking
+        const keys = {
+            ArrowLeft: false,
+            ArrowRight: false
+        };
+
+        // Entities
+        let items = [];
+        let particles = [];
+        let snowflakes = [];
+
+        // Initialize background snowflakes
+        for (let i = 0; i < 60; i++) {
+            snowflakes.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 2.5 + 1,
+                speed: Math.random() * 1.5 + 0.5
+            });
+        }
+
+        // Item Types with High-Resolution Emojis
+        const itemTypes = [
+            { type: 'gift', name: 'Teddy', points: 10, emoji: '🧸', weight: 22 },
+            { type: 'gift', name: 'Bike', points: 10, emoji: '🚲', weight: 18 },
+            { type: 'gift', name: 'Box', points: 10, emoji: '🎁', weight: 20 },
+            { type: 'gift', name: 'Beanie', points: 10, emoji: '🧢', weight: 15 },
+            { type: 'gift', name: 'Bag', points: 10, emoji: '🛍️', weight: 10 },
+            { type: 'gift', name: 'Thermos', points: 10, emoji: '🍵', weight: 10 },
+            { type: 'golden', name: 'Star', points: 25, emoji: '⭐', weight: 8 },
+            { type: 'ice', name: 'Ice', points: 0, emoji: '🧊', weight: 15 },
+            { type: 'bell', name: 'Bell', points: 0, emoji: '🔔', weight: 5 }
+        ];
+
+        // Event Listeners
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                keys[e.key] = true;
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                keys[e.key] = false;
+            }
+        });
+
+        startBtn.addEventListener('click', startGame);
+        restartBtn.addEventListener('click', startGame);
+
+        function startGame() {
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+
+            score = 0;
+            combo = 1;
+            lives = 3;
+            timeLeft = 90;
+            spawnInterval = 1000;
+            fallSpeedMultiplier = 1.0;
+            items = [];
+            particles = [];
+            player.x = 350;
+
+            updateHUD();
+            gameRunning = true;
+
+            clearInterval(gameTimer);
+            clearInterval(spawnTimer);
+            clearInterval(difficultyTimer);
+
+            gameTimer = setInterval(() => {
+                if (!gameRunning) return;
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    endGame(true, "Time's up! You successfully saved Christmas!");
+                }
+            }, 1000);
+
+            spawnTimer = setInterval(spawnItem, spawnInterval);
+
+            difficultyTimer = setInterval(() => {
+                if (!gameRunning) return;
+                fallSpeedMultiplier += 0.1;
+                if (spawnInterval > 400) {
+                    spawnInterval -= 70;
+                    clearInterval(spawnTimer);
+                    spawnTimer = setInterval(spawnItem, spawnInterval);
+                }
+            }, 10000);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function spawnItem() {
+            if (!gameRunning) return;
+
+            let totalWeight = itemTypes.reduce((sum, item) => sum + item.weight, 0);
+            let randomNum = Math.random() * totalWeight;
+            let currentWeight = 0;
+            let selectedTemplate = itemTypes[0];
+
+            for (let template of itemTypes) {
+                currentWeight += template.weight;
+                if (randomNum <= currentWeight) {
+                    selectedTemplate = template;
+                    break;
+                }
+            }
+
+            const size = 40;
+            const x = Math.random() * (canvas.width - size - 50) + 25;
+
+            items.push({
+                x: x,
+                y: -60,
+                width: size,
+                height: size,
+                speed: Math.random() * 2 + 2.5,
+                type: selectedTemplate.type,
+                emoji: selectedTemplate.emoji,
+                name: selectedTemplate.name,
+                points: selectedTemplate.points
+            });
+        }
+
+        function update() {
+            // Player movement
+            if (keys.ArrowLeft) player.x -= player.speed;
+            if (keys.ArrowRight) player.x += player.speed;
+
+            // Boundaries
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+            // Update items
+            for (let i = items.length - 1; i >= 0; i--) {
+                let item = items[i];
+                item.y += item.speed * fallSpeedMultiplier;
+
+                // Hitbox for basket collection
+                let basketHitbox = {
+                    x: player.x + 5,
+                    y: player.y + 25,
+                    width: player.width - 10,
+                    height: 30
+                };
+
+                if (
+                    item.x < basketHitbox.x + basketHitbox.width &&
+                    item.x + item.width > basketHitbox.x &&
+                    item.y < basketHitbox.y + basketHitbox.height &&
+                    item.y + item.height > basketHitbox.y
+                ) {
+                    handleCollection(item);
+                    items.splice(i, 1);
+                    continue;
+                }
+
+                // Hit ground
+                if (item.y > canvas.height - 45) {
+                    if (item.type === 'gift' || item.type === 'golden') {
+                        lives--;
+                        combo = 1;
+                        triggerFlash('#f72585');
+                        updateHUD();
+                        if (lives <= 0) {
+                            endGame(false, "Too many presents hit the cold snow!");
+                            return;
+                        }
+                    }
+                    items.splice(i, 1);
+                }
+            }
+
+            // Update particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= 0.025;
+                if (p.alpha <= 0) particles.splice(i, 1);
+            }
+
+            // Background snowflakes
+            snowflakes.forEach(flake => {
+                flake.y += flake.speed;
+                if (flake.y > canvas.height) {
+                    flake.y = 0;
+                    flake.x = Math.random() * canvas.width;
+                }
+            });
+
+            // Score Win condition
+            if (score >= 250) {
+                endGame(true, "Amazing! You reached 250 points and saved Christmas!");
+            }
+        }
+
+        function handleCollection(item) {
+            createParticles(item.x + item.width / 2, item.y + item.height / 2, item.type === 'golden' ? '#ffd700' : '#4cc9f0');
+
+            if (item.type === 'gift' || item.type === 'golden') {
+                let earned = item.points * combo;
+                score += earned;
+                combo = Math.min(combo + 1, 5);
+                triggerFlash('#4cc9f0');
+            } else if (item.type === 'ice') {
+                lives--;
+                combo = 1;
+                triggerFlash('#f72585');
+                if (lives <= 0) {
+                    endGame(false, "You caught too many heavy ice blocks!");
+                    return;
+                }
+            } else if (item.type === 'bell') {
+                items = items.filter(i => i.type !== 'ice');
+                score += 50;
+                triggerFlash('#ff477e');
+            }
+            updateHUD();
+        }
+
+        let screenFlashAlpha = 0;
+        let screenFlashColor = '#fff';
+        function triggerFlash(color) {
+            screenFlashColor = color;
+            screenFlashAlpha = 0.25;
+        }
+
+        function createParticles(x, y, color) {
+            for (let i = 0; i < 14; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 7,
+                    vy: (Math.random() - 0.5) * 7,
+                    radius: Math.random() * 4 + 2,
+                    color: color,
+                    alpha: 1.0
+                });
+            }
+        }
+
+        function updateHUD() {
+            scoreDisplay.textContent = score;
+            comboDisplay.textContent = combo + 'x';
+            timerDisplay.textContent = timeLeft;
+            
+            let hearts = '';
+            for (let i = 0; i < lives; i++) hearts += '❤️';
+            livesDisplay.textContent = hearts;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Background Falling Snowflakes
+            ctx.fillStyle = '#ffffff';
+            snowflakes.forEach(flake => {
+                ctx.beginPath();
+                ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Snowy Ground Floor with cute layered snowbanks
+            ctx.fillStyle = '#f8fafc';
+            ctx.beginPath();
+            ctx.roundRect(0, canvas.height - 35, canvas.width, 45, [15, 15, 0, 0]);
+            ctx.fill();
+            ctx.fillStyle = '#e2e8f0';
+            ctx.fillRect(0, canvas.height - 15, canvas.width, 15);
+
+            // Draw Cute Player Elf & Woven Basket
+            // Elf head & hat (using high-res emoji)
+            ctx.font = '36px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🧝', player.x + player.width / 2, player.y + 15);
+            // Woven present basket
+            ctx.fillText('🧺', player.x + player.width / 2, player.y + 45);
+
+            // Draw Falling Items with glowing/magical auras for bells & stars
+            items.forEach(item => {
+                ctx.save();
+                ctx.translate(item.x + item.width / 2, item.y + item.height / 2);
+
+                if (item.type === 'golden' || item.type === 'bell') {
+                    ctx.shadowColor = item.type === 'golden' ? '#ffd700' : '#ff477e';
+                    ctx.shadowBlur = 12;
+                }
+
+                ctx.font = '34px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(item.emoji, 0, 0);
+
+                ctx.restore();
+            });
+
+            // Draw Sparkle Particles
+            particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            // Screen Flash Effect on collection/damage
+            if (screenFlashAlpha > 0) {
+                ctx.fillStyle = screenFlashColor;
+                ctx.globalAlpha = screenFlashAlpha;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.globalAlpha = 1.0;
+                screenFlashAlpha -= 0.03;
+            }
+        }
+
+        function gameLoop() {
+            if (!gameRunning) return;
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function endGame(isWin, message) {
+            gameRunning = false;
+            clearInterval(gameTimer);
+            clearInterval(spawnTimer);
+            clearInterval(difficultyTimer);
+
+            gameOverTitle.textContent = isWin ? "🎉 You Saved Christmas! 🎉" : "❄️ Game Over ❄️";
+            gameOverMessage.textContent = message;
+            finalScore.textContent = score;
+            gameOverScreen.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
