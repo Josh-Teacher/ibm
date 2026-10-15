@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joshua Dean | Student Portfolio</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Styling for the Data Analysis resources; colors inherit the site's theme. */
+        .data-analysis-section {
+            max-width: 900px;
+            margin: 2.5rem auto;
+            padding: clamp(1.5rem, 4vw, 3rem);
+            border: 2px solid var(--text, currentColor);
+            text-align: center;
+        }
+        .data-analysis-section h2 {
+            margin-top: 0;
+        }
+        .data-analysis-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .data-analysis-link {
+            display: block;
+            flex: 1 1 250px;
+            max-width: 390px;
+            padding: 1.25rem;
+            border: 2px solid var(--text, currentColor);
+            color: inherit;
+            text-align: left;
+            text-decoration: none;
+            transition: transform 150ms ease, border-color 150ms ease;
+        }
+        .data-analysis-link:hover,
+        .data-analysis-link:focus-visible {
+            border-color: var(--accent, currentColor);
+            transform: translateY(-2px);
+            outline-offset: 4px;
+        }
+        .data-analysis-link strong,
+        .data-analysis-link span {
+            display: block;
+        }
+        .data-analysis-link strong {
+            margin-bottom: 0.5rem;
+            color: var(--accent, inherit);
+        }
+        .data-analysis-link span {
+            line-height: 1.6;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .data-analysis-link { transition: none; }
+            .data-analysis-link:hover,
+            .data-analysis-link:focus-visible { transform: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="nav-flex">
+                <a href="index.html" class="logo">JD.</a>
+                <button class="menu-toggle" aria-label="Toggle Navigation" aria-expanded="false">☰</button>
+                <nav>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="classes.html">Classes</a></li>
+                        <li><a href="projects.html">Projects</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="#data-analysis">Data Analysis</a></li>
+                        <li><button id="theme-toggle">🌙</button></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <section class="hero-section">
+                <h1 class="retro-font">Joshua Dean</h1>
+                <p>Computer Science Major | Salisbury University</p>
+                <div style="margin: 2rem 0; width: 50px; height: 2px; background: var(--accent); margin-inline: auto;"></div>
+                <p>Student ID: 174070</p>
+                <br>
+                <a href="projects.html" style="border: 2px solid var(--text); padding: 0.5rem 1rem; text-decoration: none;">View My Work</a>
+            </section>
+
+            <section class="data-analysis-section" id="data-analysis" aria-labelledby="data-analysis-heading">
+                <h2 class="retro-font" id="data-analysis-heading">Data Analysis</h2>
+                <p>Explore my game project and its supporting document.</p>
+                <div class="data-analysis-links">
+                    <a class="data-analysis-link" href="CLI.html">
+                        <strong>CLI Dungeon Crawl</strong>
+                        <span>Play the educational terminal adventure and explore a dungeon using simulated Windows or Linux commands.</span>
+                    </a>
+                    <a class="data-analysis-link"
+                       href="https://docs.google.com/document/d/1dY_rBF551P8NWgftucx3O0TrR2pYg3wfH-lrKlmj-_U/edit?usp=sharing"
+                       target="_blank" rel="noopener noreferrer">
+                        <strong>Game Document</strong>
+                        <span>Open the Google Doc associated with the project.</span>
+                    </a>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Joshua Dean. Built with simple HTML & CSS.</p>
+        </footer>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
