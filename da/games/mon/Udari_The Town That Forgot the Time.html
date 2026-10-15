@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111827">
+<title>The Town That Forgot the Time</title>
+
+<style>
+:root {
+    --bg: #101827;
+    --panel: #192538;
+    --panel-light: #223249;
+    --gold: #f4c76b;
+    --cream: #fff4dc;
+    --muted: #aab8ca;
+    --red: #ff7272;
+    --green: #77dfad;
+    --border: rgba(255,255,255,.12);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    margin: 0; min-height: 100vh;
+    background: radial-gradient(ellipse at top, #26374d 0%, transparent 55%), var(--bg);
+    color: var(--cream); font-family: Georgia, "Times New Roman", serif;
+}
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+    outline: 3px solid var(--gold); outline-offset: 3px;
+}
+button:disabled { cursor: not-allowed; opacity: .45; }
+.topbar {
+    position: sticky; top: 0; z-index: 10; background: rgba(16,24,39,.95);
+    border-bottom: 1px solid var(--border); backdrop-filter: blur(12px);
+}
+.topbar-inner {
+    max-width: 1150px; margin: auto; padding: 13px 20px; display: flex;
+    align-items: center; justify-content: space-between; gap: 15px;
+}
+.brand { font-size: 14px; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; }
+.top-actions { display: flex; gap: 8px; }
+.small-button {
+    background: var(--panel); color: var(--cream); border: 1px solid var(--border);
+    border-radius: 9px; padding: 8px 12px; font-size: 13px;
+}
+.container { max-width: 1100px; margin: auto; padding: 28px 20px 60px; }
+.hero { text-align: center; padding: 36px 12px 28px; }
+.eyebrow { color: var(--gold); font-size: 12px; letter-spacing: 4px; text-transform: uppercase; }
+h1 { font-size: clamp(36px, 7vw, 67px); line-height: 1.08; margin: 17px 0; font-weight: normal; text-shadow: 0 5px 25px rgba(0,0,0,.3); }
+.hero p { color: var(--muted); max-width: 650px; margin: 0 auto; font-family: Arial, sans-serif; line-height: 1.8; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 15px 0 25px; }
+.stat { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 15px; text-align: center; }
+.stat-label { color: var(--muted); font: 11px Arial, sans-serif; letter-spacing: 1.5px; text-transform: uppercase; }
+.stat-value { margin-top: 8px; font-size: 25px; color: var(--gold); }
+.lives { letter-spacing: 2px; color: var(--red); font-size: 18px; }
+.progress-wrap { background: #303d50; height: 5px; border-radius: 20px; overflow: hidden; margin: 0 0 25px; }
+.progress-bar { height: 100%; width: 0; background: var(--gold); transition: width .35s ease; }
+.game-layout { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: 20px; align-items: start; }
+.panel { background: rgba(25,37,56,.96); border: 1px solid var(--border); border-radius: 17px; overflow: hidden; margin-bottom: 20px; }
+.panel-header { padding: 17px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.panel-header h2 { font-size: 18px; font-weight: normal; margin: 0; }
+.panel-body { padding: 20px; }
+.tag { color: var(--gold); border: 1px solid rgba(244,199,107,.35); border-radius: 30px; padding: 5px 9px; font: 10px Arial, sans-serif; letter-spacing: 1px; white-space: nowrap; }
+.scene { position: relative; height: 190px; overflow: hidden; background: linear-gradient(#253b58, #64748b); }
+.moon { position: absolute; top: 25px; right: 16%; width: 42px; height: 42px; border-radius: 50%; background: #fff0c7; box-shadow: 0 0 35px rgba(255,240,199,.25); }
+.hill { position: absolute; bottom: -65px; width: 75%; height: 140px; background: #1b2d37; border-radius: 50% 50% 0 0; }
+.hill.one { left: -20%; }
+.hill.two { right: -20%; background: #263e43; }
+.town-buildings { position: absolute; bottom: 0; left: 0; right: 0; height: 105px; display: flex; align-items: end; justify-content: center; gap: 7px; }
+.building { width: 53px; height: 65px; background: #24323e; position: relative; border-top: 4px solid #455464; }
+.building:nth-child(2), .building:nth-child(5) { height: 92px; width: 65px; background: #1b2935; }
+.building:nth-child(3) { height: 75px; }
+.building::before { content: ""; position: absolute; left: 10px; top: 12px; width: 8px; height: 11px; background: #e8bd70; box-shadow: 20px 0 #e8bd70, 0 21px #e8bd70, 20px 21px #e8bd70; opacity: .75; }
+.building:nth-child(4)::before { background: #344657; box-shadow: 20px 0 #344657, 0 21px #344657, 20px 21px #344657; }
+.street { position: absolute; bottom: 0; width: 100%; height: 13px; background: #111b27; }
+.story-text { font-size: 16px; line-height: 1.9; color: #e5e7eb; }
+.story-text p { margin: 0 0 14px; }
+.letter { background: #f2e5c7; color: #4b3825; border-radius: 5px; padding: 23px; position: relative; box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+.letter::before { content: "CONFIDENTIAL"; display: block; text-align: center; font: bold 10px Arial, sans-serif; letter-spacing: 3px; margin-bottom: 17px; opacity: .65; }
+.letter h3 { text-align: center; font-weight: normal; font-size: 22px; margin: 0 0 17px; }
+.letter p { line-height: 1.85; font-size: 15px; margin: 0 0 14px; }
+.signature { text-align: right; font-style: italic; margin-top: 20px; }
+.clue { background: rgba(244,199,107,.08); border-left: 3px solid var(--gold); padding: 12px 14px; margin-top: 15px; font: 13px/1.7 Arial, sans-serif; color: #e9d7ad; }
+.section-intro { font: 13px/1.8 Arial, sans-serif; color: var(--muted); margin: 0 0 17px; }
+.bus-card { background: #202e42; border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 12px; transition: border-color .2s, background .2s; }
+.bus-card.selected { border-color: var(--gold); background: #29374a; }
+.bus-top { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+.bus-name { font-size: 17px; }
+.bus-number { display: inline-flex; background: var(--gold); color: #182130; border-radius: 6px; padding: 5px 8px; font: bold 12px Arial, sans-serif; margin-right: 7px; }
+.bus-description { font: 12px/1.7 Arial, sans-serif; color: var(--muted); margin: 11px 0; }
+.choice-button { background: transparent; color: var(--gold); border: 1px solid rgba(244,199,107,.5); border-radius: 8px; padding: 9px 12px; font: 12px Arial, sans-serif; width: 100%; text-align: center; }
+.choice-button:hover:not(:disabled) { background: rgba(244,199,107,.1); }
+.bus-times { display: none; margin-top: 13px; padding-top: 13px; border-top: 1px solid var(--border); }
+.bus-card.selected .bus-times { display: block; }
+.time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.time-button { background: #142033; color: var(--cream); border: 1px solid var(--border); border-radius: 8px; padding: 11px 5px; font-size: 14px; }
+.time-button.selected { border-color: var(--gold); color: var(--gold); background: #374256; }
+.time-note { font: 11px Arial, sans-serif; color: var(--muted); margin-top: 12px; }
+.field-label { display: block; font: 12px Arial, sans-serif; color: var(--muted); margin-bottom: 9px; }
+.text-input { width: 100%; padding: 12px; border-radius: 8px; background: #111c2c; border: 1px solid var(--border); color: var(--cream); margin-bottom: 12px; }
+.primary-button { background: var(--gold); color: #192131; border: 0; border-radius: 9px; padding: 13px 16px; font: bold 13px Arial, sans-serif; width: 100%; transition: transform .2s; }
+.primary-button:hover:not(:disabled) { transform: translateY(-2px); background: #ffda88; }
+.secondary-button { background: var(--panel-light); color: var(--cream); border: 1px solid var(--border); border-radius: 9px; padding: 11px 14px; font: 12px Arial, sans-serif; }
+.action-row { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 15px; }
+.action-row button { flex: 1; }
+.feedback { display: none; margin-top: 15px; padding: 13px; border-radius: 9px; font: 13px/1.7 Arial, sans-serif; }
+.feedback.show { display: block; }
+.feedback.success { background: rgba(119,223,173,.1); border: 1px solid rgba(119,223,173,.4); color: var(--green); }
+.feedback.error { background: rgba(255,114,114,.1); border: 1px solid rgba(255,114,114,.4); color: #ffaaaa; }
+.feedback.info { background: rgba(244,199,107,.08); border: 1px solid rgba(244,199,107,.3); color: #f5d995; }
+.hint-box { display: none; background: #273247; border: 1px solid rgba(244,199,107,.3); border-radius: 10px; padding: 14px; margin-top: 13px; font: 13px/1.8 Arial, sans-serif; }
+.hint-box.show { display: block; }
+.lock-message { text-align: center; padding: 20px 10px; color: var(--muted); font: 13px/1.8 Arial, sans-serif; }
+.lock-icon { display: block; font-size: 27px; margin-bottom: 8px; }
+.reveal { display: none; }
+.reveal.visible { display: block; animation: fadeIn .6s ease; }
+.reveal-content { background: linear-gradient(145deg, #263b48, #192b3c); border: 1px solid rgba(119,223,173,.35); border-radius: 13px; padding: 20px; }
+.reveal-content h3 { color: var(--green); font-size: 22px; font-weight: normal; }
+.reveal-content p { font: 14px/1.9 Arial, sans-serif; color: #e0e7ed; }
+.final-question { margin-top: 15px; border-top: 1px solid var(--border); padding-top: 17px; }
+.ending { display: none; text-align: center; padding: 35px 20px; }
+.ending.visible { display: block; }
+.ending h2 { font-size: 32px; font-weight: normal; color: var(--gold); }
+.ending p { color: var(--muted); font: 14px/1.8 Arial, sans-serif; }
+.footer { text-align: center; color: #73849a; font: 11px Arial, sans-serif; letter-spacing: 1px; margin-top: 30px; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 760px) {
+    .game-layout { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .hero { padding-top: 25px; }
+    .container { padding: 15px 13px 35px; }
+    .panel-body { padding: 15px; }
+    .letter { padding: 17px; }
+    .topbar-inner { padding: 11px 13px; }
+    .brand { font-size: 10px; letter-spacing: 1px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+</style>
+</head>
+
+<body>
+<header class="topbar">
+    <div class="topbar-inner">
+        <div class="brand">✦ Midnight Mystery Society</div>
+        <div class="top-actions">
+            <button class="small-button" id="soundButton" onclick="toggleSound()">🔊 Sound On</button>
+            <button class="small-button" onclick="confirmRestart()">↻ Restart</button>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <section class="hero">
+        <div class="eyebrow">A story-driven mystery game</div>
+        <h1>The Town That<br>Forgot the Time</h1>
+        <p>A forgotten town. A mysterious letter. Three buses. One departure time that could reveal everything. Can you uncover the truth before your last chance disappears?</p>
+    </section>
+
+    <section class="stats" aria-label="Game statistics">
+        <div class="stat"><div class="stat-label">Lives Remaining</div><div class="stat-value lives" id="livesDisplay">♥ ♥ ♥ ♥ ♥</div></div>
+        <div class="stat"><div class="stat-label">Score</div><div class="stat-value" id="scoreDisplay">0</div></div>
+        <div class="stat"><div class="stat-label">Hints Left</div><div class="stat-value" id="hintsDisplay">3</div></div>
+        <div class="stat"><div class="stat-label">Mystery Status</div><div class="stat-value" id="statusDisplay" style="font-size:17px">Unsolved</div></div>
+    </section>
+
+    <div class="progress-wrap" aria-label="Mystery progress"><div class="progress-bar" id="progressBar"></div></div>
+
+    <div id="gameArea">
+        <div class="game-layout">
+            <div>
+                <section class="panel">
+                    <div class="scene" aria-label="A mysterious town at night">
+                        <div class="moon"></div><div class="hill one"></div><div class="hill two"></div>
+                        <div class="town-buildings"><div class="building"></div><div class="building"></div><div class="building"></div><div class="building"></div><div class="building"></div></div>
+                        <div class="street"></div>
+                    </div>
+                    <div class="panel-header"><h2>Chapter I: The Forgotten Town</h2><span class="tag">THE BEGINNING</span></div>
+                    <div class="panel-body story-text">
+                        <p>You arrive in the quiet town of Bellwether just before midnight. The streets are empty, every clock shows a different time, and the old station has been abandoned for years.</p>
+                        <p>Nobody in town remembers why time stopped being reliable. The town records are incomplete, the station clock is frozen, and the last train disappeared from local history.</p>
+                        <p>An elderly station keeper finds you near the platform and places a sealed letter in your hand.</p>
+                        <p style="color:var(--gold);font-style:italic">"Find the right bus. Find the right time. Only then will the town remember."</p>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header"><h2>✉ The Hidden Letter</h2><span class="tag">EVIDENCE #01</span></div>
+                    <div class="panel-body">
+                        <div class="letter">
+                            <h3>To the One Who Still Remembers</h3>
+                            <p>Dear Stranger,</p>
+                            <p>If this letter has reached you, Bellwether has forgotten again.</p>
+                            <p>Three buses leave the old station every night. One follows the river road, one crosses the mountain, and one passes the abandoned clock tower.</p>
+                            <p>Do not trust the earliest bus. Do not trust the road that looks shortest.</p>
+                            <p>The correct bus leaves when the clock tower strikes thirteen minutes past nine. Its number is hidden in the date the town lost its time.</p>
+                            <p>The town lost its time on October 14, 1987. Add the digits of that date until only one digit remains. Then add the number of the month.</p>
+                            <p>When you find the right bus and the correct departure, ask why it was the only one allowed to leave that night.</p>
+                            <p>Do not leave before you understand what happened. The answer is more important than the journey.</p>
+                            <div class="signature">— The Last Station Keeper</div>
+                        </div>
+                        <div class="clue"><strong>Detective's note:</strong> The letter contains clues about the town's forgotten date, a bus number, a departure time, and a secret reason. Read carefully.</div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header"><h2>📓 Detective's Notebook</h2><span class="tag">YOUR NOTES</span></div>
+                    <div class="panel-body">
+                        <p class="section-intro">Write down your discoveries as you investigate. Your notes remain available while you play.</p>
+                        <label class="field-label" for="notes">Personal clues and theories</label>
+                        <textarea id="notes" class="text-input" rows="5" placeholder="Example: The letter mentions a date, a bus number, and a special time..." style="resize:vertical"></textarea>
+                        <button class="secondary-button" onclick="saveNotes()">Save Notes</button>
+                        <span id="notesMessage" style="font:12px Arial,sans-serif;color:var(--green);margin-left:8px" aria-live="polite"></span>
+                    </div>
+                </section>
+            </div>
+
+            <div>
+                <section class="panel" id="busPanel">
+                    <div class="panel-header"><h2>Chapter II: The Three Buses</h2><span class="tag">INVESTIGATION</span></div>
+                    <div class="panel-body">
+                        <p class="section-intro">Inspect the available routes. Select a bus to examine its departure times. You must identify both the correct bus and the correct time.</p>
+
+                        <div class="bus-card" id="bus-card-17">
+                            <div class="bus-top"><div class="bus-name"><span class="bus-number">17</span>River Road Express</div></div>
+                            <div class="bus-description">A fast route beside the river. The driver says it is the oldest active service in town.</div>
+                            <button class="choice-button" onclick="selectBus(17)">Inspect Route 17</button>
+                            <div class="bus-times">
+                                <div class="field-label">Choose a departure</div>
+                                <div class="time-grid">
+                                    <button class="time-button" onclick="selectTime('21:00')">9:00 PM</button>
+                                    <button class="time-button" onclick="selectTime('21:13')">9:13 PM</button>
+                                    <button class="time-button" onclick="selectTime('21:30')">9:30 PM</button>
+                                </div>
+                                <div class="time-note">Route information: The river road is occasionally closed after midnight.</div>
+                            </div>
+                        </div>
+
+                        <div class="bus-card" id="bus-card-24">
+                            <div class="bus-top"><div class="bus-name"><span class="bus-number">24</span>Mountain Crossing</div></div>
+                            <div class="bus-description">A winding mountain route. Its timetable has several handwritten corrections.</div>
+                            <button class="choice-button" onclick="selectBus(24)">Inspect Route 24</button>
+                            <div class="bus-times">
+                                <div class="field-label">Choose a departure</div>
+                                <div class="time-grid">
+                                    <button class="time-button" onclick="selectTime('21:00')">9:00 PM</button>
+                                    <button class="time-button" onclick="selectTime('21:13')">9:13 PM</button>
+                                    <button class="time-button" onclick="selectTime('21:30')">9:30 PM</button>
+                                </div>
+                                <div class="time-note">Route information: The mountain road is dangerous during heavy fog.</div>
+                            </div>
+                        </div>
+
+                        <div class="bus-card" id="bus-card-32">
+                            <div class="bus-top"><div class="bus-name"><span class="bus-number">32</span>Clock Tower Route</div></div>
+                            <div class="bus-description">A quiet route that passes the abandoned clock tower. Its timetable has an unusual symbol beside one departure.</div>
+                            <button class="choice-button" onclick="selectBus(32)">Inspect Route 32</button>
+                            <div class="bus-times">
+                                <div class="field-label">Choose a departure</div>
+                                <div class="time-grid">
+                                    <button class="time-button" onclick="selectTime('21:00')">9:00 PM</button>
+                                    <button class="time-button" onclick="selectTime('21:13')">9:13 PM</button>
+                                    <button class="time-button" onclick="selectTime('21:30')">9:30 PM</button>
+                                </div>
+                                <div class="time-note">Route information: The clock tower has been closed to visitors since 1987.</div>
+                            </div>
+                        </div>
+
+                        <div class="clue"><strong>Investigation rule:</strong> The correct bus number can be calculated from the date in the letter. Its departure time is described separately.</div>
+                        <div id="selectionSummary" class="feedback info show" aria-live="polite">Select a bus and a departure time to begin your investigation.</div>
+                        <button class="primary-button" id="submitBus" onclick="checkBusAnswer()" style="margin-top:15px">Confirm My Bus and Time</button>
+                        <div id="busFeedback" class="feedback" role="status" aria-live="polite"></div>
+                        <div class="action-row">
+                            <button class="secondary-button" onclick="useHint()" id="hintButton">💡 Request a Hint</button>
+                            <button class="secondary-button" onclick="showNotebook()">📓 View Notes</button>
+                        </div>
+                        <div id="hintBox" class="hint-box"></div>
+                    </div>
+                </section>
+
+                <section class="panel locked" id="secretPanel">
+                    <div class="panel-header"><h2>Chapter III: The Missing Truth</h2><span class="tag">CLASSIFIED</span></div>
+                    <div class="panel-body">
+                        <div class="lock-message" id="lockMessage"><span class="lock-icon">🔒</span><strong>The town's secret remains hidden.</strong><p>Identify the correct bus and departure time to unlock the complete story.</p></div>
+                        <div class="reveal" id="secretReveal">
+                            <div class="reveal-content">
+                                <div class="eyebrow">Evidence unlocked</div>
+                                <h3>The Night Time Disappeared</h3>
+                                <p>You have discovered the correct bus and departure time. The station keeper finally opens the second envelope.</p>
+                                <p>In October 1987, Bellwether depended on its old clock tower to synchronize the station, the town hall, and the emergency warning system.</p>
+                                <p>On the night of October 14, the clock tower mechanism failed during a severe storm. The town's official records were damaged, and different buildings began recording different times.</p>
+                                <p>A midnight evacuation had been scheduled, but the broken clocks caused confusion. Families missed departures, messages arrived too late, and the town's history was recorded incorrectly.</p>
+                                <p>The station keeper discovered that Route 32 was the only bus authorized to carry the original time records to the regional archive. Its departure was delayed until the clock tower's final signal could be verified.</p>
+                                <p>The unusual departure at 9:13 PM was not random. It matched the recorded signal time in the station's surviving log.</p>
+                                <p>The keeper hid the letter so that someone would reconstruct the clues instead of accepting the town's incomplete official story.</p>
+                                <div class="clue"><strong>The truth:</strong> Bellwether did not literally forget how time works. Its people lost trust in their clocks and records after one night of confusion. The mystery was preserved by a hidden letter and a forgotten bus timetable.</div>
+                            </div>
+
+                            <div class="final-question">
+                                <h3 style="font-size:19px;font-weight:normal">Final Investigation</h3>
+                                <p class="section-intro">To complete the mystery, explain why the correct bus was important.</p>
+                                <label class="field-label" for="finalAnswer">Choose the best explanation</label>
+                                <select id="finalAnswer" class="text-input">
+                                    <option value="">Select your explanation...</option>
+                                    <option value="a">It was the fastest bus and could reach the next town first.</option>
+                                    <option value="b">It was the authorized route carrying the original time records to the regional archive.</option>
+                                    <option value="c">It was the only bus that traveled through the mountains.</option>
+                                    <option value="d">It was selected because it had the fewest passengers.</option>
+                                </select>
+                                <button class="primary-button" onclick="checkFinalAnswer()">Solve the Final Mystery</button>
+                                <div id="finalFeedback" class="feedback" role="status" aria-live="polite"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <section class="panel ending" id="ending">
+        <div class="eyebrow">Mystery completed</div>
+        <h2 id="endingTitle">The Town Remembers</h2>
+        <p id="endingMessage">You have uncovered Bellwether's forgotten history.</p>
+        <div class="stats">
+            <div class="stat"><div class="stat-label">Final Score</div><div class="stat-value" id="finalScore">0</div></div>
+            <div class="stat"><div class="stat-label">Hints Used</div><div class="stat-value" id="finalHints">0</div></div>
+            <div class="stat"><div class="stat-label">Lives Remaining</div><div class="stat-value" id="finalLives">0</div></div>
+            <div class="stat"><div class="stat-label">Result</div><div class="stat-value" id="finalResult" style="font-size:17px">Complete</div></div>
+        </div>
+        <button class="primary-button" onclick="restartGame()" style="max-width:320px">Play Again</button>
+    </section>
+
+    <div class="footer">THE TOWN THAT FORGOT THE TIME · EVERY CLUE MATTERS</div>
+</main>
+
+<script>
+"use strict";
+
+const CONFIG = {
+    startingLives: 5,
+    startingHints: 3,
+    correctBus: 32,
+    correctTime: "21:13",
+    points: { correctBusAndTime: 100, correctFinalAnswer: 100, incorrectFinalAnswer: 0, hintPenalty: 10 },
+    hints: [
+        "Start with the date: October 14, 1987. Add all the digits of 14101987 together, then repeatedly add the digits of the result until you have one digit. Finally, add the month number, 10.",
+        "The letter says the correct bus number is based on the date and the month. Calculate the date's single-digit sum, then add 10. Compare your result with the three bus numbers.",
+        "Look at the exact wording: the letter says the clock tower strikes thirteen minutes past nine. That is 9:13 PM. The correct route also passes the abandoned clock tower."
+    ]
+};
+
+let state = {};
+let audioContext = null;
+
+function resetState() {
+    state = {
+        lives: CONFIG.startingLives, hints: CONFIG.startingHints, hintsUsed: 0,
+        score: 0, selectedBus: null, selectedTime: null, busSolved: false,
+        finalSolved: false, gameOver: false, wrongAttempts: 0, soundEnabled: true
+    };
+}
+
+function playSound(type) {
+    if (!state.soundEnabled) return;
+    try {
+        audioContext = audioContext || new (window.AudioContext || window.webkitAudioContext)();
+        if (audioContext.state === "suspended") audioContext.resume();
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+        const sounds = {
+            success: { frequency: 660, duration: .18 },
+            error: { frequency: 180, duration: .22 },
+            click: { frequency: 420, duration: .07 },
+            win: { frequency: 880, duration: .4 }
+        };
+        const config = sounds[type] || sounds.click;
+        oscillator.frequency.value = config.frequency;
+        oscillator.type = "sine";
+        gain.gain.setValueAtTime(.08, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(.001, audioContext.currentTime + config.duration);
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + config.duration);
+    } catch (error) {
+        // Audio is optional; the game still works without it.
+    }
+}
+
+function toggleSound() {
+    state.soundEnabled = !state.soundEnabled;
+    document.getElementById("soundButton").textContent = state.soundEnabled ? "🔊 Sound On" : "🔇 Sound Off";
+    if (state.soundEnabled) playSound("click");
+}
+
+function updateDisplay() {
+    document.getElementById("livesDisplay").textContent =
+        state.lives > 0 ? Array(state.lives).fill("♥").join(" ") : "0";
+    document.getElementById("scoreDisplay").textContent = state.score;
+    document.getElementById("hintsDisplay").textContent = state.hints;
+    document.getElementById("statusDisplay").textContent =
+        state.finalSolved ? "Solved" : state.busSolved ? "Unlocked" : state.gameOver ? "Failed" : "Unsolved";
+    let progress = 0;
+    if (state.busSolved) progress = 60;
+    if (state.finalSolved) progress = 100;
+    document.getElementById("progressBar").style.width = progress + "%";
+    document.getElementById("hintButton").disabled = state.gameOver || state.busSolved || state.hints <= 0;
+    document.getElementById("submitBus").disabled = state.gameOver || state.busSolved;
+    document.querySelectorAll(".choice-button, .time-button").forEach(button => {
+        button.disabled = state.gameOver || state.busSolved;
+    });
+}
+
+function showFeedback(id, message, type) {
+    const element = document.getElementById(id);
+    element.className = "feedback show " + type;
+    element.textContent = message;
+}
+
+function clearFeedback(id) {
+    const element = document.getElementById(id);
+    element.className = "feedback";
+    element.textContent = "";
+}
+
+function selectBus(busNumber) {
+    if (state.gameOver || state.busSolved) return;
+    playSound("click");
+    state.selectedBus = busNumber;
+    document.querySelectorAll(".bus-card").forEach(card => card.classList.remove("selected"));
+    document.getElementById("bus-card-" + busNumber).classList.add("selected");
+    updateSelectionSummary();
+    clearFeedback("busFeedback");
+}
+
+function selectTime(time) {
+    if (state.gameOver || state.busSolved || state.selectedBus === null) return;
+    playSound("click");
+    state.selectedTime = time;
+    const card = document.getElementById("bus-card-" + state.selectedBus);
+    card.querySelectorAll(".time-button").forEach(button => {
+        button.classList.remove("selected");
+        const label = button.textContent.trim();
+        const matches = (time === "21:00" && label === "9:00 PM") ||
+            (time === "21:13" && label === "9:13 PM") ||
+            (time === "21:30" && label === "9:30 PM");
+        if (matches) button.classList.add("selected");
+    });
+    updateSelectionSummary();
+    clearFeedback("busFeedback");
+}
+
+function updateSelectionSummary() {
+    const busText = state.selectedBus ? "Route " + state.selectedBus : "No bus selected";
+    const timeText = state.selectedTime ? formatTime(state.selectedTime) : "No time selected";
+    document.getElementById("selectionSummary").textContent = "Selected: " + busText + " · Departure: " + timeText;
+}
+
+function formatTime(time) {
+    if (!time) return "";
+    const parts = time.split(":");
+    let hours = Number(parts[0]);
+    const minutes = parts[1];
+    const period = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12 || 12;
+    return hours + ":" + minutes + " " + period;
+}
+
+function checkBusAnswer() {
+    if (state.gameOver || state.busSolved) return;
+    if (state.selectedBus === null || state.selectedTime === null) {
+        showFeedback("busFeedback", "Choose a bus and a departure time before submitting your answer.", "info");
+        playSound("click");
+        return;
+    }
+    if (state.selectedBus === CONFIG.correctBus && state.selectedTime === CONFIG.correctTime) {
+        solveBusMystery();
+        return;
+    }
+    state.wrongAttempts++;
+    state.lives--;
+    playSound("error");
+    if (state.selectedBus !== CONFIG.correctBus && state.selectedTime !== CONFIG.correctTime) {
+        showFeedback("busFeedback", "That combination is incorrect. The bus route and departure time must both match the letter. You have lost one life.", "error");
+    } else if (state.selectedBus !== CONFIG.correctBus) {
+        showFeedback("busFeedback", "The departure time matches the clue, but the route is incorrect. You have lost one life.", "error");
+    } else {
+        showFeedback("busFeedback", "You found the correct route, but the departure time is wrong. You have lost one life.", "error");
+    }
+    updateDisplay();
+    if (state.lives <= 0) endGame(false);
+}
+
+function solveBusMystery() {
+    state.busSolved = true;
+    state.score += CONFIG.points.correctBusAndTime;
+    playSound("success");
+    showFeedback("busFeedback", "Correct! Route 32 leaves at 9:13 PM. You have uncovered the correct journey and unlocked the town's hidden records.", "success");
+    document.getElementById("lockMessage").style.display = "none";
+    document.getElementById("secretReveal").classList.add("visible");
+    updateDisplay();
+    document.getElementById("secretPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function useHint() {
+    if (state.gameOver || state.busSolved || state.hints <= 0) return;
+    const hintIndex = CONFIG.startingHints - state.hints;
+    state.hints--;
+    state.hintsUsed++;
+    state.score = Math.max(0, state.score - CONFIG.points.hintPenalty);
+    const hintBox = document.getElementById("hintBox");
+    hintBox.classList.add("show");
+    hintBox.textContent = "HINT " + state.hintsUsed + " OF " + CONFIG.startingHints + ": " + CONFIG.hints[hintIndex];
+    playSound("click");
+    updateDisplay();
+}
+
+function checkFinalAnswer() {
+    if (state.gameOver || !state.busSolved || state.finalSolved) return;
+    const answer = document.getElementById("finalAnswer").value;
+    if (!answer) {
+        showFeedback("finalFeedback", "Choose an explanation before submitting your answer.", "info");
+        return;
+    }
+    if (answer === "b") {
+        state.finalSolved = true;
+        state.score += CONFIG.points.correctFinalAnswer;
+        playSound("win");
+        showFeedback("finalFeedback", "Exactly right! Route 32 was authorized to carry the original time records to the regional archive. You have solved the mystery.", "success");
+        updateDisplay();
+        endGame(true);
+    } else {
+        state.lives--;
+        playSound("error");
+        showFeedback("finalFeedback", "That explanation does not match the evidence. Reconsider what the hidden letter and station records reveal. You have lost one life.", "error");
+        updateDisplay();
+        if (state.lives <= 0) endGame(false);
+    }
+}
+
+function endGame(won) {
+    state.gameOver = true;
+    updateDisplay();
+    document.getElementById("gameArea").style.display = "none";
+    const ending = document.getElementById("ending");
+    ending.classList.add("visible");
+    document.getElementById("endingTitle").textContent = won ? "The Town Remembers" : "The Mystery Remains";
+    document.getElementById("endingMessage").textContent = won
+        ? "You uncovered the truth behind Bellwether's forgotten time. The original records can finally be restored, and the town can begin to trust its history again."
+        : "Your investigation has ended because you ran out of lives. The hidden records remain locked away. Restart the game and investigate the clues again.";
+    document.getElementById("finalScore").textContent = state.score;
+    document.getElementById("finalHints").textContent = state.hintsUsed;
+    document.getElementById("finalLives").textContent = state.lives;
+    document.getElementById("finalResult").textContent = won ? "Victory" : "Game Over";
+    ending.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function saveNotes() {
+    const notes = document.getElementById("notes").value;
+    try {
+        localStorage.setItem("bellwetherDetectiveNotes", notes);
+        document.getElementById("notesMessage").textContent = "Notes saved.";
+    } catch (error) {
+        document.getElementById("notesMessage").textContent = "Notes available for this session.";
+    }
+    playSound("click");
+}
+
+function loadNotes() {
+    try {
+        const notes = localStorage.getItem("bellwetherDetectiveNotes");
+        if (notes !== null) document.getElementById("notes").value = notes;
+    } catch (error) {
+        // Local storage is optional.
+    }
+}
+
+function showNotebook() {
+    document.getElementById("notes").scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById("notes").focus();
+}
+
+function confirmRestart() {
+    if (state.finalSolved || state.wrongAttempts > 0 || state.selectedBus !== null) {
+        const confirmed = window.confirm("Restart the mystery from the beginning? Your current score, lives, and progress will reset.");
+        if (!confirmed) return;
+    }
+    restartGame();
+}
+
+function restartGame() {
+    resetState();
+    document.getElementById("gameArea").style.display = "block";
+    document.getElementById("ending").classList.remove("visible");
+    document.getElementById("lockMessage").style.display = "block";
+    document.getElementById("secretReveal").classList.remove("visible");
+    document.querySelectorAll(".bus-card").forEach(card => card.classList.remove("selected"));
+    document.querySelectorAll(".time-button").forEach(button => button.classList.remove("selected"));
+    document.getElementById("selectionSummary").textContent = "Select a bus and a departure time to begin your investigation.";
+    document.getElementById("hintBox").classList.remove("show");
+    document.getElementById("hintBox").textContent = "";
+    document.getElementById("finalAnswer").value = "";
+    clearFeedback("busFeedback");
+    clearFeedback("finalFeedback");
+    document.getElementById("soundButton").textContent = "🔊 Sound On";
+    updateDisplay();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+resetState();
+loadNotes();
+updateDisplay();
+</script>
+</body>
+</html>
