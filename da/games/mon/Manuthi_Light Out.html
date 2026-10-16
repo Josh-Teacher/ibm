@@ -1,0 +1,591 @@
+ <!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07111f">
+<meta name="description" content="LIGHT OUT — a pixel-art survival arcade game. Reach home, avoid the zombies, and survive ten rounds.">
+<title>LIGHT OUT — Survival Arcade</title>
+<style>
+  :root{color-scheme:dark;--ink:#e9f4ff;--muted:#9ab0c9;--cyan:#72f4e8;--pink:#ff6587;--panel:#0b1727;--line:#29465e;--gold:#ffd77b}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#19334b 0,#0a1423 48%,#050a12 100%);color:var(--ink);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;display:flex;justify-content:center;padding:22px 14px 30px}
+  button{font:inherit}
+  .app{width:min(100%,1020px)}
+  .brand-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 0 14px;padding:0 2px}
+  .brand{display:flex;align-items:center;gap:12px;min-width:0}
+  .brand-mark{width:38px;height:38px;display:grid;place-items:center;background:#102c3d;border:1px solid #326478;box-shadow:inset 0 0 0 3px #0a1b2a;color:var(--cyan);font-size:21px;flex:none}
+  .brand-title{font-size:13px;letter-spacing:.16em;color:#f5fbff;font-weight:900}
+  .brand-sub{font-size:10px;letter-spacing:.1em;color:var(--muted);margin-top:4px}
+  .sound-btn{background:#101f31;border:1px solid #35536a;color:#bfeef0;padding:10px 13px;min-width:105px;border-radius:3px;cursor:pointer;font-size:11px;font-weight:800;letter-spacing:.08em;transition:background .15s,border-color .15s;white-space:nowrap}
+  .sound-btn:hover,.sound-btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;background:#183348;border-color:var(--cyan)}
+  .hud{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px}
+  .hud-cell{min-width:0;background:linear-gradient(180deg,#112239,#0a1625);border:1px solid #284157;padding:10px 12px;box-shadow:inset 0 1px 0 #ffffff08}
+  .hud-label{font-size:9px;letter-spacing:.14em;color:#87a5bf;text-transform:uppercase;margin-bottom:5px}
+  .hud-value{font-size:clamp(14px,2.2vw,20px);font-weight:900;letter-spacing:.025em;white-space:nowrap}
+  #timeValue{color:var(--gold)}#lifeValue{color:#ff8198}#zombieValue{color:#be9bff}
+  .stage{position:relative;overflow:hidden;width:100%;border:1px solid #34536c;background:#07111e;box-shadow:0 20px 50px #0008,0 0 0 5px #0a1523,0 0 0 6px #223b51;isolation:isolate}
+  canvas{display:block;width:100%;height:auto;aspect-ratio:8/5;image-rendering:pixelated;image-rendering:crisp-edges}
+  .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(3,9,17,.68);backdrop-filter:blur(2px);overflow:auto}
+  .overlay.hidden,.hidden{display:none!important}
+  .panel{width:min(100%,650px);padding:clamp(18px,4vw,33px);background:linear-gradient(155deg,rgba(14,33,51,.98),rgba(5,15,27,.98));border:1px solid #42657e;box-shadow:0 0 0 5px #07111dbb,inset 0 0 0 3px #173349;position:relative;text-align:center}
+  .panel:before,.panel:after{content:"";position:absolute;width:14px;height:14px;border-color:var(--cyan);border-style:solid;opacity:.9}
+  .panel:before{left:7px;top:7px;border-width:2px 0 0 2px}.panel:after{right:7px;bottom:7px;border-width:0 2px 2px 0}
+  .eyebrow{font-size:10px;color:var(--cyan);letter-spacing:.22em;font-weight:900;text-transform:uppercase}
+  h1{font-size:clamp(38px,8vw,76px);letter-spacing:.09em;line-height:.98;margin:12px 0 8px;color:#f1fbff;text-shadow:4px 4px 0 #1f5265,0 0 24px #6df7e52b}
+  h1 .out{color:var(--pink);text-shadow:4px 4px 0 #61283f,0 0 23px #ff658733}
+  .subtitle{font-size:clamp(11px,2vw,14px);line-height:1.7;color:#aac1d7;margin:0 auto 18px;max-width:490px}
+  .title-art{height:58px;display:flex;align-items:center;justify-content:center;gap:22px;margin:2px 0 13px;color:#6c92a9}
+  .pixel-boy{width:19px;height:32px;position:relative;background:#4b9bba;box-shadow:0 -13px 0 -2px #e8b693,0 -17px 0 -2px #19202d, -6px -10px 0 -3px #e8b693,6px -10px 0 -3px #e8b693, -5px 12px 0 -3px #273c68,5px 12px 0 -3px #273c68;image-rendering:pixelated}
+  .pixel-z{width:24px;height:27px;background:#5e7180;position:relative;box-shadow:0 -10px 0 -2px #5e7180, -8px -7px 0 -4px #5e7180,8px -5px 0 -3px #5e7180}
+  .pixel-z:before{content:"";position:absolute;top:-7px;left:4px;width:4px;height:4px;background:#ff647d;box-shadow:10px 0 #ff647d,0 14px #14202d,10px 14px #14202d}
+  .art-light{height:2px;width:75px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.65}
+  .instructions{display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left;margin:15px 0 20px}
+  .instruction{padding:11px 12px;border:1px solid #284459;background:#071421}
+  .instruction strong{display:block;font-size:10px;color:var(--cyan);letter-spacing:.08em;margin-bottom:5px}
+  .instruction p{font-size:10px;line-height:1.55;color:#b3c4d3;margin:0}
+  .keycaps{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+  kbd{display:inline-block;padding:4px 6px;border:1px solid #4c7087;border-bottom-width:3px;background:#142b40;border-radius:2px;color:#eafaff;font-weight:900;font-size:10px;min-width:21px;text-align:center}
+  .primary-btn,.secondary-btn{border:0;cursor:pointer;text-transform:uppercase;font-weight:900;letter-spacing:.12em;font-size:12px;padding:14px 23px;min-height:46px;transition:transform .12s,filter .12s,background .12s}
+  .primary-btn{color:#031316;background:var(--cyan);box-shadow:0 4px 0 #287c7b,0 0 24px #72f4e82a}
+  .primary-btn:hover,.primary-btn:focus-visible{background:#a0fff5;filter:brightness(1.03);outline:2px solid #e5fffb;outline-offset:3px;transform:translateY(-1px)}
+  .secondary-btn{color:#d7e8f7;background:#192b40;border:1px solid #45647b}
+  .secondary-btn:hover,.secondary-btn:focus-visible{background:#243e56;outline:2px solid var(--cyan);outline-offset:2px}
+  .tiny-note{font-size:9px;line-height:1.6;color:#7f9bb2;margin:15px 0 0}
+  .big-message{font-size:clamp(27px,6vw,48px);font-weight:1000;letter-spacing:.04em;line-height:1.08;margin:12px 0;color:var(--cyan);text-shadow:3px 3px 0 #17414c}
+  .big-message.loss{color:var(--pink);text-shadow:3px 3px 0 #59283b}.big-message.win{color:#ffe08a;text-shadow:3px 3px 0 #674e24}
+  .result-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:19px 0;text-align:left}
+  .stat{padding:12px;border:1px solid #2c485c;background:#081624}
+  .stat span{display:block;font-size:9px;color:#8aa7bd;letter-spacing:.1em;margin-bottom:7px;text-transform:uppercase}
+  .stat strong{font-size:18px;color:#f0f8ff}
+  .panel-actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:18px}
+  .stage-note{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:38px;padding:10px 3px 0;color:#8ba7bd;font-size:10px;letter-spacing:.02em}
+  .stage-note strong{color:#bfe5ed;font-weight:700}
+  .blink{animation:blink 1s steps(2,end) infinite}@keyframes blink{50%{opacity:.45}}
+  .footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid #172b3c;margin-top:15px;padding-top:12px;color:#607d95;font-size:9px;letter-spacing:.05em}
+  @media(max-width:560px){body{padding:13px 9px 20px}.brand-mark{width:32px;height:32px}.brand-title{font-size:11px}.brand-sub{font-size:8px}.sound-btn{padding:9px 10px;min-width:92px;font-size:10px}.hud{gap:5px}.hud-cell{padding:8px 7px}.hud-label{font-size:8px}.overlay{padding:8px}.panel{padding:17px 13px}.instructions{gap:6px;margin:10px 0 13px}.instruction{padding:8px}.instruction p{font-size:9px}.instruction strong{font-size:9px}.stage-note{font-size:9px}.footer{font-size:8px}}
+  @media(max-height:700px){body{padding-top:10px}.panel{padding-top:15px;padding-bottom:15px}.title-art{height:38px;margin:0}.subtitle{margin-bottom:10px}.instructions{margin:10px 0 12px}.tiny-note{margin-top:9px}}
+  @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="app" aria-label="LIGHT OUT survival game">
+  <div class="brand-row">
+    <div class="brand"><div class="brand-mark" aria-hidden="true">☾</div><div><div class="brand-title">NIGHT SHIFT ARCADE</div><div class="brand-sub">A PIXEL SURVIVAL EXPERIENCE</div></div></div>
+    <button id="soundBtn" class="sound-btn" type="button" aria-pressed="false" title="Toggle game sounds">♫ SOUND OFF</button>
+  </div>
+  <section id="hud" class="hud hidden" aria-label="Game status">
+    <div class="hud-cell"><div class="hud-label">Round</div><div class="hud-value" id="roundValue">01 / 10</div></div>
+    <div class="hud-cell"><div class="hud-label">Time left</div><div class="hud-value" id="timeValue">60s</div></div>
+    <div class="hud-cell"><div class="hud-label">Lives</div><div class="hud-value" id="lifeValue">♥ ♥</div></div>
+    <div class="hud-cell"><div class="hud-label">Zombies</div><div class="hud-value" id="zombieValue">01</div></div>
+  </section>
+  <section class="stage" aria-label="Game play area">
+    <canvas id="gameCanvas" width="960" height="600" aria-label="Nighttime neighborhood game. Use the arrow keys to move the boy to the glowing home door while avoiding zombies."></canvas>
+    <div id="titleOverlay" class="overlay">
+      <div class="panel">
+        <div class="eyebrow">LAST LIGHT • TEN ROUNDS • TWO LIVES</div>
+        <h1>LIGHT <span class="out">OUT</span></h1>
+        <p class="subtitle">The neighborhood goes dark. The dead start moving.<br>Find the glowing door before they find you.</p>
+        <div class="title-art" aria-hidden="true"><span class="pixel-boy"></span><span class="art-light"></span><span class="pixel-z"></span><span class="art-light"></span><span style="font-size:26px;color:#ffd77b;text-shadow:0 0 15px #ffd77b">⌂</span></div>
+        <div class="instructions">
+          <div class="instruction"><strong>MOVE</strong><p class="keycaps"><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> Arrow keys</p></div>
+          <div class="instruction"><strong>YOUR MISSION</strong><p>Reach the glowing home door in every round. Each round has 60 seconds.</p></div>
+          <div class="instruction"><strong>STAY ALIVE</strong><p>You have only <b style="color:#ff8198">2 lives</b> for all ten rounds. A second catch ends the game.</p></div>
+          <div class="instruction"><strong>LIGHTS OUT</strong><p>A warning comes first. During the 2–3 second blackout, everyone still moves.</p></div>
+        </div>
+        <button id="startBtn" class="primary-btn" type="button">▶ &nbsp; Start Game</button>
+        <p class="tiny-note">Sound starts OFF. Turn it on any time with the sound button above.<br>Tip: keep moving, watch the corners, and use the darkness wisely.</p>
+      </div>
+    </div>
+    <div id="transitionOverlay" class="overlay hidden" aria-live="polite">
+      <div class="panel"><div class="eyebrow">YOU FOUND A WAY THROUGH</div><div class="big-message">ROUND COMPLETE!</div><p id="transitionText" class="subtitle">Catch your breath. The next street will be more dangerous.</p><div class="art-light" style="margin:20px auto"></div><div class="eyebrow blink">PREPARING NEXT ROUND…</div></div>
+    </div>
+    <div id="resultOverlay" class="overlay hidden" aria-live="polite">
+      <div class="panel"><div id="resultEyebrow" class="eyebrow">END OF THE NIGHT</div><div id="resultTitle" class="big-message loss">GAME OVER</div><p id="resultText" class="subtitle">The street was too dangerous.</p><div id="resultStats" class="result-stats"></div><div class="panel-actions"><button id="restartBtn" class="primary-btn" type="button">↻ &nbsp; Play Again</button><button id="titleBtn" class="secondary-btn" type="button">Title Screen</button></div></div>
+    </div>
+    <div id="pauseOverlay" class="overlay hidden" aria-live="polite"><div class="panel"><div class="eyebrow">TAKE A BREATH</div><div class="big-message">GAME PAUSED</div><p class="subtitle">The street waits while this tab is in the background.</p><button id="resumeBtn" class="primary-btn" type="button">Resume</button></div></div>
+  </section>
+  <div class="stage-note"><span id="statusText"><strong>OBJECTIVE:</strong> reach the glowing door and avoid the zombies.</span><span><strong>MOVE:</strong> <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd></span></div>
+  <div class="footer"><span>LIGHT OUT · ORIGINAL PIXEL-ART ARCADE</span><span>NO DOWNLOADS · NO EXTERNAL ASSETS · GITHUB PAGES READY</span></div>
+</main>
+<script>
+(() => {
+  'use strict';
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d', { alpha: false });
+  ctx.imageSmoothingEnabled = false;
+  const W = canvas.width, H = canvas.height;
+  const $ = (id) => document.getElementById(id);
+  const ui = {
+    hud: $('hud'), round: $('roundValue'), time: $('timeValue'), lives: $('lifeValue'), zombies: $('zombieValue'),
+    sound: $('soundBtn'), title: $('titleOverlay'), transition: $('transitionOverlay'), result: $('resultOverlay'), pause: $('pauseOverlay'),
+    resultTitle: $('resultTitle'), resultText: $('resultText'), resultEyebrow: $('resultEyebrow'), resultStats: $('resultStats'),
+    transitionText: $('transitionText'), status: $('statusText')
+  };
+  const bounds = { left: 32, right: W - 32, top: 38, bottom: H - 38 };
+  const cornerPoints = [
+    { x: 82, y: 78 }, { x: W - 82, y: 78 }, { x: W - 82, y: H - 78 }, { x: 82, y: H - 78 }
+  ];
+  let state = 'title';
+  let stateBeforePause = 'playing';
+  let lastFrame = null;
+  let keys = new Set();
+  let round = 1, lives = 2, score = 0, completedRounds = 0, highestRound = 1;
+  let totalElapsed = 0, roundTimeLeft = 60, roundElapsed = 0, transitionLeft = 0;
+  let totalZombiesEncountered = 0, lastRoundTimeLeft = null;
+  let boy = { x: 0, y: 0, spawnX: 0, spawnY: 0, speed: 205, invuln: 0 };
+  let home = { x: 0, y: 0, corner: 0 };
+  let zombies = [];
+  let blackout = { phase: 'none', timer: 0, nextAt: 11 };
+  let hitFlash = 0, statusTimer = 0, statusMessage = '';
+  let zombieSoundTimer = 5;
+  let audioEnabled = false, audioContext = null, masterGain = null, ambienceNodes = [];
+
+  // Decorative coordinates are fixed, so the neighborhood never changes under the player.
+  const trees = [
+    [150,155],[255,86],[330,490],[120,390],[235,535],[390,155],[570,85],[675,505],[815,410],[810,150],
+    [525,490],[420,400],[70,265],[890,275],[715,95],[285,280],[610,265],[740,340]
+  ];
+  const buildingLights = [
+    [22,175,42,54],[86,214,30,30],[865,195,54,37],[896,360,28,45],
+    [25,430,45,54],[180,26,48,26],[730,26,45,26],[850,470,43,38]
+  ];
+
+  function rand(min, max) { return min + Math.random() * (max - min); }
+  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+  function distance(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+  function setStatus(message, duration = 2.4) { statusMessage = message; statusTimer = duration; }
+
+  function setSoundButton() {
+    ui.sound.textContent = audioEnabled ? '♫ SOUND ON' : '♫ SOUND OFF';
+    ui.sound.setAttribute('aria-pressed', String(audioEnabled));
+    ui.sound.style.color = audioEnabled ? '#72f4e8' : '#bfeef0';
+  }
+  function makeAudio() {
+    if (audioContext) {
+      if (audioContext.state === 'suspended') audioContext.resume().catch(() => {});
+      return;
+    }
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    try {
+      audioContext = new AudioCtx();
+      masterGain = audioContext.createGain(); masterGain.gain.value = 0.35; masterGain.connect(audioContext.destination);
+      const oscA = audioContext.createOscillator(), gainA = audioContext.createGain();
+      oscA.type = 'sine'; oscA.frequency.value = 48; gainA.gain.value = 0.035; oscA.connect(gainA); gainA.connect(masterGain); oscA.start();
+      const oscB = audioContext.createOscillator(), gainB = audioContext.createGain();
+      oscB.type = 'triangle'; oscB.frequency.value = 73; gainB.gain.value = 0.012; oscB.connect(gainB); gainB.connect(masterGain); oscB.start();
+      ambienceNodes = [oscA, oscB, gainA, gainB];
+    } catch (e) { audioContext = null; masterGain = null; }
+  }
+  function sound(kind) {
+    if (!audioEnabled) return;
+    makeAudio();
+    if (!audioContext || !masterGain) return;
+    try {
+      const now = audioContext.currentTime;
+      const notes = {
+        warning: [[440,.08],[330,.11]], hit: [[95,.18],[65,.2]],
+        round: [[520,.09],[680,.1],[820,.14]], victory: [[440,.12],[554,.12],[659,.16],[880,.3]],
+        over: [[220,.16],[165,.2],[110,.35]], zombie: [[105,.1]]
+      }[kind] || [[330,.1]];
+      notes.forEach((n, i) => {
+        const osc = audioContext.createOscillator(), gain = audioContext.createGain();
+        osc.type = kind === 'hit' || kind === 'zombie' ? 'sawtooth' : 'triangle';
+        osc.frequency.setValueAtTime(n[0], now + i * .105);
+        gain.gain.setValueAtTime(.0001, now + i * .105);
+        gain.gain.exponentialRampToValueAtTime(kind === 'zombie' ? .045 : .12, now + i * .105 + .015);
+        gain.gain.exponentialRampToValueAtTime(.0001, now + i * .105 + n[1]);
+        osc.connect(gain); gain.connect(masterGain); osc.start(now + i * .105); osc.stop(now + i * .105 + n[1] + .02);
+      });
+    } catch (e) { /* Sound is optional; gameplay must continue if audio fails. */ }
+  }
+  function toggleSound() {
+    audioEnabled = !audioEnabled;
+    if (audioEnabled) makeAudio();
+    else if (audioContext && audioContext.state !== 'closed') {
+      try { masterGain.gain.setTargetAtTime(0, audioContext.currentTime, .03); } catch (e) {}
+    }
+    if (audioEnabled && masterGain && audioContext) {
+      try { masterGain.gain.setTargetAtTime(.35, audioContext.currentTime, .08); } catch (e) {}
+    }
+    setSoundButton();
+  }
+
+  function spawnBoyForHome() {
+    // Start at the diagonally opposite corner so the target is always reachable across open ground.
+    const start = cornerPoints[(home.corner + 2) % 4];
+    boy.x = start.x; boy.y = start.y; boy.spawnX = start.x; boy.spawnY = start.y;
+    boy.invuln = 1.15;
+  }
+  function makeZombie(index) {
+    let p = null;
+    for (let tries = 0; tries < 400; tries++) {
+      const candidate = { x: rand(58, W - 58), y: rand(58, H - 58) };
+      if (distance(candidate, boy) < 185 || distance(candidate, home) < 110) continue;
+      if (zombies.some(z => distance(candidate, z) < 65)) continue;
+      p = candidate; break;
+    }
+    if (!p) p = { x: rand(90, W - 90), y: rand(90, H - 90) };
+    const roundBoost = Math.max(0, round - 5) * 1.4;
+    const fasterTypeBoost = (round >= 5 && index % 3 === 0) ? round * 1.15 : 0;
+    const z = {
+      x: p.x, y: p.y, targetX: p.x, targetY: p.y, mode: 'wander',
+      speed: 54 + round * 1.9 + roundBoost + fasterTypeBoost + rand(0, 8),
+      patrolTimer: rand(.4, 2.2), phase: rand(0, Math.PI * 2), wobble: rand(0, 2)
+    };
+    choosePatrolTarget(z); return z;
+  }
+  function choosePatrolTarget(z) {
+    z.targetX = rand(bounds.left + 15, bounds.right - 15);
+    z.targetY = rand(bounds.top + 15, bounds.bottom - 15);
+    z.patrolTimer = rand(1.2, 3.2);
+  }
+  function startRound(number) {
+    round = number; highestRound = Math.max(highestRound, round);
+    roundTimeLeft = 60; roundElapsed = 0; transitionLeft = 0; hitFlash = 0;
+    home.corner = (round - 1) % 4;
+    home.x = cornerPoints[home.corner].x; home.y = cornerPoints[home.corner].y;
+    spawnBoyForHome(); zombies = [];
+    for (let i = 0; i < round; i++) zombies.push(makeZombie(i));
+    totalZombiesEncountered += zombies.length;
+    blackout = { phase: 'none', timer: 0, nextAt: rand(10, 15) };
+    zombieSoundTimer = rand(4, 7); keys.clear(); state = 'playing';
+    setStatus('Find the glowing door. Keep moving and watch for the blackout warning.', 3.6);
+    renderUI();
+  }
+  function startGame() {
+    keys.clear(); lives = 2; score = 0; completedRounds = 0; highestRound = 1; totalElapsed = 0;
+    totalZombiesEncountered = 0; lastRoundTimeLeft = null;
+    round = 1; roundTimeLeft = 60; state = 'playing'; hitFlash = 0;
+    startRound(1); lastFrame = performance.now();
+  }
+  function returnToTitle() {
+    keys.clear(); zombies = []; state = 'title'; round = 1; lives = 2; score = 0; completedRounds = 0; totalElapsed = 0;
+    totalZombiesEncountered = 0; lastRoundTimeLeft = null;
+    roundTimeLeft = 60; blackout = { phase: 'none', timer: 0, nextAt: 11 }; setStatus('Reach the glowing door and avoid the zombies.', 9999); renderUI();
+  }
+  function endGame(type, reason = '') {
+    if (state === 'victory' || state === 'gameover') return;
+    state = type; keys.clear(); sound(type === 'victory' ? 'victory' : 'over');
+    ui.resultTitle.textContent = type === 'victory' ? 'YOU SURVIVED!' : 'GAME OVER';
+    ui.resultTitle.className = 'big-message ' + (type === 'victory' ? 'win' : 'loss');
+    ui.resultEyebrow.textContent = type === 'victory' ? 'THE NIGHT IS OVER' : 'END OF THE NIGHT';
+    ui.resultText.textContent = type === 'victory'
+      ? `You reached home through all ten rounds. Time left on the final clear: ${Math.ceil(lastRoundTimeLeft ?? 0)} seconds. The neighborhood is quiet… for now.`
+      : reason || 'The neighborhood was too dangerous. Take a breath and try again.';
+    const stats = [
+      ['ROUNDS CLEARED', `${completedRounds} / 10`],
+      ['FINAL ROUND REACHED', `${highestRound} / 10`],
+      ['ZOMBIES FACED', totalZombiesEncountered.toLocaleString('en-US')],
+      ['FINAL SCORE', score.toLocaleString('en-US')],
+      ['LIVES LEFT', `${'♥ '.repeat(lives).trim() || '0'}`],
+      ['TIME SURVIVED', formatTime(totalElapsed)]
+    ];
+    ui.resultStats.replaceChildren();
+    stats.forEach(([label, value]) => {
+      const box = document.createElement('div'); box.className = 'stat';
+      const l = document.createElement('span'); l.textContent = label;
+      const v = document.createElement('strong'); v.textContent = value;
+      box.append(l, v); ui.resultStats.append(box);
+    });
+    renderUI();
+  }
+  function formatTime(seconds) {
+    const s = Math.max(0, Math.floor(seconds));
+    return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+  }
+  function reachHome() {
+    if (state !== 'playing') return;
+    completedRounds++;
+    lastRoundTimeLeft = roundTimeLeft;
+    score += 100 + Math.floor(roundTimeLeft) * 2;
+    sound('round'); keys.clear(); state = 'transition'; transitionLeft = round === 10 ? 1.55 : 1.3;
+    ui.transitionText.textContent = round === 10
+      ? 'You made it home in the final round. The lights are coming back…'
+      : `Round ${round} cleared with ${Math.ceil(roundTimeLeft)} seconds left. +${100 + Math.floor(roundTimeLeft) * 2} points. The next street will be more dangerous.`;
+    setStatus('ROUND COMPLETE!'); renderUI();
+  }
+  function playerCaught() {
+    if (state !== 'playing' || boy.invuln > 0) return;
+    lives--; hitFlash = .55; sound('hit'); keys.clear();
+    if (lives <= 0) {
+      endGame('gameover', 'A zombie caught you for the second time.'); return;
+    }
+    boy.x = boy.spawnX; boy.y = boy.spawnY; boy.invuln = 2.25;
+    // Push nearby zombies away from the respawn point to prevent a cheap repeat hit.
+    zombies.forEach(z => {
+      const dx = z.x - boy.x, dy = z.y - boy.y, d = Math.hypot(dx, dy) || 1;
+      if (d < 150) {
+        z.x = clamp(boy.x + dx / d * 165, bounds.left + 12, bounds.right - 12);
+        z.y = clamp(boy.y + dy / d * 165, bounds.top + 12, bounds.bottom - 12);
+        z.mode = 'wander'; choosePatrolTarget(z);
+      }
+    });
+    setStatus('CAUGHT! One life lost — you are briefly protected. Keep moving!', 2.8); renderUI();
+  }
+
+  function updateBlackout(dt) {
+    if (blackout.phase === 'none' && roundElapsed >= blackout.nextAt) {
+      blackout.phase = 'warning'; blackout.timer = 1.25; sound('warning');
+      setStatus('⚠ LIGHTS FLICKERING — BLACKOUT INCOMING!', 1.3);
+    } else if (blackout.phase === 'warning') {
+      blackout.timer -= dt;
+      if (blackout.timer <= 0) {
+        blackout.phase = 'blackout'; blackout.timer = 2.55;
+        setStatus('LIGHTS OUT! Keep moving — the zombies can still catch you.', 2.55);
+      }
+    } else if (blackout.phase === 'blackout') {
+      blackout.timer -= dt;
+      if (blackout.timer <= 0) {
+        blackout.phase = 'none';
+        blackout.nextAt = roundElapsed + Math.max(6.8, 15 - round * .72) + rand(1, 5.2);
+        setStatus('Lights restored. Find the glowing home door!', 2.2);
+      }
+    }
+  }
+  function updateBoy(dt) {
+    let dx = (keys.has('ArrowRight') ? 1 : 0) - (keys.has('ArrowLeft') ? 1 : 0);
+    let dy = (keys.has('ArrowDown') ? 1 : 0) - (keys.has('ArrowUp') ? 1 : 0);
+    if (dx && dy) { const k = Math.SQRT1_2; dx *= k; dy *= k; }
+    boy.x = clamp(boy.x + dx * boy.speed * dt, bounds.left + 8, bounds.right - 8);
+    boy.y = clamp(boy.y + dy * boy.speed * dt, bounds.top + 8, bounds.bottom - 8);
+    if (boy.invuln > 0) boy.invuln = Math.max(0, boy.invuln - dt);
+  }
+  function updateZombies(dt) {
+    let anyChasing = false;
+    for (const z of zombies) {
+      const dx = boy.x - z.x, dy = boy.y - z.y, d = Math.hypot(dx, dy) || 1;
+      if (d < 280) z.mode = 'chase';
+      else if (d > 365) z.mode = 'wander';
+      if (z.mode === 'chase') {
+        anyChasing = true;
+        z.x += dx / d * z.speed * dt;
+        z.y += dy / d * z.speed * dt;
+      } else {
+        z.patrolTimer -= dt;
+        const tx = z.targetX - z.x, ty = z.targetY - z.y, td = Math.hypot(tx, ty) || 1;
+        if (z.patrolTimer <= 0 || td < 12) choosePatrolTarget(z);
+        else { z.x += tx / td * z.speed * .48 * dt; z.y += ty / td * z.speed * .48 * dt; }
+      }
+      z.x = clamp(z.x, bounds.left + 12, bounds.right - 12);
+      z.y = clamp(z.y, bounds.top + 12, bounds.bottom - 12);
+      z.phase += dt * 5;
+    }
+    zombieSoundTimer -= dt;
+    if (anyChasing && zombieSoundTimer <= 0) { sound('zombie'); zombieSoundTimer = rand(5.5, 9); }
+  }
+  function update(dt, clockDt = dt) {
+    if (state === 'transition') {
+      transitionLeft -= dt;
+      if (transitionLeft <= 0) {
+        if (round >= 10) endGame('victory');
+        else startRound(round + 1);
+      }
+      return;
+    }
+    if (state !== 'playing') return;
+    // dt is capped by the frame loop and browser visibility pauses the game, avoiding unfair timer jumps.
+    totalElapsed += clockDt; roundElapsed += clockDt; roundTimeLeft = Math.max(0, roundTimeLeft - clockDt);
+    statusTimer = Math.max(0, statusTimer - clockDt); hitFlash = Math.max(0, hitFlash - dt);
+    updateBlackout(clockDt);
+    updateBoy(dt);
+    updateZombies(dt);
+    if (distance(boy, home) < 31) { reachHome(); return; }
+    if (boy.invuln <= 0) {
+      for (const z of zombies) {
+        if (distance(boy, z) < 22) { playerCaught(); break; }
+      }
+    }
+    if (state === 'playing' && roundTimeLeft <= 0) endGame('gameover', `Time ran out in Round ${round}. You did not reach home in time.`);
+  }
+
+  function rect(x,y,w,h,color) { ctx.fillStyle = color; ctx.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h)); }
+  function drawBackground() {
+    rect(0,0,W,H,'#0b1827');
+    // Quiet block-grid pavement and small ground variations.
+    for (let y=0;y<H;y+=32) for (let x=0;x<W;x+=32) {
+      if (((x/32 + y/32) % 3) === 0) rect(x+2,y+2,27,27,'#0d1c2b');
+      if (((x/32 * 3 + y/32) % 7) === 0) rect(x+8,y+11,2,2,'#203448');
+    }
+    // Neighborhood road crossing: open and non-solid, only visual landmarks.
+    rect(0,265,W,92,'#101c2a'); rect(0,260,W,5,'#253448'); rect(0,357,W,5,'#253448');
+    rect(445,0,88,H,'#101c2a'); rect(440,0,5,H,'#253448'); rect(533,0,5,H,'#253448');
+    for (let x=22;x<W;x+=58) rect(x,307,27,3,'#465365');
+    for (let y=18;y<H;y+=55) rect(482,y,3,27,'#465365');
+    // Drain grates and cracks add detail without creating collision obstacles.
+    [[366,281],[555,342],[430,379],[537,223],[310,328],[653,281]].forEach(([x,y])=>{
+      rect(x,y,22,8,'#182b3a'); for(let i=0;i<5;i++) rect(x+3+i*4,y+2,2,4,'#324556');
+    });
+    buildingLights.forEach(([x,y,w,h],i)=>{
+      rect(x,y,w,h,'#152639'); rect(x+3,y+3,w-6,h-6,'#102033');
+      const n = Math.max(1,Math.floor((w-10)/13));
+      for(let j=0;j<n;j++) rect(x+6+j*13,y+8,5,7,(i+j)%3===0?'#b18f58':'#39485a');
+      rect(x+3,y+h-5,w-6,3,'#2b4156');
+    });
+    trees.forEach(([x,y],i)=>drawTree(x,y,i));
+    drawFences();
+    // Low wall and curb around the edges.
+    rect(0,0,W,5,'#1d3448'); rect(0,H-5,W,5,'#1d3448'); rect(0,0,5,H,'#1d3448'); rect(W-5,0,5,H,'#1d3448');
+    for(let x=12;x<W;x+=34){rect(x,8,13,2,'#2d4354');rect(x,H-10,13,2,'#2d4354')}
+  }
+  function drawTree(x,y,i) {
+    const sway = Math.sin(performance.now()/1100 + i)*1.2;
+    rect(x-4,y+7,11,18,'#342f39');
+    rect(x-15+sway,y-4,31,21,'#153b3b');
+    rect(x-11+sway,y-12,24,16,'#1b5049');
+    rect(x-5+sway,y-17,12,8,'#235a51');
+    rect(x-12+sway,y+5,6,7,'#1c4a43'); rect(x+5+sway,y+4,7,7,'#1e4e46');
+    rect(x-8+sway,y-7,4,4,'#397267');
+  }
+  function drawFences() {
+    // Short fence fragments frame the blocks but leave wide, clear routes open.
+    const groups = [
+      {x:340,y:65,n:5,h:18},{x:610,y:555,n:6,h:18},{x:45,y:475,n:4,h:17},
+      {x:835,y:115,n:4,h:17},{x:175,y:365,n:4,h:16},{x:690,y:205,n:5,h:16}
+    ];
+    groups.forEach(g=>{
+      rect(g.x,g.y,g.n*12,3,'#344758'); rect(g.x,g.y+g.h,g.n*12,3,'#344758');
+      for(let i=0;i<g.n;i++){rect(g.x+i*12+3,g.y-2,5,g.h+7,'#263d50');rect(g.x+i*12+4,g.y,3,3,'#527084')}
+    });
+  }
+  function drawHome() {
+    const x=home.x,y=home.y; const pulse=.5+.5*Math.sin(performance.now()/230);
+    // Glow and doorstep.
+    const grad=ctx.createRadialGradient(x,y,5,x,y,64);
+    grad.addColorStop(0,`rgba(255,215,123,${.20 + pulse*.1})`); grad.addColorStop(1,'rgba(255,215,123,0)');
+    ctx.fillStyle=grad;ctx.fillRect(x-66,y-66,132,132);
+    rect(x-30,y-23,60,45,'#1c3442'); rect(x-26,y-19,52,37,'#35505a');
+    // Roof tiles, facade, lit windows, door.
+    rect(x-34,y-28,68,7,'#4d5e6a');rect(x-27,y-34,54,7,'#66727a');rect(x-18,y-40,36,7,'#808588');
+    rect(x-25,y-17,50,30,'#5f6e71');rect(x-19,y-13,13,11,'#ffd77b');rect(x+6,y-13,13,11,'#ffd77b');
+    rect(x-8,y-7,16,26,'#f3c765');rect(x-5,y-4,10,21,'#8d5f43');rect(x+3,y+5,2,2,'#fff0b0');
+    rect(x-31,y+19,62,4,'#79827e');
+    ctx.strokeStyle=`rgba(255,218,127,${.55+pulse*.4})`;ctx.lineWidth=2;ctx.strokeRect(x-38,y-43,76,68);
+    // A small arrow points toward the entrance.
+    ctx.fillStyle='#ffe29a';ctx.beginPath();ctx.moveTo(x,y+36);ctx.lineTo(x-7,y+45);ctx.lineTo(x+7,y+45);ctx.closePath();ctx.fill();
+  }
+  function drawBoy(silhouette=false) {
+    const x=Math.round(boy.x),y=Math.round(boy.y);
+    if(!silhouette && boy.invuln>0 && Math.floor(performance.now()/100)%2===0)return;
+    ctx.save();ctx.translate(x,y);
+    ctx.fillStyle='rgba(0,0,0,.36)';ctx.beginPath();ctx.ellipse(0,17,13,5,0,0,Math.PI*2);ctx.fill();
+    if(silhouette){
+      rect(-7,-19,14,12,'#788997');rect(-9,-21,18,5,'#8797a3');rect(-9,-7,18,15,'#6c8495');rect(-12,-5,4,13,'#6c8495');rect(8,-5,4,13,'#6c8495');rect(-7,7,5,10,'#536879');rect(2,7,5,10,'#536879');
+    }else{
+      // Hair and head, side-facing pixel ears, bright scarf and jacket.
+      rect(-7,-22,14,4,'#151927');rect(-9,-19,18,5,'#202336');rect(-8,-15,16,10,'#e9b48e');
+      rect(-10,-19,5,7,'#202336');rect(5,-21,5,8,'#202336');rect(-5,-12,3,3,'#172231');rect(3,-12,3,3,'#172231');
+      rect(-8,-5,16,14,'#3d87a8');rect(-11,-4,4,11,'#e9b48e');rect(7,-4,4,11,'#e9b48e');
+      rect(-8,-1,16,3,'#8affec');rect(-5,3,10,3,'#256280');
+      rect(-7,9,5,9,'#252c4a');rect(2,9,5,9,'#252c4a');rect(-8,16,7,3,'#121a2a');rect(2,16,7,3,'#121a2a');
+      rect(7,-2,2,5,'#e9b48e');
+    }
+    ctx.restore();
+  }
+  function drawZombie(z,silhouette=false) {
+    const x=Math.round(z.x),y=Math.round(z.y);
+    ctx.save();ctx.translate(x,y+Math.sin(z.phase)*1.2);
+    ctx.fillStyle='rgba(0,0,0,.4)';ctx.beginPath();ctx.ellipse(0,16,14,5,0,0,Math.PI*2);ctx.fill();
+    if(silhouette){
+      ctx.globalAlpha=.85;rect(-10,-14,20,13,'#6f7c83');rect(-8,-21,16,9,'#89949a');rect(-12,-11,4,14,'#55656e');rect(8,-10,4,14,'#55656e');rect(-8,-2,6,16,'#52616b');rect(2,-2,6,16,'#52616b');rect(-12,12,9,4,'#46545f');rect(3,12,9,4,'#46545f');
+      rect(-5,-17,3,3,'#e46c78');rect(3,-17,3,3,'#e46c78');
+    }else{
+      rect(-8,-21,16,7,'#526e61');rect(-11,-16,22,13,'#678c76');rect(-9,-20,5,5,'#7da68b');rect(3,-22,6,5,'#4b6b5b');
+      rect(-13,-10,5,12,'#5d806a');rect(8,-10,5,13,'#5d806a');rect(-9,-4,18,13,'#456e5b');
+      rect(-6,-17,4,4,'#ff526d');rect(3,-17,4,4,'#ff526d');rect(-5,-16,2,2,'#fff0cd');rect(4,-16,2,2,'#fff0cd');
+      rect(-7,-8,5,3,'#17252b');rect(1,-8,5,3,'#17252b');rect(-3,-7,6,2,'#c7b9a4');
+      rect(-8,8,6,8,'#394d47');rect(2,8,6,8,'#394d47');rect(-10,14,9,4,'#263a38');rect(1,14,10,4,'#263a38');
+      rect(-12,-7,3,7,'#a1b07d');
+    }
+    ctx.restore();
+  }
+  function drawBlackoutLayer() {
+    rect(0,0,W,H,'rgba(0,0,0,.945)');
+    // Faint, recognizable silhouettes and zombie eyes remain visible through the darkness.
+    zombies.forEach(z=>drawZombie(z,true));drawBoy(true);
+    const g=ctx.createRadialGradient(boy.x,boy.y,4,boy.x,boy.y,74);
+    g.addColorStop(0,'rgba(95,143,171,.13)');g.addColorStop(1,'rgba(10,20,32,0)');
+    ctx.fillStyle=g;ctx.fillRect(boy.x-76,boy.y-76,152,152);
+  }
+  function drawEffects() {
+    if (blackout.phase === 'blackout') drawBlackoutLayer();
+    else if (blackout.phase === 'warning') {
+      const a=.04+.035*(.5+.5*Math.sin(performance.now()/65));rect(0,0,W,H,`rgba(255,75,103,${a})`);
+      // Tiny warning lamps at the corners.
+      for(const [x,y] of [[18,18],[W-25,18],[18,H-25],[W-25,H-25]]){rect(x,y,7,7,'#ff617e');rect(x+2,y+2,3,3,'#ffe5a2')}
+    }
+    if(hitFlash>0){const a=(hitFlash/.55)*.2;rect(0,0,W,H,`rgba(255,54,87,${a})`)}
+  }
+  function drawScene() {
+    drawBackground();
+    // Ambient pools of moonlight help the destination and player remain legible.
+    const moon=ctx.createRadialGradient(500,80,12,500,80,330);moon.addColorStop(0,'rgba(70,116,155,.12)');moon.addColorStop(1,'rgba(40,80,110,0)');ctx.fillStyle=moon;ctx.fillRect(160,0,680,390);
+    if(state!=='title'){
+      drawHome();
+      zombies.forEach(z=>drawZombie(z,blackout.phase==='blackout'));
+      drawBoy(blackout.phase==='blackout');
+      drawEffects();
+    } else {
+      // Background motion on the title remains purely decorative; the game itself is inactive.
+      const oldHome=home;home={x:cornerPoints[2].x,y:cornerPoints[2].y,corner:2};drawHome();home=oldHome;
+      drawBoy(false);
+      drawZombie({x:W-180,y:H-120,phase:performance.now()/1000},false);
+      rect(0,0,W,H,'rgba(2,9,17,.22)');
+    }
+    // Thin map frame, round progress indicator, and pixel corners.
+    ctx.strokeStyle='#31495c';ctx.lineWidth=2;ctx.strokeRect(9,9,W-18,H-18);
+    for(let i=0;i<10;i++)rect(24+i*12,19,8,3,i<completedRounds?'#72f4e8':'#304457');
+  }
+  function renderUI() {
+    const active = state==='playing' || state==='transition' || state==='paused';
+    ui.hud.classList.toggle('hidden', !active);
+    ui.title.classList.toggle('hidden', state!=='title');
+    ui.transition.classList.toggle('hidden', state!=='transition');
+    ui.result.classList.toggle('hidden', state!=='victory' && state!=='gameover');
+    ui.pause.classList.toggle('hidden', state!=='paused');
+    if(active){
+      ui.round.textContent=String(round).padStart(2,'0')+' / 10';
+      ui.time.textContent=Math.ceil(roundTimeLeft)+'s';
+      ui.time.style.color=roundTimeLeft<=10?'#ff6587':'#ffd77b';
+      ui.lives.textContent=(lives>0?'♥ '.repeat(lives).trim():'0');
+      ui.zombies.textContent=String(zombies.length).padStart(2,'0');
+    }
+    if(statusTimer>0 && statusMessage) ui.status.innerHTML = `<strong>${escapeText(statusMessage)}</strong>`;
+    else ui.status.innerHTML = '<strong>OBJECTIVE:</strong> reach the glowing door and avoid the zombies.';
+  }
+  function escapeText(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function frame(now) {
+    if(lastFrame===null)lastFrame=now;
+    const raw=Math.max(0,(now-lastFrame)/1000);lastFrame=now;
+    const dt=Math.min(raw,.05);       // Movement stays stable after a slow frame.
+    const clockDt=Math.min(raw,.25); // Countdown follows elapsed time, without large hitch penalties.
+    update(dt,clockDt);drawScene();renderUI();
+    requestAnimationFrame(frame);
+  }
+
+  $('startBtn').addEventListener('click',startGame);
+  $('restartBtn').addEventListener('click',startGame);
+  $('titleBtn').addEventListener('click',returnToTitle);
+  $('resumeBtn').addEventListener('click',()=>{if(state==='paused'){state=stateBeforePause;lastFrame=performance.now();keys.clear();renderUI();}});
+  ui.sound.addEventListener('click',toggleSound);
+  window.addEventListener('keydown',e=>{
+    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){
+      if(state==='playing'){e.preventDefault();keys.add(e.key)}
+    }
+    if((e.key==='Enter'||e.key===' ') && state==='paused') { e.preventDefault(); state=stateBeforePause; lastFrame=performance.now(); renderUI(); }
+  },{passive:false});
+  window.addEventListener('keyup',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){keys.delete(e.key);if(state==='playing')e.preventDefault()}},{passive:false});
+  window.addEventListener('blur',()=>keys.clear());
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden && (state==='playing'||state==='transition')){stateBeforePause=state;state='paused';keys.clear();renderUI();}
+    else if(!document.hidden && state==='paused'){lastFrame=performance.now();renderUI();}
+  });
+  // The animation loop is created exactly once. All restarts reuse this loop and the same event listeners.
+  setSoundButton();setStatus('Reach the glowing door and avoid the zombies.',9999);renderUI();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
