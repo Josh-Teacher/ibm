@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#071711">
+<title>The Royal Labyrinth</title>
+<style>
+  :root{
+    --bg:#07110e;--panel:#0d1e18;--panel2:#10251c;--line:rgba(126,191,145,.19);
+    --text:#f1f6ea;--muted:#9db5a3;--gold:#e7c77b;--green:#72d79a;--mint:#b0f5c6;
+    --danger:#ff856e;--blue:#8fc8ff;--shadow:0 20px 55px rgba(0,0,0,.38)
+  }
+  *{box-sizing:border-box}
+  html{min-height:100%;background:var(--bg)}
+  body{margin:0;min-height:100vh;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:radial-gradient(ellipse at 16% -8%,rgba(33,99,63,.3),transparent 43%),radial-gradient(ellipse at 94% 25%,rgba(114,82,30,.12),transparent 33%),var(--bg)}
+  button{font:inherit;cursor:pointer}
+  button:focus-visible{outline:2px solid var(--mint);outline-offset:3px}
+  #app{width:min(1380px,100%);margin:auto;padding:22px 24px 28px}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:20px}
+  .brand{display:flex;align-items:center;gap:13px;min-width:0}
+  .brand-mark{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex:none;color:var(--gold);font-size:24px;
+    background:linear-gradient(145deg,#183b29,#0b1c14);border:1px solid rgba(231,199,123,.4);box-shadow:inset 0 0 20px rgba(105,206,136,.08),0 5px 25px rgba(0,0,0,.25)}
+  .brand h1{font-family:Georgia,"Times New Roman",serif;font-weight:600;letter-spacing:.035em;font-size:clamp(21px,2vw,29px);margin:0}
+  .eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:800;color:var(--green);margin-bottom:4px}
+  .top-actions{display:flex;align-items:center;gap:9px}
+  .pill{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12px;background:rgba(12,29,22,.66);white-space:nowrap}
+  .pill-dot{width:7px;height:7px;border-radius:100%;background:var(--green);box-shadow:0 0 12px var(--green)}
+  .text-button,.icon-button{border:1px solid var(--line);color:#dce9dd;background:#11251b;border-radius:11px;padding:10px 13px;transition:.18s ease}
+  .text-button:hover,.icon-button:hover{background:#183729;border-color:rgba(114,215,154,.5)}
+  .hud{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:15px}
+  .stat{padding:13px 16px 12px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(135deg,rgba(17,39,28,.95),rgba(10,25,18,.92));box-shadow:0 8px 25px rgba(0,0,0,.12);min-width:0}
+  .stat-label{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+  .stat-value{font-variant-numeric:tabular-nums;font-size:clamp(20px,2.4vw,28px);font-weight:740;letter-spacing:-.035em;margin-top:5px;white-space:nowrap}
+  .stat-value small{font-weight:500;font-size:12px;color:var(--muted);letter-spacing:0}
+  #timeStat .stat-value{color:var(--mint)}
+  #timeStat.urgent{border-color:rgba(255,133,110,.65);box-shadow:0 0 0 1px rgba(255,133,110,.08),0 0 23px rgba(255,133,110,.09)}
+  #timeStat.urgent .stat-value{color:var(--danger)}
+  .hearts{letter-spacing:.1em;color:#ff9e87;font-size:19px;white-space:nowrap}
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 294px;gap:15px;align-items:stretch}
+  .board-card,.side-card{border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,rgba(14,31,23,.98),rgba(8,20,15,.98));box-shadow:var(--shadow);overflow:hidden}
+  .board-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line);background:rgba(15,35,25,.7)}
+  .board-head strong{font-size:12px;letter-spacing:.07em;text-transform:uppercase}
+  .board-head span{font-size:11px;color:var(--muted)}
+  .map-index{display:flex;align-items:center;gap:6px;color:var(--gold)!important;font-weight:750;letter-spacing:.1em}
+  .canvas-wrap{position:relative;background:#07120d;padding:9px;min-height:100px}
+  #gameCanvas{display:block;width:100%;height:auto;max-width:744px;margin:0 auto;aspect-ratio:31/21;image-rendering:auto;border-radius:9px;background:#07120d}
+  .overlay{position:absolute;inset:9px;z-index:5;border-radius:9px;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(3,12,8,.77);backdrop-filter:blur(5px)}
+  .overlay.visible{display:flex}
+  .overlay-card{width:min(440px,100%);max-height:100%;overflow:auto;border:1px solid rgba(231,199,123,.38);border-radius:19px;padding:clamp(18px,3vw,30px);text-align:center;background:radial-gradient(ellipse at 50% 0,rgba(49,112,66,.27),transparent 65%),linear-gradient(145deg,rgba(17,41,29,.98),rgba(7,20,14,.99));box-shadow:0 25px 65px rgba(0,0,0,.52)}
+  .overlay-icon{width:54px;height:54px;margin:0 auto 14px;border-radius:17px;display:grid;place-items:center;border:1px solid rgba(231,199,123,.38);color:var(--gold);font-size:28px;background:rgba(231,199,123,.07)}
+  .overlay-card h2{font:600 clamp(25px,3.3vw,35px)/1.1 Georgia,"Times New Roman",serif;margin:0 0 12px;letter-spacing:.015em}
+  .overlay-card p{font-size:13px;line-height:1.65;color:#b6c9b9;margin:0 auto 18px;max-width:355px}
+  .overlay-kicker{font-size:10px;text-transform:uppercase;letter-spacing:.2em;color:var(--green);font-weight:800;margin-bottom:8px}
+  .primary-button{display:inline-flex;justify-content:center;align-items:center;gap:9px;width:100%;border:1px solid rgba(231,199,123,.55);border-radius:11px;padding:13px 17px;color:#182013;font-weight:850;background:linear-gradient(135deg,#f0d691,#d8b761);box-shadow:0 7px 18px rgba(0,0,0,.23);transition:transform .16s,filter .16s}
+  .primary-button:hover{transform:translateY(-1px);filter:brightness(1.06)}
+  .secondary-button{display:inline-flex;justify-content:center;width:100%;margin-top:9px;padding:11px 15px;border:1px solid var(--line);border-radius:11px;color:#dce9dd;background:#11251b}
+  .board-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 15px;border-top:1px solid var(--line);color:var(--muted);font-size:11px}
+  .keys{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+  kbd{display:inline-grid;place-items:center;min-width:22px;padding:3px 5px;border:1px solid #355141;border-bottom-width:2px;border-radius:5px;background:#12251a;color:#e3f1e4;font:700 10px ui-monospace,SFMono-Regular,Menlo,monospace}
+  .sidebar{display:flex;flex-direction:column;gap:12px;min-width:0}
+  .side-card{padding:15px 16px}
+  .side-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+  .side-heading h3{font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin:0}
+  .tiny-label{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .status-line{font-size:13px;color:#e1efe2;line-height:1.55;margin:0 0 8px}
+  .status-note{font-size:11px;line-height:1.55;color:var(--muted);margin:0}
+  .progress-track{height:5px;border-radius:99px;background:#1b3225;overflow:hidden;margin-top:12px}
+  .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#4aa96b,#c6df87);border-radius:99px;transition:width .2s}
+  .gate-card{background:linear-gradient(145deg,rgba(17,43,29,.94),rgba(11,25,18,.92));border-color:rgba(231,199,123,.2)}
+  .gate-status{font-size:12px;color:var(--gold);font-weight:750}
+  .rune-row{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;margin:16px 0 10px;min-height:42px;align-items:center}
+  .rune{display:grid;place-items:center;width:32px;height:37px;border-radius:8px;border:1px solid rgba(139,188,147,.22);background:rgba(8,22,14,.82);color:#355944;font-size:20px;font-weight:800}
+  .rune.visible{color:#e7d291;text-shadow:0 0 13px rgba(231,199,123,.6);border-color:rgba(231,199,123,.42);background:rgba(105,76,25,.18)}
+  .rune.entered{color:var(--mint);border-color:rgba(114,215,154,.45);background:rgba(51,119,68,.18)}
+  .puzzle-meter{height:4px;background:#203628;border-radius:99px;overflow:hidden;margin:10px 0 7px}
+  #puzzleMeterFill{height:100%;width:100%;background:var(--gold);transition:width .08s linear}
+  #puzzleHelp{font-size:11px;color:var(--muted);line-height:1.5;min-height:30px;margin:0}
+  .route-item{display:flex;gap:10px;padding:10px 0;border-top:1px solid rgba(126,191,145,.11)}
+  .route-swatch{flex:none;width:8px;height:34px;border-radius:9px;margin-top:2px}
+  .route-swatch.hard{background:linear-gradient(#efbd6b,#9a6832);box-shadow:0 0 12px rgba(231,176,93,.17)}
+  .route-swatch.safe{background:linear-gradient(#80e2a0,#267d4a);box-shadow:0 0 12px rgba(114,215,154,.15)}
+  .route-copy{min-width:0;flex:1}
+  .route-title{display:flex;align-items:center;justify-content:space-between;gap:6px;font-weight:780;font-size:12px;margin-bottom:3px}
+  .route-sub{font-size:11px;line-height:1.45;color:var(--muted)}
+  .route-tag{font-size:9px;text-transform:uppercase;letter-spacing:.07em;border-radius:5px;padding:3px 5px;color:#eac77e;background:rgba(231,199,123,.09);border:1px solid rgba(231,199,123,.18);white-space:nowrap}
+  .route-tag.safe{color:#9de7b2;background:rgba(114,215,154,.07);border-color:rgba(114,215,154,.2)}
+  .mechanics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:3px}
+  .mechanic{padding:9px 8px;border:1px solid rgba(126,191,145,.13);border-radius:9px;background:rgba(9,23,15,.6)}
+  .mechanic b{display:block;font-size:11px;margin-bottom:3px}
+  .mechanic span{display:block;font-size:10px;line-height:1.45;color:var(--muted)}
+  .toast{position:absolute;top:15px;left:50%;z-index:4;transform:translate(-50%,-8px);opacity:0;pointer-events:none;max-width:90%;border:1px solid rgba(231,199,123,.36);background:rgba(9,24,15,.94);color:#f2e3b1;border-radius:999px;padding:9px 14px;font-size:11px;font-weight:750;text-align:center;box-shadow:0 8px 28px rgba(0,0,0,.4);transition:opacity .16s,transform .16s;white-space:normal}
+  .toast.visible{opacity:1;transform:translate(-50%,0)}
+  .bottom-note{display:flex;justify-content:space-between;gap:14px;align-items:center;color:#6f8e78;font-size:10px;padding:17px 2px 0}
+  .bottom-note strong{color:#9fc7a6;font-weight:650}
+  .warning-banner{display:none;position:absolute;top:13px;left:50%;transform:translateX(-50%);z-index:3;background:rgba(79,24,19,.9);border:1px solid rgba(255,133,110,.6);color:#ffd1c6;border-radius:8px;padding:8px 12px;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.13em;white-space:nowrap;box-shadow:0 0 25px rgba(255,100,80,.15)}
+  .warning-banner.visible{display:block;animation:pulse 1.2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+  @media(max-width:1050px){#app{padding:18px 16px 24px}.layout{grid-template-columns:minmax(0,1fr) 270px;gap:12px}.side-card{padding:13px}.stat{padding:12px}.sidebar{gap:10px}}
+  @media(max-width:780px){.layout{grid-template-columns:1fr}.sidebar{display:grid;grid-template-columns:1fr 1fr;align-items:start}.sidebar .mission-card{grid-column:1/-1}.board-card{min-width:0}.canvas-wrap{padding:6px}.overlay{inset:6px}.topbar{align-items:flex-start}.pill{display:none}.bottom-note{align-items:flex-start;flex-direction:column}.board-foot{align-items:flex-start;flex-direction:column}}
+  @media(max-width:510px){#app{padding:13px 10px 22px}.topbar{margin-bottom:14px}.brand-mark{width:39px;height:39px;font-size:20px}.brand h1{font-size:21px}.text-button{padding:9px 10px;font-size:12px}.hud{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-bottom:10px}.stat{padding:10px 12px;border-radius:11px}.stat-value{font-size:23px}.sidebar{grid-template-columns:1fr}.sidebar .mission-card{grid-column:auto}.side-card{padding:14px}.overlay-card{padding:19px 16px}.board-head{padding:11px 12px}.canvas-wrap{padding:4px}.overlay{inset:4px}.rune{width:28px;height:34px}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">♜</div>
+      <div><div class="eyebrow">A royal escape challenge</div><h1>The Royal Labyrinth</h1></div>
+    </div>
+    <div class="top-actions">
+      <div class="pill"><span class="pill-dot"></span><span>Single-player · 15 rounds</span></div>
+      <button id="pauseTop" class="text-button" type="button">Ⅱ &nbsp; Pause</button>
+    </div>
+  </header>
+
+  <section class="hud" aria-label="Game status">
+    <div class="stat"><div class="stat-label">Score <span>✦</span></div><div class="stat-value" id="scoreValue">0</div></div>
+    <div class="stat"><div class="stat-label">Current round <span>⌘</span></div><div class="stat-value" id="roundValue">01 <small>/ 15</small></div></div>
+    <div class="stat"><div class="stat-label">Chances left <span>♥</span></div><div class="stat-value hearts" id="livesValue">♥ ♥</div></div>
+    <div class="stat" id="timeStat"><div class="stat-label">Time remaining <span>◷</span></div><div class="stat-value" id="timeValue">02:00</div></div>
+  </section>
+
+  <main class="layout">
+    <section class="board-card" aria-label="Maze game">
+      <div class="board-head"><strong>Emerald royal grounds</strong><span class="map-index" id="mapIndex">✧ LEVEL 01</span></div>
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="gameCanvas" width="744" height="504" aria-label="Top-down maze. Use arrow keys or WASD to move, and Space near a gate to start its rune challenge."></canvas>
+        <div class="warning-banner" id="warningBanner">⚠ THE LION IS CLOSE</div>
+        <div class="toast" id="toast" role="status" aria-live="polite"></div>
+        <div class="overlay visible" id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlayTitle">
+          <div class="overlay-card">
+            <div class="overlay-icon" id="overlayIcon">♜</div>
+            <div class="overlay-kicker" id="overlayKicker">The guardian has awakened</div>
+            <h2 id="overlayTitle">Escape the Labyrinth</h2>
+            <p id="overlayText">A royal guardian is on your trail. Choose your route, memorize magical runes, and escape all 15 connected levels.</p>
+            <button id="overlayPrimary" class="primary-button" type="button">Enter the Labyrinth &nbsp; →</button>
+            <button id="overlaySecondary" class="secondary-button" type="button">How to play</button>
+          </div>
+        </div>
+      </div>
+      <div class="board-foot">
+        <div class="keys"><span>Move</span><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd><span>or</span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></div>
+        <div class="keys"><kbd>SPACE</kbd><span>Activate gate</span><kbd>ESC</kbd><span>Pause</span></div>
+      </div>
+    </section>
+
+    <aside class="sidebar" aria-label="Mission and challenge information">
+      <section class="side-card mission-card">
+        <div class="side-heading"><h3>Mission status</h3><span class="tiny-label" id="missionBadge">IN PROGRESS</span></div>
+        <p class="status-line" id="missionText">Find a route to the royal exit. The lion is already moving.</p>
+        <p class="status-note" id="missionNote">A short route is risky. A longer route gives you an easier rune gate.</p>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      </section>
+
+      <section class="side-card gate-card">
+        <div class="side-heading"><h3>Royal rune gate</h3><span id="gateStatus" class="gate-status">STANDBY</span></div>
+        <div class="rune-row" id="runeRow" aria-label="Rune sequence"><span class="rune">↑</span><span class="rune">?</span><span class="rune">?</span></div>
+        <div class="puzzle-meter"><div id="puzzleMeterFill"></div></div>
+        <p id="puzzleHelp">Approach a locked gate and press Space. Watch the runes, then repeat the sequence with the arrow keys.</p>
+      </section>
+
+      <section class="side-card">
+        <div class="side-heading"><h3>Choose your route</h3><span class="tiny-label">YOUR CALL</span></div>
+        <div class="route-item"><div class="route-swatch hard"></div><div class="route-copy"><div class="route-title">The King's Shortcut <span class="route-tag">Hard</span></div><div class="route-sub" id="hardRouteNote">Fewer steps. Longer rune sequence.</div></div></div>
+        <div class="route-item"><div class="route-swatch safe"></div><div class="route-copy"><div class="route-title">The Garden Passage <span class="route-tag safe">Safer</span></div><div class="route-sub" id="safeRouteNote">More walking. Shorter rune sequence.</div></div></div>
+      </section>
+
+      <section class="side-card">
+        <div class="side-heading"><h3>Survival guide</h3><span class="tiny-label">QUICK TIPS</span></div>
+        <div class="mechanics">
+          <div class="mechanic"><b>✦ Watch & repeat</b><span>Memorize each rune order before it disappears.</span></div>
+          <div class="mechanic"><b>♜ Keep moving</b><span>The lion advances while you solve a gate.</span></div>
+          <div class="mechanic"><b>⌁ Save time</b><span>Every whole second left earns 10 points.</span></div>
+          <div class="mechanic"><b>⚑ Choose wisely</b><span>One mistake costs 50 points and boosts the hunt.</span></div>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <footer class="bottom-note"><span><strong>THE ROYAL LABYRINTH</strong> &nbsp;·&nbsp; A test of instinct, memory, and courage.</span><span>Original browser game · Progress stays in this run</span></footer>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const COLS = 31, ROWS = 21, TILE = 24, WIDTH = COLS * TILE, HEIGHT = ROWS * TILE;
+  const DIRS = [
+    {dx:0,dy:-1,key:'ArrowUp',alt:'w',icon:'↑',name:'UP'},
+    {dx:1,dy:0,key:'ArrowRight',alt:'d',icon:'→',name:'RIGHT'},
+    {dx:0,dy:1,key:'ArrowDown',alt:'s',icon:'↓',name:'DOWN'},
+    {dx:-1,dy:0,key:'ArrowLeft',alt:'a',icon:'←',name:'LEFT'}
+  ];
+  const ROUND_TIMES = [120,90,60];
+  const ROUND_LIVES = [2,3,4];
+  const $ = id => document.getElementById(id);
+  const canvas = $('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  let screen = 'intro';
+  let level = 1, score = 0, lives = 2, roundTime = 120, roundTimeMax = 120;
+  let maze = [], gates = [], player = null, lion = null, challenge = null;
+  let moveAccumulator = 0, lionAccumulator = 0, uiAccumulator = 0, totalTime = 0;
+  let lionBoostTime = 0, wallSlowTime = 0, toastUntil = 0, toastText = '', lastTimeBonus = 0;
+  let heldKeys = [], lastFrame = 0, animationTime = 0;
+  let roundLedger = {approached:new Set(), cleared:new Set()};
+  let stats = {roundsCleared:0,gatesCleared:0,failedAttempts:0,livesLost:0};
+  let seededRandom = Math.random;
+  let canvasScale = 1;
+
+  function livesForRound(n){ return n <= 5 ? ROUND_LIVES[0] : n <= 10 ? ROUND_LIVES[1] : ROUND_LIVES[2]; }
+  function timeForRound(n){ return n <= 5 ? ROUND_TIMES[0] : n <= 10 ? ROUND_TIMES[1] : ROUND_TIMES[2]; }
+  function difficultyBand(n){ return n <= 5 ? 0 : n <= 10 ? 1 : 2; }
+  function sequenceLength(route,n){ const band = difficultyBand(n); return (route === 'hard' ? [4,5,6] : [3,4,5])[band]; }
+  function displayTime(n){ return [1.8,1.4,1.0][difficultyBand(n)]; }
+  function responseTime(n){ return [8,7,6][difficultyBand(n)]; }
+  function lionInterval(){
+    const base = Math.max(0.30, 0.49 - (level - 1) * 0.0125);
+    return lionBoostTime > 0 ? base * 0.67 : base;
+  }
+  function playerInterval(){ return 0.16; }
+  function cellKey(x,y){ return `${x},${y}`; }
+  function inBounds(x,y){ return x >= 0 && x < COLS && y >= 0 && y < ROWS; }
+  function seeded(seed){
+    let a = seed >>> 0;
+    return () => { a += 0x6D2B79F5; let t = a; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  }
+  function randInt(min,max){ return Math.floor(seededRandom() * (max-min+1)) + min; }
+
+  function lineCells(a,b){
+    const result=[]; let x=a.x,y=a.y; result.push({x,y});
+    const dx=Math.sign(b.x-a.x),dy=Math.sign(b.y-a.y);
+    while(x!==b.x || y!==b.y){ x += dx; y += dy; result.push({x,y}); }
+    return result;
+  }
+  function carvePolyline(grid,points,collector){
+    let out=[];
+    for(let i=0;i<points.length-1;i++){
+      const part=lineCells(points[i],points[i+1]);
+      for(let j=0;j<part.length;j++){
+        const p=part[j]; grid[p.y][p.x]=true;
+        if(!out.length || out[out.length-1].x!==p.x || out[out.length-1].y!==p.y) out.push(p);
+      }
+    }
+    if(collector) collector.push(...out);
+    return out;
+  }
+  function orthFloorCount(grid,x,y){
+    return [[1,0],[-1,0],[0,1],[0,-1]].reduce((n,[dx,dy])=>n+(inBounds(x+dx,y+dy)&&grid[y+dy][x+dx]?1:0),0);
+  }
+  function makeLevel(n){
+    seededRandom = seeded(n * 7919 + 0xBADA55);
+    const grid=Array.from({length:ROWS},()=>Array(COLS).fill(false));
+    const core=[];
+    const topY=5+((n-1)%3);
+    const x1=8+(n%3), x2=x1+4;
+    const xDown=7+(n%3), xUp=18+(n%3);
+    const upper=carvePolyline(grid,[{x:5,y:10},{x:5,y:topY},{x:x1,y:topY},{x:x1,y:topY-2},{x:x2,y:topY-2},{x:x2,y:topY},{x:25,y:topY},{x:25,y:10}],core);
+    const lower=carvePolyline(grid,[{x:5,y:10},{x:5,y:16},{x:xDown,y:16},{x:xDown,y:18},{x:xUp,y:18},{x:xUp,y:15},{x:25,y:15},{x:25,y:10}],core);
+    const entrance=carvePolyline(grid,[{x:1,y:10},{x:5,y:10}],core);
+    const exitPath=carvePolyline(grid,[{x:25,y:10},{x:29,y:10}],core);
+    const gateSpecs=[
+      {id:'hard',x:19,y:topY,route:'hard',label:'HARD'},
+      {id:'safe',x:13,y:18,route:'safe',label:'SAFE'}
+    ];
+    const gateKeys=new Set(gateSpecs.map(g=>cellKey(g.x,g.y)));
+    const excluded=new Set();
+    for(const g of gateSpecs){
+      for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++) excluded.add(cellKey(g.x+dx,g.y+dy));
+    }
+    // Add short, isolated side passages. Each branch attaches to the maze at one point only.
+    const anchors=core.filter(p=>p.x>2&&p.x<28&&p.y>2&&p.y<19&&!excluded.has(cellKey(p.x,p.y))&&!(p.x===5&&p.y===10)&&!(p.x===25&&p.y===10));
+    const branchCount=Math.min(20,5+Math.floor(n*0.8));
+    for(let b=0;b<branchCount;b++){
+      if(!anchors.length) break;
+      const anchor=anchors[randInt(0,anchors.length-1)];
+      let cur={x:anchor.x,y:anchor.y};
+      const length=randInt(2,Math.min(7,3+Math.floor(n/3)));
+      let previous=null;
+      for(let step=0;step<length;step++){
+        const candidates=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>({x:cur.x+dx,y:cur.y+dy})).filter(p=>{
+          if(p.x<2||p.x>28||p.y<2||p.y>19||grid[p.y][p.x]||gateKeys.has(cellKey(p.x,p.y))) return false;
+          if(orthFloorCount(grid,p.x,p.y)!==1) return false;
+          if(previous && p.x===previous.x&&p.y===previous.y) return false;
+          return true;
+        });
+        if(!candidates.length) break;
+        const next=candidates[randInt(0,candidates.length-1)];
+        grid[next.y][next.x]=true; previous=cur; cur=next;
+      }
+    }
+    // Stable, varied rune patterns for this level and route.
+    const gatesBuilt=gateSpecs.map(g=>{
+      const r=seeded(n*151 + (g.route==='hard'?73:191));
+      const len=sequenceLength(g.route,n), seq=[];
+      for(let i=0;i<len;i++){
+        let d=Math.floor(r()*4);
+        if(i>1&&seq[i-1]===d&&seq[i-2]===d) d=(d+1+Math.floor(r()*3))%4;
+        seq.push(d);
+      }
+      return {...g,seq,unlocked:false};
+    });
+    return {grid,gates:gatesBuilt,upper,lower,topY};
+  }
+
+  function createEntity(x,y,kind){ return {x,y,kind,fromX:x,fromY:y,toX:x,toY:y,anim:1,animDuration:0.1}; }
+  function resetRoundAttempt(){
+    const made=makeLevel(level); maze=made.grid; gates=made.gates;
+    player=createEntity(4,10,'player'); lion=createEntity(2,10,'lion');
+    challenge=null; moveAccumulator=0; lionAccumulator=0; wallSlowTime=0; lionBoostTime=0; heldKeys=[];
+    roundTimeMax=timeForRound(level); roundTime=roundTimeMax;
+    screen='playing'; hideOverlay(); renderUI();
+  }
+  function beginNewRun(){
+    level=1;score=0;lives=livesForRound(level);totalTime=0;
+    stats={roundsCleared:0,gatesCleared:0,failedAttempts:0,livesLost:0};
+    roundLedger={approached:new Set(),cleared:new Set()};
+    resetRoundAttempt(); showToast('The guardian is awake. Find your route!');
+  }
+  function startNextRound(){
+    level++;
+    if(level>15){ showVictory(); return; }
+    lives=livesForRound(level);
+    roundLedger={approached:new Set(),cleared:new Set()};
+    resetRoundAttempt(); showToast(`Round ${level} begins. The labyrinth grows harder.`);
+  }
+  function finishRound(){
+    if(screen!=='playing'&&screen!=='challenge') return;
+    const bonus=Math.max(0,Math.floor(roundTime))*10;
+    lastTimeBonus=bonus;
+    score+=bonus;stats.roundsCleared=Math.max(stats.roundsCleared,level);
+    if(level>=15){showVictory();return;}
+    screen='transition';challenge=null;heldKeys=[];
+    showRoundTransition();
+    renderUI();
+  }
+  function showVictory(){
+    screen='results';challenge=null;heldKeys=[];
+    const duration=formatTime(totalTime);
+    showOverlay({icon:'♜',kicker:'The royal escape is complete',title:'You escaped!',text:`You conquered all 15 levels of the Royal Labyrinth. Final score: ${score.toLocaleString()} points. Time played: ${duration}. Gates cleared: ${stats.gatesCleared}. Failed rune attempts: ${stats.failedAttempts}. Lives lost: ${stats.livesLost}.`,primary:'Play again',secondary:'How to play',onPrimary:beginNewRun,onSecondary:showHowTo});
+    renderUI();
+  }
+  function loseLife(reason){
+    if(screen!=='playing'&&screen!=='challenge')return;
+    lives--;stats.livesLost++;
+    const exhausted=lives<=0;
+    if(exhausted) lives=livesForRound(level);
+    resetRoundAttempt();
+    if(exhausted) showToast(`All chances used — Round ${level} restarted. Your score remains.`);
+    else showToast(`${reason}. One life lost; your attempt restarts here.`);
+    renderUI();
+  }
+
+  function isGateAt(x,y){ return gates.find(g=>g.x===x&&g.y===y&&!g.unlocked); }
+  function isFloor(x,y){ return inBounds(x,y)&&maze[y]&&maze[y][x]===true; }
+  function isWalkable(x,y){ return isFloor(x,y)&&!isGateAt(x,y); }
+  function adjacent(a,b){return Math.abs(a.x-b.x)+Math.abs(a.y-b.y)===1;}
+  function checkGateApproaches(){
+    if(!player||!gates.length)return;
+    for(const g of gates){
+      if(!roundLedger.approached.has(g.id)&&Math.abs(player.x-g.x)+Math.abs(player.y-g.y)===1){
+        roundLedger.approached.add(g.id);score+=100;
+        showToast(`${g.route==='hard'?'King’s Shortcut':'Garden Passage'} gate reached: +100 points`);
+      }
+    }
+  }
+  function activateGate(){
+    if(screen!=='playing')return;
+    const gate=gates.find(g=>!g.unlocked&&Math.abs(player.x-g.x)+Math.abs(player.y-g.y)===1);
+    if(!gate){showToast('Move next to a locked gate before pressing Space.');return;}
+    challenge={gateId:gate.id,seq:gate.seq.slice(),phase:'show',phaseClock:displayTime(level),timeLeft:responseTime(level),input:[],feedback:'Memorize the rune order.'};
+    screen='challenge';heldKeys=[];moveAccumulator=0;
+    renderUI();
+  }
+  function failPuzzle(reason){
+    if(!challenge||screen!=='challenge'||challenge.phase==='error')return;
+    score-=50;stats.failedAttempts++;lionBoostTime=Math.max(lionBoostTime,2.2);
+    challenge.phase='error';challenge.phaseClock=0.68;challenge.input=[];challenge.feedback=reason==='timeout'?'Too slow! −50 points. Watch the full sequence again.':'Wrong rune! −50 points. Watch the full sequence again.';
+    renderUI();
+  }
+  function acceptRuneInput(dirIndex){
+    if(!challenge||screen!=='challenge')return;
+    if(challenge.phase!=='answer')return;
+    const i=challenge.input.length;
+    challenge.input.push(dirIndex);
+    if(challenge.seq[i]!==dirIndex){failPuzzle('wrong');return;}
+    if(challenge.input.length===challenge.seq.length){
+      const gate=gates.find(g=>g.id===challenge.gateId);
+      if(gate){
+        gate.unlocked=true;
+        if(!roundLedger.cleared.has(gate.id)){
+          roundLedger.cleared.add(gate.id);score+=200;stats.gatesCleared++;
+        }
+      }
+      challenge=null;screen='playing';lionBoostTime=0;showToast('Rune sequence solved. Gate unlocked: +200 points');renderUI();
+    }else{
+      challenge.feedback=`Correct — rune ${challenge.input.length} of ${challenge.seq.length}. Keep going.`;
+      renderPuzzlePanel();
+    }
+  }
+
+  function keyToDirection(key){
+    const lower=key.toLowerCase();
+    return DIRS.findIndex(d=>d.key===key||d.alt===lower);
+  }
+  function onKeyDown(e){
+    const dir=keyToDirection(e.key);
+    if(dir!==-1){
+      e.preventDefault();
+      if(screen==='challenge'){
+        if(!e.repeat && e.key.startsWith('Arrow'))acceptRuneInput(dir);
+        return;
+      }
+      if(screen==='playing'){
+        const k=DIRS[dir].key;
+        const alreadyHeld=heldKeys.includes(k);
+        if(!alreadyHeld)heldKeys.push(k);
+        // A short key press should move one tile immediately; holding a key repeats at a steady pace.
+        if(!e.repeat&&!alreadyHeld){
+          moveAccumulator=0;
+          movePlayer(DIRS[dir].dx,DIRS[dir].dy);
+        }
+      }
+      return;
+    }
+    if(e.code==='Space'){
+      e.preventDefault();if(!e.repeat)activateGate();return;
+    }
+    if(e.key==='Escape'||e.key==='Esc'){
+      e.preventDefault();if(!e.repeat)togglePause();return;
+    }
+    if((e.key==='Enter')&&screen==='intro'){beginNewRun();}
+  }
+  function onKeyUp(e){
+    const dir=keyToDirection(e.key);
+    if(dir!==-1){const k=DIRS[dir].key;heldKeys=heldKeys.filter(x=>x!==k);}
+  }
+  window.addEventListener('keydown',onKeyDown,{passive:false});
+  window.addEventListener('keyup',onKeyUp);
+  window.addEventListener('blur',()=>{heldKeys=[];});
+
+  function movePlayer(dx,dy){
+    const nx=player.x+dx,ny=player.y+dy;
+    const gate=isGateAt(nx,ny);
+    if(gate){wallSlowTime=Math.max(wallSlowTime,0.18);if(!toastText||performance.now()>toastUntil)showToast('A rune gate blocks the way. Press Space beside it.');return false;}
+    if(!isWalkable(nx,ny)){
+      wallSlowTime=Math.max(wallSlowTime,0.38);
+      lionBoostTime=Math.max(lionBoostTime,0.32);
+      return false;
+    }
+    player.fromX=player.x;player.fromY=player.y;player.x=nx;player.y=ny;player.anim=0;player.animDuration=0.095;
+    checkGateApproaches();
+    if(nx===29&&ny===10){finishRound();return true;}
+    return true;
+  }
+  function updatePlayer(dt){
+    wallSlowTime=Math.max(0,wallSlowTime-dt);
+    moveAccumulator+=dt;
+    let chosen=-1;
+    for(let i=heldKeys.length-1;i>=0;i--){ chosen=keyToDirection(heldKeys[i]);if(chosen!==-1)break; }
+    if(chosen===-1){moveAccumulator=0;return;}
+    let threshold=playerInterval();
+    if(wallSlowTime>0) threshold+=wallSlowTime;
+    if(moveAccumulator>=threshold){
+      moveAccumulator=0;
+      const d=DIRS[chosen];movePlayer(d.dx,d.dy);
+    }
+  }
+  function nextLionStep(){
+    const start={x:lion.x,y:lion.y},goal={x:player.x,y:player.y};
+    if(start.x===goal.x&&start.y===goal.y){loseLife('The lion caught you');return;}
+    const queue=[start], came=new Map();came.set(cellKey(start.x,start.y),null);
+    let found=false,head=0;
+    while(head<queue.length){
+      const p=queue[head++];if(p.x===goal.x&&p.y===goal.y){found=true;break;}
+      for(const d of DIRS){
+        const x=p.x+d.dx,y=p.y+d.dy,k=cellKey(x,y);
+        if(!isWalkable(x,y)||came.has(k))continue;
+        came.set(k,cellKey(p.x,p.y));queue.push({x,y});
+      }
+    }
+    if(!found)return;
+    let cur=cellKey(goal.x,goal.y),prev=null;
+    while(cur!==cellKey(start.x,start.y)){
+      prev=cur;cur=came.get(cur);if(cur===null||cur===undefined)return;
+      if(cur===cellKey(start.x,start.y))break;
+    }
+    const coords=prev.split(',').map(Number),nx=coords[0],ny=coords[1];
+    lion.fromX=lion.x;lion.fromY=lion.y;lion.x=nx;lion.y=ny;lion.anim=0;lion.animDuration=lionInterval();
+    if(lion.x===player.x&&lion.y===player.y)loseLife('The lion caught you');
+  }
+
+  function updateChallenge(dt){
+    if(!challenge)return;
+    if(challenge.phase==='show'){
+      challenge.phaseClock-=dt;
+      if(challenge.phaseClock<=0){challenge.phase='answer';challenge.timeLeft=responseTime(level);challenge.feedback='Now repeat the sequence with the arrow keys.';renderPuzzlePanel();}
+    }else if(challenge.phase==='answer'){
+      challenge.timeLeft-=dt;
+      if(challenge.timeLeft<=0)failPuzzle('timeout');
+    }else if(challenge.phase==='error'){
+      challenge.phaseClock-=dt;
+      if(challenge.phaseClock<=0){challenge.phase='show';challenge.phaseClock=displayTime(level);challenge.timeLeft=responseTime(level);challenge.input=[];challenge.feedback='Memorize the full sequence again.';renderPuzzlePanel();}
+    }
+  }
+
+  function update(dt){
+    animationTime+=dt;
+    if(player&&player.anim<1)player.anim=Math.min(1,player.anim+dt/(player.animDuration||0.1));
+    if(lion&&lion.anim<1)lion.anim=Math.min(1,lion.anim+dt/(lion.animDuration||0.1));
+    if(screen==='playing'||screen==='challenge'){
+      totalTime+=dt;
+      roundTime-=dt;
+      if(roundTime<=0){roundTime=0;loseLife('Time ran out');return;}
+      if(lionBoostTime>0)lionBoostTime=Math.max(0,lionBoostTime-dt);
+      if(screen==='playing')updatePlayer(dt);else updateChallenge(dt);
+      if(screen==='transition'||screen==='results'||screen==='playing'&&roundTime<=0)return;
+      lionAccumulator+=dt;
+      let guard=0;
+      while(lionAccumulator>=lionInterval()&&guard++<4&&(screen==='playing'||screen==='challenge')){
+        lionAccumulator-=lionInterval();nextLionStep();
+      }
+      if((screen==='playing'||screen==='challenge')&&lion.x===player.x&&lion.y===player.y)loseLife('The lion caught you');
+    }
+    uiAccumulator+=dt;
+    if(uiAccumulator>=0.10){uiAccumulator=0;renderUI();}
+  }
+
+  function formatTime(t){
+    t=Math.max(0,Math.floor(t));const m=Math.floor(t/60),s=t%60;
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+  function showToast(message){toastText=message;toastUntil=performance.now()+2400;$('toast').textContent=message;$('toast').classList.add('visible');}
+  function hideOverlay(){ $('overlay').classList.remove('visible'); }
+  function showOverlay(config){
+    const o=$('overlay');o.classList.add('visible');
+    $('overlayIcon').textContent=config.icon||'♜';$('overlayKicker').textContent=config.kicker||'';
+    $('overlayTitle').textContent=config.title||'';$('overlayText').textContent=config.text||'';
+    const p=$('overlayPrimary'),s=$('overlaySecondary');p.textContent=config.primary||'Continue';s.textContent=config.secondary||'How to play';
+    p.onclick=()=>{if(config.onPrimary)config.onPrimary();};s.onclick=()=>{if(config.onSecondary)config.onSecondary();};
+    s.style.display=config.secondary===null?'none':'inline-flex';
+  }
+  function showRoundTransition(){
+    screen='transition';
+    showOverlay({icon:'✧',kicker:`Round ${String(level).padStart(2,'0')} complete`,title:'The gate is open',text:`You escaped this section and earned a ${lastTimeBonus.toLocaleString()}-point time bonus. The next maze is more complex, and the lion will move faster.`,primary:'Enter the next level →',secondary:'Review controls',onPrimary:startNextRound,onSecondary:showHowTo});
+  }
+  function showPauseOverlay(){
+    screen='paused';heldKeys=[];
+    showOverlay({icon:'Ⅱ',kicker:'The chase is paused',title:'Catch your breath',text:'The lion and the round timer are frozen. Take a moment, then return to the escape.',primary:'Resume escape →',secondary:'Restart this round',onPrimary:()=>{screen=challenge?'challenge':'playing';hideOverlay();renderUI();},onSecondary:()=>{lives=livesForRound(level);resetRoundAttempt();showToast('Round restarted. Score retained.');}});
+    renderUI();
+  }
+  function showHowTo(){
+    const previous=screen;
+    showOverlay({icon:'⌁',kicker:'Know the rules',title:'How to survive',text:'Move with the arrow keys or WASD. At a locked gate, stand next to it and press Space. Memorize the glowing arrows, then enter the exact order with the arrow keys. The lion keeps moving while you solve a gate. Gold marks the short, difficult route; green marks the longer, easier route. Escape through the exit on the far right.',primary:previous==='intro'?'Begin your escape →':'Return',secondary:null,onPrimary:()=>{
+      if(previous==='intro'){beginNewRun();return;}
+      if(previous==='paused'){showPauseOverlay();return;}
+      if(previous==='transition'){showRoundTransition();return;}
+      if(previous==='results'){showVictory();return;}
+      screen=previous;hideOverlay();renderUI();
+    }});
+  }
+  function togglePause(){
+    if(screen==='playing'||screen==='challenge')showPauseOverlay();
+    else if(screen==='paused'){screen=challenge?'challenge':'playing';hideOverlay();renderUI();}
+  }
+  $('pauseTop').addEventListener('click',togglePause);
+
+  function renderPuzzlePanel(){
+    const row=$('runeRow'),status=$('gateStatus'),help=$('puzzleHelp'),fill=$('puzzleMeterFill');
+    row.innerHTML='';
+    if(!challenge){
+      status.textContent='STANDBY';
+      for(let i=0;i<4;i++){const el=document.createElement('span');el.className='rune';el.textContent=i===0?'✦':'?';row.appendChild(el);}
+      help.textContent='Approach a locked gate and press Space. Watch the runes, then repeat the sequence with the arrow keys.';fill.style.width='0%';fill.style.background='var(--gold)';return;
+    }
+    const g=gates.find(x=>x.id===challenge.gateId);
+    status.textContent=challenge.phase==='show'?'MEMORIZE':challenge.phase==='answer'?'YOUR TURN':challenge.phase==='error'?'TRY AGAIN':'GATE ACTIVE';
+    status.style.color=g&&g.route==='safe'?'var(--green)':'var(--gold)';
+    for(let i=0;i<challenge.seq.length;i++){
+      const el=document.createElement('span');el.className='rune';
+      if(challenge.phase==='show') {el.textContent=DIRS[challenge.seq[i]].icon;el.classList.add('visible');}
+      else if(i<challenge.input.length){el.textContent=DIRS[challenge.input[i]].icon;el.classList.add('entered');}
+      else {el.textContent='·';}
+      row.appendChild(el);
+    }
+    help.textContent=challenge.phase==='show'?`Memorize ${challenge.seq.length} runes. They disappear in ${Math.max(0,challenge.phaseClock).toFixed(1)} seconds.`:challenge.feedback;
+    if(challenge.phase==='answer')fill.style.width=`${Math.max(0,challenge.timeLeft/responseTime(level))*100}%`;
+    else if(challenge.phase==='show')fill.style.width=`${Math.max(0,challenge.phaseClock/displayTime(level))*100}%`;
+    else fill.style.width='100%';
+    fill.style.background=challenge.phase==='error'?'var(--danger)':challenge.phase==='answer'?'var(--green)':'var(--gold)';
+  }
+  function renderUI(){
+    $('scoreValue').textContent=score.toLocaleString();
+    $('roundValue').innerHTML=`${String(level).padStart(2,'0')} <small>/ 15</small>`;
+    $('livesValue').textContent='♥ '.repeat(Math.max(0,lives)).trim()||'—';
+    $('timeValue').textContent=formatTime(roundTime);
+    $('timeStat').classList.toggle('urgent',roundTime<=30&&(screen==='playing'||screen==='challenge'));
+    $('mapIndex').textContent=`✧ LEVEL ${String(level).padStart(2,'0')}`;
+    $('progressFill').style.width=`${((level-1)/15)*100}%`;
+    $('pauseTop').textContent=screen==='paused'?'▶  Resume':'Ⅱ  Pause';
+    $('pauseTop').disabled=!(screen==='playing'||screen==='challenge'||screen==='paused');
+    if(screen==='intro'){$('missionBadge').textContent='READY';$('missionText').textContent='A royal guardian has awakened. Prepare to escape.';$('missionNote').textContent='Choose a route, memorize magical runes, and survive 15 connected levels.';}
+    else if(screen==='paused'){$('missionBadge').textContent='PAUSED';$('missionText').textContent='The chase is frozen. Your timer and score are safe.';$('missionNote').textContent='Resume when you are ready.';}
+    else if(screen==='transition'){$('missionBadge').textContent='CLEARED';$('missionText').textContent='Level cleared. Your time bonus has been added.';$('missionNote').textContent='Continue to enter the next section of the royal maze.';}
+    else if(screen==='results'){$('missionBadge').textContent='VICTORY';$('missionText').textContent='All 15 levels are complete. You escaped the Royal Labyrinth.';$('missionNote').textContent='Start a new run to challenge your final score.';}
+    else if(screen==='challenge'){$('missionBadge').textContent='GATE ACTIVE';$('missionText').textContent='The child is frozen at the gate. The guardian continues to pursue.';$('missionNote').textContent='A wrong input restarts the full sequence and costs 50 points.';}
+    else{$('missionBadge').textContent='IN PROGRESS';$('missionText').textContent='Reach the exit at the far right after passing through either gate.';$('missionNote').textContent='The lion follows open corridors and gets faster in later rounds.';}
+    const hardLen=sequenceLength('hard',level),safeLen=sequenceLength('safe',level);
+    $('hardRouteNote').textContent=`Shorter path · ${hardLen} runes · ${gates.find(g=>g.id==='hard')?.unlocked?'Gate open':'harder challenge'}`;
+    $('safeRouteNote').textContent=`Longer path · ${safeLen} runes · ${gates.find(g=>g.id==='safe')?.unlocked?'Gate open':'easier challenge'}`;
+    $('warningBanner').classList.toggle('visible',(screen==='playing'||screen==='challenge')&&player&&lion&&Math.abs(player.x-lion.x)+Math.abs(player.y-lion.y)<=5);
+    const toast=$('toast');if(performance.now()>toastUntil)toast.classList.remove('visible');
+    renderPuzzlePanel();
+  }
+
+  function drawRoundRect(x,y,w,h,r,fill,stroke){
+    ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke();}
+  }
+  function floorColor(x,y){const v=(x*17+y*37+(x*y)%19)%7;return ['#0d2419','#0e271b','#10291d','#0b2117','#112b1e','#0d251a','#10251a'][v];}
+  function drawMaze(){
+    ctx.fillStyle='#06110b';ctx.fillRect(0,0,WIDTH,HEIGHT);
+    const wallGrad=ctx.createLinearGradient(0,0,WIDTH,HEIGHT);wallGrad.addColorStop(0,'#21352a');wallGrad.addColorStop(.45,'#15291e');wallGrad.addColorStop(1,'#0c1d14');
+    for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){
+      const px=x*TILE,py=y*TILE;
+      if(maze[y]&&maze[y][x]){
+        ctx.fillStyle=floorColor(x,y);ctx.fillRect(px,py,TILE,TILE);
+        ctx.strokeStyle='rgba(90,155,105,.09)';ctx.lineWidth=.7;ctx.strokeRect(px+.5,py+.5,TILE-1,TILE-1);
+        const dot=(x*7+y*11)%9;
+        if(dot===0||dot===4){ctx.fillStyle='rgba(144,190,134,.1)';ctx.fillRect(px+5+(dot%3)*4,py+7,TILE>20?2:1,2);}
+        if((x*13+y*3)%31===0){ctx.strokeStyle='rgba(94,162,111,.1)';ctx.beginPath();ctx.moveTo(px+5,py+17);ctx.lineTo(px+11,py+13);ctx.lineTo(px+15,py+18);ctx.stroke();}
+      }else{
+        ctx.fillStyle=wallGrad;ctx.fillRect(px,py,TILE,TILE);
+        ctx.fillStyle='rgba(133,164,128,.09)';ctx.fillRect(px+1,py+1,TILE-2,2);ctx.fillRect(px+1,py+1,2,TILE-2);
+        ctx.fillStyle='rgba(0,0,0,.24)';ctx.fillRect(px,py+TILE-3,TILE,3);ctx.fillRect(px+TILE-3,py,3,TILE);
+        ctx.strokeStyle='rgba(88,133,98,.18)';ctx.lineWidth=.7;ctx.strokeRect(px+2.5,py+2.5,TILE-5,TILE-5);
+        const crack=(x*19+y*7)%17;
+        if(crack===0){ctx.strokeStyle='rgba(0,0,0,.27)';ctx.beginPath();ctx.moveTo(px+8,py+6);ctx.lineTo(px+11,py+11);ctx.lineTo(px+8,py+15);ctx.stroke();}
+      }
+    }
+    // Soft magical light beneath the two paths.
+    const glow=ctx.createRadialGradient(12*TILE,10*TILE,15,12*TILE,10*TILE,310);glow.addColorStop(0,'rgba(39,119,65,.09)');glow.addColorStop(1,'rgba(5,12,8,0)');ctx.fillStyle=glow;ctx.fillRect(0,0,WIDTH,HEIGHT);
+    drawEntrance(1,10);
+    drawExit(29,10);
+    for(const g of gates)drawGate(g);
+    // Dead-end marker glints, enough to distinguish branches without clutter.
+    ctx.save();ctx.globalAlpha=.3;ctx.fillStyle='#7cc78e';
+    for(let y=2;y<19;y++)for(let x=2;x<29;x++){
+      if(!maze[y][x])continue;
+      const n=orthFloorCount(maze,x,y);
+      if(n===1&&(x*3+y*5)%4===0){ctx.beginPath();ctx.arc(x*TILE+12,y*TILE+12,1.3,0,Math.PI*2);ctx.fill();}
+    }
+    ctx.restore();
+  }
+  function drawEntrance(x,y){
+    const cx=x*TILE+12,cy=y*TILE+12;
+    ctx.save();ctx.shadowColor='#9ce9a6';ctx.shadowBlur=18;
+    ctx.strokeStyle='#6fc785';ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,cy,8,0,Math.PI*2);ctx.stroke();
+    ctx.shadowBlur=0;ctx.fillStyle='rgba(70,166,92,.25)';ctx.beginPath();ctx.arc(cx,cy,5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#b9efad';ctx.beginPath();ctx.arc(cx,cy,2,0,Math.PI*2);ctx.fill();ctx.restore();
+  }
+  function drawExit(x,y){
+    const cx=x*TILE+12,cy=y*TILE+12;ctx.save();
+    const pulse=.6+.4*Math.sin(animationTime*3.4);ctx.shadowColor='#e7c77b';ctx.shadowBlur=12+8*pulse;
+    ctx.strokeStyle=`rgba(238,209,132,${.65+.25*pulse})`;ctx.lineWidth=2.3;
+    ctx.beginPath();ctx.arc(cx,cy,9+pulse,Math.PI,Math.PI*2);ctx.lineTo(cx+9+pulse,cy+8);ctx.moveTo(cx-9-pulse,cy+8);ctx.lineTo(cx-9-pulse,cy);ctx.stroke();
+    ctx.shadowBlur=0;ctx.fillStyle='rgba(210,175,87,.2)';ctx.fillRect(cx-7,cy-2,14,10);
+    ctx.fillStyle='#f3dda0';ctx.beginPath();ctx.arc(cx,cy-7,2.4,0,Math.PI*2);ctx.fill();ctx.restore();
+  }
+  function drawGate(g){
+    const x=g.x*TILE,y=g.y*TILE,cx=x+12,cy=y+12,open=g.unlocked;
+    ctx.save();const safe=g.route==='safe';const accent=safe?'#7ae0a1':'#edc475';
+    ctx.shadowColor=accent;ctx.shadowBlur=open?10:7;
+    ctx.fillStyle=safe?'rgba(41,133,76,.22)':'rgba(154,100,42,.23)';ctx.fillRect(x+1,y+1,TILE-2,TILE-2);
+    ctx.shadowBlur=0;
+    ctx.strokeStyle=open?'rgba(132,227,160,.5)':accent;ctx.lineWidth=1.7;
+    ctx.beginPath();ctx.moveTo(x+3,y+4);ctx.lineTo(x+3,y+20);ctx.moveTo(x+21,y+4);ctx.lineTo(x+21,y+20);ctx.stroke();
+    for(let i=0;i<4;i++){
+      const gx=x+5+i*4.6;
+      ctx.strokeStyle=open?'rgba(132,227,160,.24)':accent;ctx.lineWidth=open?1:1.5;
+      ctx.beginPath();ctx.moveTo(gx,y+3);ctx.lineTo(gx,y+21);ctx.stroke();
+    }
+    if(open){ctx.strokeStyle='#a9f3bc';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(x+5,y+12);ctx.lineTo(x+10,y+16);ctx.lineTo(x+19,y+7);ctx.stroke();}
+    else{
+      ctx.fillStyle=accent;ctx.beginPath();ctx.arc(cx,cy,3.3,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#142219';ctx.font='bold 6px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(safe?'S':'R',cx,cy+.2);
+    }
+    ctx.restore();
+  }
+  function entityPos(e){
+    const t=Math.min(1,e.anim);const ease=t*t*(3-2*t);
+    return {x:(e.fromX+(e.x-e.fromX)*ease)*TILE+TILE/2,y:(e.fromY+(e.y-e.fromY)*ease)*TILE+TILE/2};
+  }
+  function drawPlayer(){
+    if(!player)return;const p=entityPos(player),x=p.x,y=p.y,bob=Math.sin(animationTime*13)*.7;
+    ctx.save();ctx.translate(x,y+bob);
+    ctx.fillStyle='rgba(0,0,0,.38)';ctx.beginPath();ctx.ellipse(0,8,8.5,4,0,0,Math.PI*2);ctx.fill();
+    // Small travelling cloak.
+    ctx.fillStyle='#2b8b79';ctx.beginPath();ctx.moveTo(0,-3);ctx.quadraticCurveTo(-10,2,-7,9);ctx.quadraticCurveTo(0,13,7,9);ctx.quadraticCurveTo(9,2,0,-3);ctx.fill();
+    ctx.fillStyle='#8dd8ba';ctx.beginPath();ctx.ellipse(0,1,6,8,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#dcae82';ctx.beginPath();ctx.arc(0,-5,5.5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#1b3d30';ctx.beginPath();ctx.arc(0,-7,6.5,Math.PI,Math.PI*2);ctx.lineTo(5,-3);ctx.lineTo(-5,-3);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#1b3025';ctx.beginPath();ctx.arc(-1.7,-4.3,.75,0,Math.PI*2);ctx.arc(2,-4.3,.75,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#f0d49b';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(-4,1);ctx.lineTo(-7,5);ctx.moveTo(4,1);ctx.lineTo(7,5);ctx.stroke();
+    ctx.restore();
+  }
+  function drawLion(){
+    if(!lion)return;const p=entityPos(lion),x=p.x,y=p.y,bob=Math.sin(animationTime*8)*.45;
+    ctx.save();ctx.translate(x,y+bob);
+    ctx.fillStyle='rgba(0,0,0,.42)';ctx.beginPath();ctx.ellipse(0,8,11,4.5,0,0,Math.PI*2);ctx.fill();
+    const pulse=.5+.5*Math.sin(animationTime*6);ctx.shadowColor='#ff815c';ctx.shadowBlur=5+7*pulse;
+    ctx.fillStyle='#8e4d26';ctx.beginPath();ctx.arc(0,0,10.2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+    ctx.fillStyle='#c57939';ctx.beginPath();ctx.arc(0,-1,8,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#efad5e';ctx.beginPath();ctx.arc(0,-2,5.7,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#f0c58a';ctx.beginPath();ctx.ellipse(0,1.7,5.2,4.1,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#5c261d';ctx.beginPath();ctx.arc(-2.1,-2.3,1.05,0,Math.PI*2);ctx.arc(2.1,-2.3,1.05,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#54261d';ctx.beginPath();ctx.moveTo(-1.8,1);ctx.lineTo(1.8,1);ctx.lineTo(0,2.7);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#efbc7a';ctx.lineWidth=1.1;ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(0,-10);ctx.moveTo(-7,-5);ctx.lineTo(-10,-7);ctx.moveTo(7,-5);ctx.lineTo(10,-7);ctx.stroke();
+    ctx.restore();
+  }
+  function draw(){
+    ctx.clearRect(0,0,WIDTH,HEIGHT);drawMaze();
+    if(screen!=='intro'||player){drawLion();drawPlayer();}
+    if(screen==='challenge'&&player){
+      const p=entityPos(player);ctx.save();ctx.strokeStyle='rgba(231,199,123,.72)';ctx.lineWidth=1.1;ctx.setLineDash([3,3]);ctx.beginPath();ctx.arc(p.x,p.y,13+Math.sin(animationTime*7)*1.5,0,Math.PI*2);ctx.stroke();ctx.restore();
+    }
+    if(screen==='paused'){
+      ctx.fillStyle='rgba(3,12,8,.24)';ctx.fillRect(0,0,WIDTH,HEIGHT);
+    }
+  }
+  function resizeCanvas(){
+    const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
+    canvas.width=WIDTH*dpr;canvas.height=HEIGHT*dpr;canvas.style.aspectRatio=`${COLS}/${ROWS}`;
+    ctx.setTransform(dpr,0,0,dpr,0,0);canvasScale=dpr;
+  }
+  window.addEventListener('resize',resizeCanvas);
+
+  function frame(timestamp){
+    if(!lastFrame)lastFrame=timestamp;
+    const dt=Math.min(0.08,(timestamp-lastFrame)/1000);lastFrame=timestamp;
+    update(dt);
+    draw();
+    requestAnimationFrame(frame);
+  }
+  function init(){
+    // Prepare a visible maze behind the opening card without starting the chase.
+    const made=makeLevel(1);maze=made.grid;gates=made.gates;
+    player=createEntity(4,10,'player');lion=createEntity(2,10,'lion');
+    lives=livesForRound(1);roundTimeMax=timeForRound(1);roundTime=roundTimeMax;
+    resizeCanvas();renderUI();
+    showOverlay({icon:'♜',kicker:'The guardian has awakened',title:'Escape the Labyrinth',text:'A royal guardian is on your trail. Choose your route, memorize magical runes, and escape all 15 connected levels.',primary:'Enter the Labyrinth →',secondary:'How to play',onPrimary:beginNewRun,onSecondary:showHowTo});
+    requestAnimationFrame(frame);
+  }
+  init();
+})();
+</script>
+</body>
+</html>
