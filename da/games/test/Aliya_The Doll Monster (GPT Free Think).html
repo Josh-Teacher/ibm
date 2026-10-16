@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Monster Doll — A Cartoon Horror Adventure</title>
+<style>
+  :root{
+    --ink:#211e2b;--paper:#f7efdb;--rose:#e6a2a0;--mint:#b8d8c4;--gold:#edc66c;
+    --night:#171b29;--panel:#282b3d;--line:#51485d;--cream:#fff8e9;--red:#df626b;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;background:#171b29;color:var(--cream);font-family:ui-rounded,"Trebuchet MS",system-ui,sans-serif}
+  body{padding:18px;background:radial-gradient(ellipse at top,#30344b 0,#171b29 66%)}
+  button{font:inherit;cursor:pointer;border:2px solid #171724;border-radius:10px;padding:10px 15px;background:var(--gold);color:#242131;font-weight:900;box-shadow:0 4px 0 #13131d;transition:transform .12s,filter .12s}
+  button:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  button:active{transform:translateY(2px);box-shadow:0 2px 0 #13131d}
+  button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+  button.secondary{background:#b8d8c4} button.danger{background:#e6a2a0} button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+  .app{max-width:1120px;margin:0 auto}
+  .masthead{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:10px}.brand-mark{width:42px;height:42px;border-radius:12px;background:#e6a2a0;display:grid;place-items:center;font-size:24px;box-shadow:inset 0 -5px #bb737b;border:2px solid #171724}
+  h1{font-size:clamp(20px,3vw,30px);line-height:1;margin:0;letter-spacing:.3px}.subtitle{font-size:12px;color:#c2bfd0;margin-top:4px}
+  .top-actions{display:flex;gap:8px;flex-wrap:wrap}.top-actions button{font-size:13px;padding:8px 12px}
+  .hud{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:10px}
+  .hud-card{min-width:0;border:1px solid #4b485e;border-radius:12px;background:#262a3c;padding:9px 11px;box-shadow:inset 0 1px #454257}
+  .hud-label{font-size:10px;letter-spacing:1.2px;color:#bcb9cc;text-transform:uppercase;font-weight:900}.hud-value{margin-top:3px;font-size:16px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hud-value small{font-size:11px;color:#c4c0d1}
+  .stage{position:relative;width:100%;border:3px solid #090c15;border-radius:16px;overflow:hidden;background:#d9ccad;box-shadow:0 15px 40px #05060c99;isolation:isolate}
+  canvas{display:block;width:100%;height:auto;aspect-ratio:1000/600;touch-action:none}
+  .bottom-row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-top:10px;flex-wrap:wrap}
+  .prompt{font-size:14px;min-height:24px;color:#fff4d4;font-weight:800}.prompt span{color:#a8e1c0}.tip{font-size:12px;color:#b7b5c7;max-width:530px;text-align:right}
+  .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:clamp(12px,3vw,28px);background:#111421c9;backdrop-filter:blur(4px);z-index:5;overflow:auto}
+  .overlay.hidden{display:none}.dialog{width:min(580px,100%);max-height:100%;overflow:auto;background:#f7efdb;color:#272332;border:3px solid #191725;border-radius:18px;box-shadow:0 12px 0 #0005;padding:clamp(16px,3vw,26px);animation:pop .18s ease-out}
+  @keyframes pop{from{transform:translateY(12px) scale(.98);opacity:.3}to{transform:none;opacity:1}}
+  .dialog h2{font-size:clamp(22px,3vw,30px);margin:0 0 9px;line-height:1.05}.dialog p{line-height:1.45;margin:8px 0}.dialog .eyebrow{text-transform:uppercase;letter-spacing:1.8px;font-size:10px;font-weight:1000;color:#72677b}.dialog .button-row{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px}.dialog .button-row button{flex:1 1 auto}
+  .menu-dialog{text-align:center;max-width:560px;background:linear-gradient(145deg,#fbefd9,#e6b6b5 145%)}.menu-doll{font-size:86px;line-height:1.1;display:block;filter:drop-shadow(0 7px 0 #5a344c55);animation:float 2.4s ease-in-out infinite}.menu-dialog h2{font-size:clamp(35px,7vw,62px);letter-spacing:1px;color:#3a2439;text-shadow:2px 2px #fff6d5}.menu-dialog p{max-width:400px;margin:10px auto;color:#4e3c50}
+  @keyframes float{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-7px) rotate(3deg)}}
+  .instructions-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.instruction-item{background:#fff7e7;border:1px solid #d6c4b6;border-radius:10px;padding:10px;font-size:13px}.instruction-item strong{display:block;color:#6f3c62;margin-bottom:3px}
+  .cable-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:15px 0}.cable{background:#292b3b;color:#fff8e9;border:2px solid #151624;border-radius:13px;padding:12px 5px;min-height:116px;box-shadow:0 4px #11111d}.cable:hover{transform:translateY(-2px)}.wire{height:7px;width:75%;margin:3px auto 12px;border-radius:8px;box-shadow:0 3px 0 #0006}.cable .cable-symbol{font-size:27px;line-height:1.2}.cable .cable-name{display:block;font-size:12px;margin-top:5px}.cable .cable-color{display:block;font-size:10px;color:#c9c5d5;margin-top:2px}
+  .clue-box{background:#e3d8b9;border:1px dashed #8c7b79;border-radius:10px;padding:11px;font-size:14px}.log-list{padding-left:20px}.log-list li{margin:8px 0;line-height:1.35}.drawer-content{display:flex;align-items:center;gap:14px;background:#e8dcc2;border-radius:11px;padding:13px;margin-top:12px}.drawer-icon{font-size:39px;min-width:50px;text-align:center}
+  .toast{position:absolute;z-index:4;top:16px;left:50%;transform:translateX(-50%);padding:10px 16px;border:2px solid #161521;border-radius:999px;background:#fff4d9;color:#242132;font-weight:1000;font-size:13px;box-shadow:0 4px #0005;max-width:90%;text-align:center;pointer-events:none;animation:toastIn .18s ease-out}
+  .toast.hidden{display:none}@keyframes toastIn{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translate(-50%,0)}}
+  .note{font-size:12px;color:#c8c5d6;line-height:1.45;margin-top:13px}.keycap{display:inline-block;min-width:22px;text-align:center;padding:1px 5px;border-radius:5px;border:1px solid #7a7286;background:#343447;color:#fff3d8;font-weight:900;font-size:11px}
+  .footer{text-align:center;font-size:11px;color:#858398;margin-top:12px}
+  @media(max-width:680px){body{padding:8px}.hud{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.hud-card{padding:7px}.hud-value{font-size:14px}.hud-card:nth-child(4),.hud-card:nth-child(5){display:block}.instructions-grid{grid-template-columns:1fr}.tip{text-align:left}.bottom-row{gap:5px}.dialog{border-radius:14px}.cable{min-height:100px}.cable .cable-name{font-size:10px}}
+  @media(max-width:400px){.hud{grid-template-columns:repeat(2,minmax(0,1fr))}.brand-mark{width:36px;height:36px}.top-actions button{padding:7px 9px}.cable-grid{gap:5px}.cable{padding:9px 2px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="masthead">
+    <div class="brand"><div class="brand-mark" aria-hidden="true">🧸</div><div><h1>THE MONSTER DOLL</h1><div class="subtitle">A tiny daycare. Two missing kids. One deeply unsettling toy.</div></div></div>
+    <div class="top-actions"><button class="secondary" id="logBtn">Investigation Log</button><button class="secondary" id="instructionsBtn">Instructions</button><button class="danger" id="restartBtn">Restart Mission</button></div>
+  </header>
+  <section class="hud" aria-label="Mission status">
+    <div class="hud-card"><div class="hud-label">Location</div><div class="hud-value" id="stationHud">Main Menu</div></div>
+    <div class="hud-card"><div class="hud-label">Objective</div><div class="hud-value" id="objectiveHud">Begin investigation</div></div>
+    <div class="hud-card"><div class="hud-label">Score</div><div class="hud-value" id="scoreHud">0 <small>/ 700</small></div></div>
+    <div class="hud-card"><div class="hud-label">Lives</div><div class="hud-value" id="livesHud">♥ ♥ ♥</div></div>
+    <div class="hud-card"><div class="hud-label">Protective Mask</div><div class="hud-value" id="maskHud">Not found</div></div>
+  </section>
+  <main>
+    <div class="stage" id="stage">
+      <canvas id="game" width="1000" height="600" aria-label="The Monster Doll game world"></canvas>
+      <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+      <section class="overlay" id="menuOverlay">
+        <div class="dialog menu-dialog"><span class="menu-doll" aria-hidden="true">🪆</span><h2>THE MONSTER DOLL</h2><p>A cartoon horror adventure about clues, courage, and not trusting dolls with cracked faces.</p><div class="button-row"><button id="startBtn">Start Game</button><button class="secondary" id="menuInstructionsBtn">Instructions</button></div><div class="note">Keyboard + mouse · Best played with sound on · No downloads or server required</div></div>
+      </section>
+      <section class="overlay hidden" id="instructionsOverlay">
+        <div class="dialog"><div class="eyebrow">Field guide / read before entering</div><h2>Investigator's Instructions</h2><p><strong>Mission:</strong> Find the clues, reconnect the right wires, recover and equip the gas mask, defeat the doll with the gas system, then rescue both children.</p>
+          <div class="instructions-grid">
+            <div class="instruction-item"><strong>Move & interact</strong><span><span class="keycap">W</span> <span class="keycap">A</span> <span class="keycap">S</span> <span class="keycap">D</span> or arrow keys to move. <span class="keycap">E</span> inspects nearby objects, searches drawers, hides, equips, presses the button, or rescues.</span></div>
+            <div class="instruction-item"><strong>Explore for clues</strong>Notes and labels reveal the correct cable symbol. Use the Investigation Log to review clues you've found.</div>
+            <div class="instruction-item"><strong>Electrical panels</strong>Click one of the three cables. A wrong choice makes a dangerous noise and starts a hunt. The right choice solves the puzzle.</div>
+            <div class="instruction-item"><strong>Hide from the doll</strong>Approach a marked hiding spot and press E. Stay hidden while the doll searches for exactly 3 seconds. Leave after it departs.</div>
+            <div class="instruction-item"><strong>Mask & gas</strong>Search drawers in Station Two. Find and explicitly equip the mask before using the second panel or pressing “PUSH HERE.”</div>
+            <div class="instruction-item"><strong>Lives & scoring</strong>Start with 3 lives. Death costs 1 life and restarts the current station's tasks. Scores persist; earn extra lives at 300 and 600 points. Losing all lives resets the mission.</div>
+          </div><p class="note">Dangerous electrical mistakes attract the monster. Ordinary walking and drawer searches are silent. No weapons exist; poisonous gas is the only way to defeat the doll. Both children must be rescued to win.</p><div class="button-row"><button id="instructionsBackBtn">Back</button><button id="instructionsStartBtn">Start Investigating</button></div>
+        </div>
+      </section>
+      <section class="overlay hidden" id="puzzleOverlay">
+        <div class="dialog"><div class="eyebrow" id="puzzleEyebrow">Electrical panel</div><h2 id="puzzleTitle">Choose the right cable</h2><p id="puzzleIntro">Study the clue, then select a cable.</p><div class="clue-box" id="puzzleClue">You have not found the clue.</div><div class="cable-grid" id="cableGrid"></div><p class="note" id="puzzleFeedback" aria-live="polite">A wrong connection will make noise.</p><div class="button-row"><button class="secondary" id="puzzleCloseBtn">Close Panel</button></div></div>
+      </section>
+      <section class="overlay hidden" id="inspectOverlay">
+        <div class="dialog"><div class="eyebrow" id="inspectEyebrow">Investigation</div><h2 id="inspectTitle">A curious object</h2><div id="inspectBody"></div><div class="button-row"><button id="inspectCloseBtn">Close</button></div></div>
+      </section>
+      <section class="overlay hidden" id="logOverlay">
+        <div class="dialog"><div class="eyebrow">Evidence collected this mission</div><h2>Investigation Log</h2><p>Clues you have discovered stay here for the rest of this mission.</p><div id="logContent"></div><div class="button-row"><button id="logCloseBtn">Close Log</button></div></div>
+      </section>
+      <section class="overlay hidden" id="endOverlay">
+        <div class="dialog menu-dialog"><span class="menu-doll" id="endEmoji" aria-hidden="true">🎉</span><h2 id="endTitle">YOU WIN!</h2><p id="endMessage">Both children are safe.</p><p><strong>Final score:</strong> <span id="finalScore">700</span> / 700<br><strong>Remaining lives:</strong> <span id="finalLives">3</span></p><div class="button-row"><button id="endRestartBtn">Restart Mission</button><button class="secondary" id="endMenuBtn">Main Menu</button></div></div>
+      </section>
+    </div>
+    <div class="bottom-row"><div class="prompt" id="prompt"><span>Ready?</span> Select Start Game to begin.</div><div class="tip">Move: <span class="keycap">WASD</span> / <span class="keycap">↑ ↓ ← →</span> &nbsp; Interact: <span class="keycap">E</span> &nbsp; Stay calm. The doll has terrible manners.</div></div>
+  </main>
+  <div class="footer">Original browser game · One file · HTML, CSS, JavaScript, Canvas, and generated tones</div>
+</div>
+<script>
+(() => {
+'use strict';
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const $ = (id) => document.getElementById(id);
+const overlays = ['menuOverlay','instructionsOverlay','puzzleOverlay','inspectOverlay','logOverlay','endOverlay'];
+const ui = {
+  station:$('stationHud'), objective:$('objectiveHud'), score:$('scoreHud'), lives:$('livesHud'), mask:$('maskHud'), prompt:$('prompt'), toast:$('toast')
+};
+const W = 1000, H = 600;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+const rect=(x,y,w,h)=>({x,y,w,h});
+const now=()=>performance.now()/1000;
+let last=now(), elapsed=0, toastUntil=0, toastTimer=null, audioCtx=null;
+let screen='menu', modal=null, keys={}, lastInteract=0, animT=0, gasT=0, deathT=0, respawnStation=1;
+let mission, player, monster, worldObjects=[], solids=[], hidingSpots=[], particles=[], floatingTexts=[];
+
+const CABLES = {
+  1:[
+    {name:'STAR',symbol:'✦',color:'#d95c63',label:'Red / Star'},
+    {name:'MOON',symbol:'☾',color:'#5d8fd1',label:'Blue / Moon'},
+    {name:'SUN',symbol:'☀',color:'#edc66c',label:'Gold / Sun'}
+  ],
+  2:[
+    {name:'LEAF',symbol:'❧',color:'#71b88e',label:'Green / Leaf'},
+    {name:'GEAR',symbol:'⚙',color:'#6c91c8',label:'Blue / Gear'},
+    {name:'FLAME',symbol:'♨',color:'#df795e',label:'Orange / Flame'}
+  ]
+};
+const PUZZLES = {
+  1:{correct:1,clue:'“When the room falls dark, follow the moon. The BLUE wire marked with a crescent returns power to the classroom lamp.”',title:'Station One — Restore the Lights',intro:'Three wires. One clue. Choose the cable that matches the note.'},
+  2:{correct:1,clue:'“The gas valves answer to the GEAR symbol. Look for the BLUE cable stamped with the little cog.”',title:'Station Two — Connect the Gas System',intro:'The mask is equipped. Connect the cable named in your clue to prime the gas system.'}
+};
+
+function freshMission(){
+  mission={
+    score:0,lives:3,station:1,maskFound:false,maskEquipped:false,clues:{},log:[],rewards:{},milestones:{300:false,600:false},
+    puzzles:{1:false,2:false},doorOpen:false,gasReady:false,gasReleased:false,monsterDefeated:false,
+    rescued:{one:false,two:false},drawerSearched:{},won:false,missionNumber:(mission?.missionNumber||0)+1
+  };
+  player={x:90,y:300,r:13,dir:'down',moving:false,hidden:false,hideId:null,invuln:0,actionT:0,walkT:0,dead:false};
+  monster={x:760,y:130,r:23,mode:'idle',target:{x:760,y:130},searchUntil:0,departUntil:0,alertStarted:0,face:1,anim:0};
+  gasT=0;deathT=0;respawnStation=1;particles=[];floatingTexts=[];modal=null;screen='playing';setupStation(1);updateHUD();hideAllOverlays();
+}
+function setupStation(station){
+  mission.station=station;
+  player.hidden=false;player.hideId=null;player.dead=false;
+  player.x=station===1?70:120;player.y=300;player.invuln=1.2;player.actionT=0;
+  monster.mode=mission.monsterDefeated?'defeated':'idle';
+  if(station===1){monster.x=780;monster.y=125;}else{monster.x=835;monster.y=465;}
+  monster.target={x:monster.x,y:monster.y};monster.searchUntil=0;monster.departUntil=0;
+  buildWorld();updateHUD();
+}
+function buildWorld(){
+  const s=mission.station;worldObjects=[];solids=[];hidingSpots=[];
+  // All solid furniture is represented in world coordinates, with enough walking room between each cluster.
+  solids.push(rect(0,0,W,22),rect(0,H-22,W,22),rect(0,0,22,H),rect(W-22,0,22,H));
+  const furniture = [
+    {x:185,y:98,w:108,h:62,type:'table',id:'tableA'},
+    {x:405,y:98,w:108,h:62,type:'table',id:'tableB'},
+    {x:650,y:92,w:116,h:66,type:'table',id:'tableC'},
+    {x:220,y:390,w:115,h:62,type:'desk',id:'deskA'},
+    {x:475,y:390,w:115,h:62,type:'desk',id:'deskB'},
+    {x:710,y:385,w:115,h:62,type:'desk',id:'deskC'},
+    {x:85,y:210,w:54,h:96,type:'cabinet',id:'cabinetA'},
+    {x:850,y:185,w:50,h:84,type:'cabinet',id:'cabinetB'}
+  ];
+  for(const f of furniture){solids.push(rect(f.x,f.y,f.w,f.h));worldObjects.push({...f,solid:true});}
+  // Chairs are small collision objects beside tables; they are deliberately separated from hiding points.
+  for(const [x,y] of [[170,170],[310,130],[390,172],[535,132],[635,174],[785,135],[192,355],[360,425],[445,355],[600,425],[680,355],[850,430]]){
+    solids.push(rect(x,y,28,28));worldObjects.push({x,y,w:28,h:28,type:'chair',id:'chair'+x+'_'+y,solid:true});
+  }
+  // Hiding points are beside, not inside, collision furniture.
+  hidingSpots = [
+    {id:'hideA',x:145,y:156,label:'under the little table'},
+    {id:'hideB',x:550,y:180,label:'behind the desk'},
+    {id:'hideC',x:620,y:455,label:'under the supply desk'}
+  ];
+  for(const h of hidingSpots)worldObjects.push({type:'hide',...h});
+  if(s===1){
+    // Clues can be read before interacting with the panel.
+    worldObjects.push({type:'clue',id:'clue1',x:360,y:235,w:32,h:24,title:'Crayon note',text:'A crayon note is pinned to the wall: “When the room falls dark, follow the moon. The BLUE wire marked with a crescent returns power to the classroom lamp.”',log:'Station One clue: the correct cable is BLUE and marked with a crescent moon.'});
+    worldObjects.push({type:'panel',id:'panel1',x:755,y:292,w:45,h:58,title:'Electrical panel'});
+    worldObjects.push({type:'drawer',id:'drawer1a',x:280,y:310,w:43,h:30,contents:'A box of blunt crayons and a drawing of a very suspicious rabbit.'});
+    worldObjects.push({type:'drawer',id:'drawer1b',x:570,y:295,w:43,h:30,contents:'Old attendance sheets. Every page ends on the same day.'});
+    worldObjects.push({type:'door',id:'door1',x:925,y:300,w:30,h:104,title:'Station Two door'});
+  } else {
+    worldObjects.push({type:'clue',id:'clue2',x:365,y:238,w:35,h:25,title:'Valve instruction',text:'A laminated instruction reads: “For the gas valves, connect the BLUE wire stamped with the GEAR. Do not confuse a cog with a cookie.”',log:'Station Two clue: the gas cable is BLUE and marked with a gear.'});
+    worldObjects.push({type:'panel',id:'panel2',x:755,y:292,w:45,h:58,title:'Gas control panel'});
+    worldObjects.push({type:'drawer',id:'drawer2a',x:280,y:310,w:43,h:30,contents:'A tiny shoe, a wooden block, and a note that says “not the mask.”'});
+    worldObjects.push({type:'drawer',id:'drawer2b',x:425,y:300,w:43,h:30,contents:'A pile of paper stars and a plastic dinosaur missing its judgmental eyes.'});
+    worldObjects.push({type:'drawer',id:'maskDrawer',x:570,y:295,w:43,h:30,contents:'A sealed protective gas mask rests inside the drawer.',hasMask:true});
+    worldObjects.push({type:'drawer',id:'drawer2d',x:645,y:315,w:43,h:30,contents:'Clean napkins, one bent spoon, and a very tiny party hat.'});
+    worldObjects.push({type:'gasbutton',id:'gasbutton',x:860,y:310,w:44,h:44,title:'PUSH HERE'});
+    worldObjects.push({type:'child',id:'child1',key:'one',x:845,y:225,w:30,h:34,title:'Mia'});
+    worldObjects.push({type:'child',id:'child2',key:'two',x:845,y:405,w:30,h:34,title:'Noah'});
+    worldObjects.push({type:'doorBack',id:'doorBack',x:48,y:300,w:28,h:104,title:'Return to Station One'});
+    if(mission.maskFound&&!mission.maskEquipped)worldObjects.push({type:'mask',id:'maskObj',x:625,y:309,w:24,h:22,title:'Protective Mask'});
+  }
+}
+
+function hideAllOverlays(){for(const id of overlays)$(id).classList.add('hidden');}
+function showOverlay(id){hideAllOverlays();$(id).classList.remove('hidden');}
+function activeOverlay(){return overlays.some(id=>!$(id).classList.contains('hidden')&&id!=='menuOverlay'&&id!=='instructionsOverlay'&&id!=='endOverlay');}
+function showToast(text,duration=2.3){ui.toast.textContent=text;ui.toast.classList.remove('hidden');toastUntil=now()+duration;}
+function prompt(text){ui.prompt.innerHTML=text;}
+function updateHUD(){
+  const isPlaying=screen==='playing';
+  ui.station.textContent=isPlaying?`Station ${mission.station}`:(screen==='won'?'Rescued!':screen==='menu'?'Main Menu':screen==='instructions'?'Field Guide':'—');
+  ui.objective.textContent=isPlaying?currentObjective():screen==='won'?'Both children safe':screen==='dead'?'Recovering…':'Begin investigation';
+  ui.score.innerHTML=`${mission?.score||0} <small>/ 700</small>`;
+  ui.lives.textContent=mission?Array.from({length:mission.lives},()=> '♥').join(' ')||'—':'♥ ♥ ♥';
+  ui.mask.textContent=!mission?.maskFound?'Not found':mission.maskEquipped?'Equipped':'Found — not equipped';
+}
+function currentObjective(){
+ if(mission.station===1){if(!mission.clues.clue1)return'Find the clue';if(!mission.puzzles[1])return'Choose the moon cable';return'Enter Station Two';}
+ if(!mission.maskFound)return'Find the protective mask';if(!mission.maskEquipped)return'Equip the mask';if(!mission.clues.clue2)return'Find the gas clue';if(!mission.puzzles[2])return'Connect the gas panel';if(!mission.monsterDefeated)return'Press PUSH HERE';if(!mission.rescued.one||!mission.rescued.two)return'Rescue both children';return'Leave safely';
+}
+function addLog(text){if(!mission.log.includes(text))mission.log.push(text);}
+function award(key,points,message){
+ if(mission.rewards[key])return false;
+ mission.rewards[key]=true;mission.score=Math.min(700,mission.score+points);floatingTexts.push({x:500,y:85,text:`+${points}`,life:1.6});
+ if(message)showToast(message,2.4);
+ for(const m of [300,600])if(mission.score>=m&&!mission.milestones[m]){mission.milestones[m]=true;mission.lives++;showToast('Extra Life Earned!',3);floatingTexts.push({x:500,y:120,text:'+1 LIFE',life:1.8});}
+ updateHUD();return true;
+}
+function startAudio(){
+ if(!audioCtx){const AC=window.AudioContext||window.webkitAudioContext;if(AC){try{audioCtx=new AC();}catch(e){audioCtx=null;}}}
+ if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});
+}
+function tone(freq=440,duration=.1,type='sine',volume=.045,slide=0){
+ if(!audioCtx)return;
+ try{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.setValueAtTime(freq,audioCtx.currentTime);if(slide)o.frequency.linearRampToValueAtTime(Math.max(40,freq+slide),audioCtx.currentTime+duration);g.gain.setValueAtTime(volume,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+duration+.02);}catch(e){}
+}
+function sfx(kind){if(!audioCtx)return;const sounds={open:()=>{tone(260,.07,'triangle',.03,-60);tone(180,.08,'triangle',.025,-30)},good:()=>{tone(440,.1,'sine',.04,110);setTimeout(()=>tone(660,.15,'sine',.035,70),80)},bad:()=>{tone(105,.25,'sawtooth',.045,-50);setTimeout(()=>tone(80,.18,'square',.02,-20),100)},warning:()=>{tone(210,.18,'sawtooth',.025,-40);setTimeout(()=>tone(165,.2,'sawtooth',.025,-35),180)},gas:()=>{tone(95,.6,'sawtooth',.03,60);setTimeout(()=>tone(140,.6,'triangle',.025,25),260)},rescue:()=>{tone(520,.11,'sine',.035,70);setTimeout(()=>tone(730,.15,'sine',.035,80),120)},death:()=>{tone(180,.3,'triangle',.04,-130);setTimeout(()=>tone(90,.35,'sine',.03,-40),190)}};sounds[kind]?.();}
+
+function startGame(){startAudio();freshMission();showToast('Mission started. Find the clue, not the creepy doll.',3);prompt('<span>Investigate:</span> Move with WASD or arrows. Press E near an object.');}
+function returnToMenu(){screen='menu';modal=null;player.hidden=false;showOverlay('menuOverlay');updateHUD();prompt('<span>Ready?</span> Select Start Game to begin.');}
+function showInstructions(fromMenu=false){screen=fromMenu?'instructions':screen;if(fromMenu)showOverlay('instructionsOverlay');else{closeModal();showOverlay('instructionsOverlay');} }
+function closeInstructions(){if(screen==='instructions'){screen='menu';showOverlay('menuOverlay');updateHUD();}else{hideAllOverlays();if(modal==='instructions')modal=null;}}
+function openLog(){if(!mission)return;renderLog();modal='log';showOverlay('logOverlay');}
+function renderLog(){const box=$('logContent');if(!mission.log.length){box.innerHTML='<p class="clue-box">No clues recorded yet. Inspect notes, labels, and drawings around the classrooms.</p>';return;}box.innerHTML='<ol class="log-list">'+mission.log.map(t=>`<li>${escapeHTML(t)}</li>`).join('')+'</ol>';}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function closeModal(){modal=null;hideAllOverlays();}
+function inspect(title,body,eyebrow='Field notes'){$('inspectTitle').textContent=title;$('inspectEyebrow').textContent=eyebrow;$('inspectBody').innerHTML=body;modal='inspect';showOverlay('inspectOverlay');sfx('open');}
+function openPuzzle(station){
+ const cfg=PUZZLES[station];modal='puzzle';$('puzzleEyebrow').textContent=`Station ${station} / live wiring`; $('puzzleTitle').textContent=cfg.title;$('puzzleIntro').textContent=cfg.intro;
+ const clueId=station===1?'clue1':'clue2';$('puzzleClue').textContent=mission.clues[clueId]?cfg.clue:'You have not discovered the clue yet. Leave the panel and inspect the note in this classroom.';
+ $('puzzleFeedback').textContent=mission.clues[clueId]?'A wrong connection makes a dangerous noise.':'You can guess, but the clue makes this much safer.';
+ const grid=$('cableGrid');grid.innerHTML='';CABLES[station].forEach((c,i)=>{const b=document.createElement('button');b.className='cable';b.type='button';b.innerHTML=`<div class="wire" style="background:${c.color}"></div><div class="cable-symbol">${c.symbol}</div><span class="cable-name">${c.name}</span><span class="cable-color">${c.label}</span>`;b.addEventListener('click',()=>chooseCable(station,i));grid.appendChild(b);});
+ showOverlay('puzzleOverlay');sfx('open');
+}
+function chooseCable(station,index){
+ if(screen!=='playing'||mission.puzzles[station]){closeModal();return;}
+ if(station===2&&!mission.maskEquipped){$('puzzleFeedback').textContent='Equip the protective mask first!';showToast('Equip the protective mask before using the gas system!',3);return;}
+ if(index===PUZZLES[station].correct){
+  mission.puzzles[station]=true;sfx('good');closeModal();
+  if(station===1){mission.doorOpen=true;award('station1',100,'Power restored! Door unlocked.');for(let i=0;i<9;i++)particles.push(makeParticle(752,295));}
+  else{mission.gasReady=true;award('station2',100,'Gas system connected! Find the PUSH HERE button.');}
+  updateHUD();return;
+ }
+ const feedback=index===0&&station===1?'That cable is cracked. The connection spits sparks!':'Wrong cable! The panel erupts in a sharp, echoing buzz.';
+ $('puzzleFeedback').textContent=feedback;sfx('bad');closeModal();noiseAt(player.x,player.y);showToast('Wrong cable! The monster heard the noise — hide!',2.8);
+ prompt('<span>Danger!</span> Run to a marked hiding spot and press E.');
+}
+function makeParticle(x,y){return{x:x+(Math.random()-.5)*32,y:y+(Math.random()-.5)*22,vx:(Math.random()-.5)*90,vy:(Math.random()-.5)*90,life:.5+Math.random()*.4,size:2+Math.random()*4,color:['#fff0a8','#fff','#f0b45b'][Math.floor(Math.random()*3)]};}
+function noiseAt(x,y){if(mission.monsterDefeated)return;monster.mode='hunt';monster.target={x,y};monster.alertStarted=now();monster.searchUntil=0;monster.departUntil=0;monster.lastNoise={x,y};showToast('The monster heard the noise! Find a hiding place!',2.7);}
+function die(reason='The doll caught you.'){
+ if(player.dead||screen!=='playing'||player.invuln>0)return;
+ player.dead=true;player.hidden=false;player.hideId=null;deathT=1.65;mission.lives--;sfx('death');showToast('You Died! You Lost One Life.',2.8);prompt(`<span>Oh no.</span> ${escapeHTML(reason)} Recovering…`);updateHUD();
+ if(mission.lives<=0){deathT=2.4;return;}
+}
+function afterDeath(){
+ if(mission.lives<=0){showToast('All Lives Lost! Restarting from Station One...',3);const num=mission.missionNumber;freshMission();mission.missionNumber=num;showToast('All Lives Lost! Restarting from Station One...',3);return;}
+ const s=mission.station;
+ if(s===1){mission.puzzles[1]=false;mission.doorOpen=false;delete mission.rewards._unused;}
+ else {mission.puzzles[2]=false;mission.gasReady=false;mission.gasReleased=false;mission.monsterDefeated=false;mission.rescued.one=false;mission.rescued.two=false;mission.drawerSearched={};
+   // Keep a mask already found/equipped during this mission, as promised by the rules.
+   if(mission.maskFound)mission.maskEquipped=mission.maskEquipped;
+ }
+ setupStation(s);showToast('Respawning at the beginning of this station...',2.5);prompt('<span>Try again:</span> Station tasks reset, but earned score and extra lives remain.');
+}
+function winGame(){if(mission.won)return;mission.won=true;mission.score=Math.min(700,mission.score);screen='won';modal='end';$('endEmoji').textContent='🎉';$('endTitle').textContent='YOU WIN!';$('endMessage').textContent='Both children are safe. The doll is finally quiet. You did the brave thing — and remembered to read the labels.';$('finalScore').textContent=mission.score;$('finalLives').textContent=mission.lives;showOverlay('endOverlay');sfx('rescue');updateHUD();}
+
+function interact(){
+ if(screen!=='playing'||player.dead||modal||player.hidden||player.invuln>0&&player.invuln>.5)return;
+ const target=nearestInteractable();if(!target){showToast('Nothing close enough to interact with.',1.2);return;}
+ lastInteract=now();player.actionT=.34;
+ switch(target.type){
+  case'clue':
+   mission.clues[target.id]=true;addLog(target.log);inspect(target.title,`<p>${escapeHTML(target.text)}</p><p class="clue-box">Added to the Investigation Log.</p>`,'Evidence found');showToast('Clue recorded in the Investigation Log.',1.8);break;
+  case'panel':
+   if(target.id==='panel2'&&!mission.maskEquipped){showToast('Equip the protective mask before using the gas system!',3);inspect('Mask required','<p>The second panel is connected to a poisonous-gas system. Find the mask in a drawer and explicitly equip it first.</p>','Safety warning');break;}
+   if(mission.puzzles[mission.station]){inspect('Panel already solved',mission.station===1?'<p>The lights are on and the door is unlocked.</p>':'<p>The gas circuit is connected and ready. Press the button marked “PUSH HERE.”</p>');break;}
+   openPuzzle(mission.station);break;
+  case'drawer': searchDrawer(target);break;
+  case'mask': equipMask();break;
+  case'hide':
+   if(monster.mode==='search'&&now()<monster.searchUntil){player.hidden=true;player.hideId=target.id;player.x=target.x;player.y=target.y;showToast('Hidden. Stay still until the doll leaves.',2);sfx('open');}
+   else if(monster.mode==='hunt'){player.hidden=true;player.hideId=target.id;player.x=target.x;player.y=target.y;showToast('You squeeze into hiding. Do not move.',2);sfx('open');}
+   else{player.hidden=true;player.hideId=target.id;player.x=target.x;player.y=target.y;showToast('You are hiding. Press E to leave when safe.',2);sfx('open');}
+   break;
+  case'door':
+   if(!mission.doorOpen){showToast('The door is locked. Restore the power first.',2);break;}
+   player.x=925;transitionStation(2);break;
+  case'doorBack':transitionStation(1);break;
+  case'gasbutton':
+   if(mission.monsterDefeated){showToast('The doll is already out of commission.',1.8);break;}
+   if(!mission.gasReady){showToast('The gas system is not connected. Solve the second panel first.',2.5);break;}
+   if(!mission.maskEquipped){showToast('Equip the protective mask before using the gas system!',3);break;}
+   activateGas();break;
+  case'child':
+   if(!mission.monsterDefeated){showToast('The children are too frightened to leave while the doll is hunting.',2.5);break;}
+   if(mission.rescued[target.key]){showToast(`${target.title} is already safe.`,1.5);break;}
+   mission.rescued[target.key]=true;award('rescue_'+target.key,0,`${target.title} rescued!`);sfx('rescue');showToast('Child Rescued!',2);
+   if(mission.rescued.one&&mission.rescued.two){award('bothChildren',200,'Both Children Rescued!');winGame();}
+   updateHUD();break;
+ }
+}
+function nearestInteractable(){
+ let best=null,bestD=Infinity;
+ for(const o of worldObjects){if(!['clue','panel','drawer','mask','hide','door','doorBack','gasbutton','child'].includes(o.type))continue;
+  if(o.type==='child'&&mission.rescued[o.key])continue;
+  if(o.type==='door'&&!mission.doorOpen&&player.x<880){} // keep the locked door inspectable from nearby
+  const d=Math.hypot(player.x-(o.x+(o.w||0)/2),player.y-(o.y+(o.h||0)/2));
+  const reach=o.type==='hide'?55:o.type==='door'||o.type==='doorBack'?72:54;
+  if(d<reach&&d<bestD){best=o;bestD=d;}
+ }
+ return best;
+}
+function getPromptFor(o){if(!o)return '<span>Explore:</span> Look for notes, drawers, and a panel.';const map={clue:'Press E to inspect clue',panel:'Press E to use electrical panel',drawer:'Press E to search drawer',mask:'Press E to equip mask',hide:player.hidden?'Press E to leave hiding spot':'Press E to hide',door:mission.doorOpen?'Press E to enter Station Two':'Door locked — restore power first',doorBack:'Press E to return to Station One',gasbutton:'Press E to press PUSH HERE',child:`Press E to rescue ${o.title}`};return `<span>${map[o.type]||'Press E to interact'}</span>`;}
+function searchDrawer(o){
+ const already=mission.drawerSearched[o.id];
+ if(already&&!o.hasMask){inspect('Drawer contents',`<div class="drawer-content"><div class="drawer-icon">🧸</div><p>${escapeHTML(o.contents)}</p></div><p class="note">You have already searched this drawer. It contains no further surprises. Probably.</p>`,'Search result');return;}
+ mission.drawerSearched[o.id]=true;
+ let contents=o.contents;
+ if(o.hasMask){if(!mission.maskFound){mission.maskFound=true;contents='Inside is a sealed protective gas mask. It is dusty, but the seal looks intact.';if(!worldObjects.some(item=>item.type==='mask'))worldObjects.push({type:'mask',id:'maskObj',x:625,y:309,w:24,h:22,title:'Protective Mask'});award('mask',100,'Protective Mask Found!');}else contents='The drawer is empty now; you already recovered the mask.';}
+ sfx('open');inspect('Drawer searched',`<div class="drawer-content"><div class="drawer-icon">${o.hasMask?'😷':'🗄️'}</div><p>${escapeHTML(contents)}</p></div>${o.hasMask&&mission.maskFound?'<p class="clue-box">Protective Mask Found! Close this drawer, approach the mask beside it, and press E to equip it.</p>':''}`,'Search result');
+ // Finding the mask and equipping it are separate actions: the mask becomes a nearby world object.
+}
+function equipMask(){if(!mission.maskFound){showToast('Find the mask in a drawer first.',1.8);return;}if(mission.maskEquipped){showToast('The mask is already equipped.',1.6);return;}mission.maskEquipped=true;award('maskEquip',0,'Mask Equipped!');sfx('good');closeModal();updateHUD();showToast('Mask Equipped!',2.2);floatingTexts.push({x:500,y:120,text:'MASK READY',life:1.4});}
+function transitionStation(station){if(station===2&&!mission.doorOpen){showToast('The door is locked.',1.6);return;}modal=null;hideAllOverlays();setupStation(station);showToast(station===2?'Entered Station Two. Find the mask.':'Back in Station One.',1.8);}
+function activateGas(){mission.gasReleased=true;gasT=0;monster.mode='gas';monster.target={x:monster.x,y:monster.y};sfx('gas');showToast('Gas System Activated!',2.5);prompt('<span>Gas released!</span> The mask protects you. The doll is not so lucky.');}
+
+function update(dt){
+ animT+=dt;
+ if(ui.toast&&!ui.toast.classList.contains('hidden')&&now()>toastUntil)ui.toast.classList.add('hidden');
+ if(screen!=='playing')return;
+ if(player.dead){deathT-=dt;if(deathT<=0)afterDeath();return;}
+ if(modal){updateMonster(dt);updateParticles(dt);updateHUD();return;}
+ if(player.invuln>0)player.invuln-=dt;
+ if(player.hidden){if(keys['e']){keys['e']=false;if(monster.mode!=='hunt'&&monster.mode!=='search'){player.hidden=false;player.hideId=null;showToast('You leave your hiding spot.',1.4);}else if(monster.mode==='idle'||monster.mode==='defeated'){player.hidden=false;player.hideId=null;showToast('You leave your hiding spot.',1.4);} }updateMonster(dt);updateParticles(dt);return;}
+ let vx=0,vy=0;if(keys.w||keys.arrowup)vy--;if(keys.s||keys.arrowdown)vy++;if(keys.a||keys.arrowleft)vx--;if(keys.d||keys.arrowright)vx++;
+ if(vx||vy){const len=Math.hypot(vx,vy);vx/=len;vy/=len;player.dir=Math.abs(vx)>Math.abs(vy)?(vx>0?'right':'left'):(vy>0?'down':'up');player.moving=true;player.walkT+=dt*11;const speed=165;movePlayer(vx*speed*dt,vy*speed*dt);}else player.moving=false;
+ if(keys.e){keys.e=false;interact();}
+ updateMonster(dt);updateParticles(dt);updateHUD();
+}
+function movePlayer(dx,dy){
+ const oldX=player.x,oldY=player.y;player.x=clamp(player.x+dx,34,W-34);if(collides(player.x,player.y,player.r)){player.x=oldX;}
+ player.y=clamp(player.y+dy,34,H-34);if(collides(player.x,player.y,player.r)){player.y=oldY;}
+ // The station connector is a pass-through only at the door gap and only after the power is restored.
+ if(mission.station===1&&mission.doorOpen&&player.x>958&&player.y>250&&player.y<355){transitionStation(2);return;}
+ if(mission.station===2&&player.x<42&&player.y>250&&player.y<355){if(mission.doorOpen){transitionStation(1);return;}player.x=42;}
+}
+function collides(x,y,r){
+ for(const s of solids){if(x+r>s.x&&x-r<s.x+s.w&&y+r>s.y&&y-r<s.y+s.h)return true;}
+ // Door blocks the connector until the first panel is solved; once unlocked, its centre is a passage.
+ if(mission.station===1&&!mission.doorOpen&&x>900&&y>245&&y<355)return true;
+ return false;
+}
+function updateMonster(dt){
+ if(mission.monsterDefeated||monster.mode==='defeated')return;
+ monster.anim+=dt;
+ const moveToward=(tx,ty,speed)=>{let dx=tx-monster.x,dy=ty-monster.y,d=Math.hypot(dx,dy);if(d>2){monster.x+=dx/d*speed*dt;monster.y+=dy/d*speed*dt;monster.face=dx<0?-1:1;}return d;};
+ if(monster.mode==='idle'){
+   const targetX=(mission.station===1?770:855)+Math.sin(animT*.7)*16,targetY=(mission.station===1?130:465)+Math.sin(animT*1.1)*10;
+   moveToward(targetX,targetY,24);
+   if(!player.hidden&&player.invuln<=0&&dist(monster,player)<50)die('The doll found you even before the wiring went wrong.');
+ }
+ else if(monster.mode==='hunt'){
+   if(player.hidden){monster.mode='investigate';}
+   else{
+     // It beelines for the noise first, but if the player is exposed and close it changes into a chase.
+     const dPlayer=dist(monster,player),dTarget=dist(monster,monster.target);
+     if(dPlayer<205)monster.mode='chase';
+     else if(dTarget<18){monster.mode='search';monster.searchUntil=now()+3;monster.target={x:monster.x,y:monster.y};showToast('The monster is searching...',2);}
+     else moveToward(monster.target.x,monster.target.y,190);
+   }
+ }
+ else if(monster.mode==='chase'){
+   if(player.hidden){monster.mode='investigate';}
+   else{const d=moveToward(player.x,player.y,205);if(d<player.r+monster.r-4)die('The damaged doll caught up with you.');}
+ }
+ else if(monster.mode==='investigate'){
+   if(player.hidden){const d=moveToward(monster.target.x,monster.target.y,180);if(d<20){monster.mode='search';monster.searchUntil=now()+3;showToast('The monster is searching… stay hidden.',2);}}
+   else monster.mode='hunt';
+ }
+ else if(monster.mode==='search'){
+   // Exactly three seconds of searching. A hidden player cannot be caught in this state.
+   if(player.hidden){monster.x+=Math.sin(monster.anim*5)*.08;monster.y+=Math.cos(monster.anim*4)*.08;}
+   else if(dist(monster,player)<monster.r+player.r+5)die('The doll spotted you while it was searching.');
+   if(now()>=monster.searchUntil){monster.mode='leave';monster.departUntil=now()+1.1;showToast('The monster has left.',2);}
+ }
+ else if(monster.mode==='leave'){
+   const home=mission.station===1?{x:790,y:125}:{x:845,y:470};moveToward(home.x,home.y,112);
+   if(now()>=monster.departUntil||dist(monster,home)<18){monster.mode='idle';monster.x=home.x;monster.y=home.y;}
+ }
+ else if(monster.mode==='gas'){
+   gasT+=dt;monster.x+=Math.sin(monster.anim*31)*dt*13;monster.y+=Math.cos(monster.anim*27)*dt*9;
+   if(gasT>2.25){mission.monsterDefeated=true;monster.mode='defeated';award('monster',200,'Monster Defeated!');showToast('Monster Defeated!',3);sfx('good');}
+ }
+ // If exposed at point-blank range during any active search/hunt, death is immediate.
+ if(!player.hidden&&!player.dead&&player.invuln<=0&&(monster.mode==='hunt'||monster.mode==='chase'||monster.mode==='investigate'||monster.mode==='search')&&dist(monster,player)<monster.r+player.r-3)die('The doll caught you.');
+}
+function updateParticles(dt){for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;}particles=particles.filter(p=>p.life>0);for(const f of floatingTexts){f.y-=24*dt;f.life-=dt;}floatingTexts=floatingTexts.filter(f=>f.life>0);}
+
+// ----- Drawing: every scene is built from Canvas primitives so no external assets are required. -----
+function roundRect(c,x,y,w,h,r,fill,stroke=null,lw=1){c.beginPath();c.roundRect(x,y,w,h,r);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.lineWidth=lw;c.strokeStyle=stroke;c.stroke();}}
+function draw(){
+ ctx.clearRect(0,0,W,H);
+ if(screen==='menu'||screen==='instructions')drawMenuBG();else drawRoom();
+ if(screen==='playing'||screen==='won'){drawFloating();}
+ if(screen==='playing'&&player.dead){ctx.fillStyle=`rgba(19,14,28,${.3+Math.sin(animT*9)*.08})`;ctx.fillRect(0,0,W,H);}
+ requestAnimationFrame(draw);
+}
+function drawMenuBG(){
+ const g=ctx.createLinearGradient(0,0,1000,600);g.addColorStop(0,'#35334b');g.addColorStop(.5,'#242538');g.addColorStop(1,'#1b2030');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ // Scuffed tiles and drifting dust.
+ for(let y=28;y<H;y+=58){ctx.strokeStyle='#f4dfc211';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+ for(let x=25;x<W;x+=76){ctx.strokeStyle='#f4dfc20b';ctx.beginPath();ctx.moveTo(x,22);ctx.lineTo(x,H-20);ctx.stroke();}
+ for(let i=0;i<34;i++){const x=(i*137+animT*(i%3+1)*5)%W,y=(i*79+Math.sin(animT+i)*12+H)%H;ctx.fillStyle=`rgba(255,229,178,${.08+(i%4)*.03})`;ctx.fillRect(x,y,2,2);}
+ // Original doll silhouette on the menu background.
+ const bob=Math.sin(animT*1.6)*7;ctx.save();ctx.translate(500,300+bob);ctx.rotate(Math.sin(animT*.7)*.04);
+ ctx.fillStyle='#0e101b';ctx.beginPath();ctx.ellipse(0,65,96,120,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#131523';ctx.beginPath();ctx.ellipse(0,-62,78,86,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#343044';ctx.beginPath();ctx.ellipse(-27,-73,12,18,0,0,Math.PI*2);ctx.ellipse(27,-73,12,18,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#d66f79';ctx.beginPath();ctx.ellipse(-27,-71,5,8,0,0,Math.PI*2);ctx.ellipse(27,-71,5,8,0,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#090b13';ctx.lineWidth=5;ctx.beginPath();ctx.arc(0,-34,29,.2,Math.PI-.2);ctx.stroke();ctx.restore();
+ for(let i=0;i<5;i++){ctx.globalAlpha=.16+(Math.sin(animT*1.2+i)*.08);ctx.strokeStyle=i%2?'#e6a2a0':'#b8d8c4';ctx.lineWidth=1;ctx.beginPath();ctx.arc(500,300,170+i*35+Math.sin(animT+i)*8,0,Math.PI*2);ctx.stroke();}ctx.globalAlpha=1;
+}
+function drawRoom(){
+ const s=mission.station;
+ // floor base and tile lines
+ ctx.fillStyle=s===1?'#d9cba6':'#c9d2b9';ctx.fillRect(0,0,W,H);
+ for(let y=22;y<H-20;y+=58){ctx.strokeStyle=s===1?'#988c711e':'#71846e24';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(22,y);ctx.lineTo(W-22,y);ctx.stroke();}
+ for(let x=24;x<W-20;x+=70){ctx.strokeStyle='#6d685015';ctx.beginPath();ctx.moveTo(x,22);ctx.lineTo(x,H-22);ctx.stroke();}
+ // wall, baseboard and corners
+ ctx.fillStyle=s===1?'#8c7e76':'#718276';ctx.fillRect(0,0,W,22);ctx.fillRect(0,H-22,W,22);ctx.fillRect(0,0,22,H);ctx.fillRect(W-22,0,22,H);
+ ctx.fillStyle=s===1?'#b9a18b':'#9cae91';ctx.fillRect(22,22,W-44,7);ctx.fillRect(22,H-29,W-44,7);
+ // slightly grim wall details and posters
+ drawPoster(320,37,'★','BE KIND');drawPoster(520,37,'☾','NAP TIME');drawPoster(715,37,'✿','PLAY NICE');
+ // doorway connector
+ if(s===1){if(mission.doorOpen){ctx.fillStyle='#292733';ctx.fillRect(902,242,62,116);ctx.fillStyle='#4f4953';ctx.fillRect(919,246,34,108);ctx.fillStyle='#e7c36b';ctx.beginPath();ctx.arc(945,301,4,0,Math.PI*2);ctx.fill();}else{ctx.fillStyle='#6f514f';ctx.fillRect(908,242,47,116);ctx.strokeStyle='#362c36';ctx.lineWidth=5;ctx.strokeRect(908,242,47,116);ctx.fillStyle='#d6a06c';ctx.beginPath();ctx.arc(942,300,4,0,Math.PI*2);ctx.fill();}}
+ else{ctx.fillStyle='#292733';ctx.fillRect(22,242,53,116);ctx.fillStyle='#4f4953';ctx.fillRect(28,246,31,108);ctx.fillStyle='#e7c36b';ctx.beginPath();ctx.arc(37,301,4,0,Math.PI*2);ctx.fill();}
+ // room details and furniture
+ for(const o of worldObjects){if(o.solid){drawFurniture(o);}}
+ for(const o of worldObjects){if(!o.solid)drawObject(o);}
+ // monster and player render layers
+ if(monster.mode!=='defeated'&&!mission.monsterDefeated)drawMonster();else drawDefeatedDoll();
+ drawPlayer();drawGas();drawParticles();drawAtmosphere();drawContext();
+ // room labels
+ roundRect(ctx,35,35,170,29,8,'#2b2b3bdd','#2a2534',1);ctx.fillStyle='#fff3db';ctx.font='900 13px Trebuchet MS';ctx.fillText(s===1?'STATION ONE · CLASSROOM':'STATION TWO · CLASSROOM',45,54);
+ if(monster.mode==='hunt'||monster.mode==='chase'||monster.mode==='search'||monster.mode==='investigate'){
+  roundRect(ctx,755,36,205,32,9,'#3b202ceF','#e6a2a0',1);ctx.fillStyle='#fff2e0';ctx.font='900 12px Trebuchet MS';ctx.fillText(monster.mode==='search'?'⚠ THE DOLL IS SEARCHING':'⚠ DANGEROUS NOISE — HIDE',767,56);
+ }
+ if(mission.gasReleased&&!mission.monsterDefeated){ctx.fillStyle='#b8e2ca';ctx.font='900 15px Trebuchet MS';ctx.fillText('GAS SYSTEM ACTIVE',390,575);}
+}
+function drawPoster(x,y,sym,label){roundRect(ctx,x,y,82,48,4,'#f4e7c9','#6d655b',2);ctx.fillStyle='#b85e69';ctx.font='bold 21px Georgia';ctx.fillText(sym,x+8,y+24);ctx.fillStyle='#50424b';ctx.font='bold 8px Trebuchet MS';ctx.fillText(label,x+8,y+39);}
+function drawFurniture(o){
+ const {x,y,w,h,type}=o;
+ if(type==='table'||type==='desk'){
+   ctx.fillStyle='#00000020';roundRect(ctx,x+5,y+8,w,h,8,'#00000018');
+   const wood=type==='desk'?'#956a54':'#bc8a65';roundRect(ctx,x,y,w,h,8,wood,'#76513f',2);roundRect(ctx,x+7,y+6,w-14,h-16,5,type==='desk'?'#b78968':'#d2a47d','#704a3d',1);
+   ctx.strokeStyle='#734b3d';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x+14,y+h-7);ctx.lineTo(x+14,y+h+7);ctx.moveTo(x+w-14,y+h-7);ctx.lineTo(x+w-14,y+h+7);ctx.stroke();
+   // a notebook / blocks on some surfaces
+   if(o.id==='tableA'){roundRect(ctx,x+18,y+15,27,18,2,'#efe1bd','#86735c',1);ctx.strokeStyle='#b79b8b';ctx.beginPath();ctx.moveTo(x+22,y+20);ctx.lineTo(x+40,y+20);ctx.moveTo(x+22,y+25);ctx.lineTo(x+38,y+25);ctx.stroke();}
+   if(o.id==='deskB'){ctx.fillStyle='#dfc35e';ctx.fillRect(x+61,y+15,19,14);ctx.fillStyle='#8c604c';ctx.fillRect(x+64,y+18,13,2);}
+ } else if(type==='cabinet'){
+   roundRect(ctx,x,y,w,h,5,'#926953','#5d453f',2);for(let i=0;i<3;i++){roundRect(ctx,x+5,y+7+i*27,w-10,22,3,'#b88c6d','#674a43',1);ctx.fillStyle='#e5bd71';ctx.fillRect(x+w/2-3,y+17+i*27,6,3);}
+ } else if(type==='chair'){
+   roundRect(ctx,x,y,w,h,5,'#769b8a','#46635b',2);roundRect(ctx,x+4,y+4,w-8,h-8,4,'#9ebba2',null);ctx.strokeStyle='#526e63';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+5,y+h-3);ctx.lineTo(x+5,y+h+4);ctx.moveTo(x+w-5,y+h-3);ctx.lineTo(x+w-5,y+h+4);ctx.stroke();
+ }
+}
+function drawObject(o){const x=o.x,y=o.y,w=o.w||28,h=o.h||24;ctx.save();
+ if(o.type==='clue'){
+  ctx.save();ctx.translate(x+w/2,y+h/2);ctx.rotate(Math.sin(animT*2)*.035);roundRect(ctx,-w/2,-h/2,w,h,2,'#f4e7bd','#7e695e',1.5);ctx.strokeStyle='#ad9580';ctx.lineWidth=1;for(let j=-5;j<7;j+=5){ctx.beginPath();ctx.moveTo(-w/2+4,j);ctx.lineTo(w/2-4,j);ctx.stroke();}ctx.fillStyle='#c65b68';ctx.beginPath();ctx.arc(0,-h/2,3,0,Math.PI*2);ctx.fill();ctx.restore();ctx.fillStyle='#43374a';ctx.font='bold 10px Trebuchet MS';ctx.fillText('CLUE',x-2,y+h+13);
+ } else if(o.type==='panel'){
+  roundRect(ctx,x,y,w,h,5,'#414653','#1b2630',2);roundRect(ctx,x+5,y+6,w-10,h-12,3,'#26333e','#81939a',1);ctx.fillStyle='#c9d4bd';ctx.fillRect(x+11,y+14,w-22,7);for(let i=0;i<3;i++){ctx.fillStyle=['#d95c63','#5d8fd1','#edc66c'][i];ctx.fillRect(x+8+i*10,y+29,7,14);}ctx.fillStyle=mission.puzzles[mission.station]?'#93e2a4':'#df626b';ctx.beginPath();ctx.arc(x+w-9,y+10,3,0,Math.PI*2);ctx.fill();ctx.fillStyle='#282735';ctx.font='bold 9px Trebuchet MS';ctx.fillText('PANEL',x-3,y+h+12);if(mission.puzzles[mission.station]){ctx.fillStyle='#287649';ctx.font='bold 11px Trebuchet MS';ctx.fillText('✓',x+w+4,y+10);}
+ } else if(o.type==='drawer'){
+  const searched=mission.drawerSearched[o.id];roundRect(ctx,x,y,w,h,4,'#9f765e','#604539',2);ctx.fillStyle=searched?'#64483c':'#be9270';ctx.fillRect(x+4,y+4,w-8,h-8);ctx.fillStyle='#e8c985';roundRect(ctx,x+w/2-6,y+h/2-2,12,4,2,'#e4c479','#755746',1);ctx.fillStyle='#43354a';ctx.font='bold 9px Trebuchet MS';ctx.fillText(o.hasMask&&mission.maskFound?'EMPTY':'DRAWER',x-7,y+h+12);
+ } else if(o.type==='mask'){
+  ctx.save();ctx.translate(x+w/2,y+h/2);ctx.rotate(Math.sin(animT*2)*.05);ctx.fillStyle='#b8d8c4';ctx.strokeStyle='#4b7166';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(-10,-8,20,16,5);ctx.fill();ctx.stroke();ctx.fillStyle='#5f8b7b';ctx.fillRect(-6,-3,4,3);ctx.fillRect(2,-3,4,3);ctx.beginPath();ctx.moveTo(-10,-4);ctx.lineTo(-15,-7);ctx.moveTo(10,-4);ctx.lineTo(15,-7);ctx.stroke();ctx.restore();ctx.fillStyle='#365b51';ctx.font='bold 10px Trebuchet MS';ctx.fillText('MASK',x-3,y+h+12);
+ } else if(o.type==='hide'){
+  // Dotted mint halo indicates a reachable hiding spot.
+  ctx.globalAlpha=.48+.13*Math.sin(animT*3);ctx.strokeStyle='#407d6a';ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.beginPath();ctx.ellipse(x,y,23,15,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;ctx.fillStyle='#315d51';ctx.font='bold 10px Trebuchet MS';ctx.fillText('HIDE',x-13,y+31);
+  if(player.hideId===o.id&&player.hidden){ctx.fillStyle='#4b3b55';ctx.beginPath();ctx.ellipse(x,y,13,10,0,0,Math.PI*2);ctx.fill();}
+ } else if(o.type==='door'||o.type==='doorBack'){
+  ctx.fillStyle='#3b2b37';ctx.font='bold 10px Trebuchet MS';ctx.fillText(o.type==='door'?(mission.doorOpen?'OPEN':'LOCKED'):'EXIT',x-6,y+h+15);
+ } else if(o.type==='gasbutton'){
+  roundRect(ctx,x-18,y-20,w+36,h+40,6,'#9f8a80','#60534f',2);roundRect(ctx,x-10,y-12,w+20,h+24,5,mission.gasReleased?'#8ec5a5':'#ded3bd','#534850',2);ctx.fillStyle=mission.gasReady?'#cf6467':'#76717a';ctx.beginPath();ctx.arc(x+w/2,y+h/2,10+Math.sin(animT*4)*1.2,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#4c3643';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#342b38';ctx.font='900 11px Trebuchet MS';ctx.fillText('PUSH HERE',x-19,y+h+31);
+ } else if(o.type==='child'){
+  const rescued=mission.rescued[o.key];ctx.fillStyle='#4f444d';ctx.fillRect(x+3,y+20,w-6,12);ctx.fillStyle=rescued?'#a8d7bd':'#d39e83';ctx.beginPath();ctx.arc(x+w/2,y+9,11,0,Math.PI*2);ctx.fill();ctx.fillStyle='#473242';ctx.beginPath();ctx.arc(x+w/2-4,y+8,1.8,0,Math.PI*2);ctx.arc(x+w/2+4,y+8,1.8,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#473242';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x+w/2,y+12,4,.2,Math.PI-.2);ctx.stroke();ctx.fillStyle=rescued?'#4d8d6d':'#bd7074';roundRect(ctx,x+4,y+20,w-8,19,5,ctx.fillStyle,null);ctx.fillStyle='#34283c';ctx.font='bold 10px Trebuchet MS';ctx.fillText(rescued?'SAFE':o.title,x-1,y+51);
+ }
+ ctx.restore();}
+function drawPlayer(){if(player.hidden)return;const bob=player.moving?Math.sin(player.walkT)*2.2:Math.sin(animT*2)*1.2;ctx.save();ctx.translate(player.x,player.y+bob);if(player.invuln>0&&Math.floor(animT*12)%2===0)ctx.globalAlpha=.5;
+ // soft shadow
+ ctx.fillStyle='#00000027';ctx.beginPath();ctx.ellipse(0,12,16,7,0,0,Math.PI*2);ctx.fill();
+ // boots + jacket
+ ctx.fillStyle='#3c4052';roundRect(ctx,-12,1,10,13,3,'#4d4a59',null);roundRect(ctx,2,1,10,13,3,'#4d4a59',null);
+ roundRect(ctx,-13,-10,26,25,8,'#5d7794','#394458',1.5);
+ // detective coat details
+ ctx.strokeStyle='#d6bf86';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(0,10);ctx.stroke();ctx.fillStyle='#e8ce92';ctx.beginPath();ctx.arc(0,-2,1.7,0,Math.PI*2);ctx.arc(0,5,1.7,0,Math.PI*2);ctx.fill();
+ // head / hair / hat
+ ctx.fillStyle='#e0b18e';ctx.beginPath();ctx.arc(0,-19,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#51404c';ctx.beginPath();ctx.arc(0,-23,10,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle='#40303d';ctx.fillRect(-12,-25,24,4);ctx.fillRect(-7,-30,14,6);
+ // eyes direction
+ ctx.fillStyle='#262332';let ex=player.dir==='left'?-3:player.dir==='right'?3:0,ey=player.dir==='up'?-5:player.dir==='down'?1:-2;ctx.beginPath();ctx.arc(ex-3,-19+ey,1.5,0,Math.PI*2);ctx.arc(ex+3,-19+ey,1.5,0,Math.PI*2);ctx.fill();
+ if(mission.maskEquipped){ctx.fillStyle='#b8d8c4';ctx.strokeStyle='#49665c';ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(-8,-17,16,8,3);ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(-8,-16);ctx.lineTo(-12,-18);ctx.moveTo(8,-16);ctx.lineTo(12,-18);ctx.stroke();}
+ ctx.restore();}
+function drawMonster(){ctx.save();ctx.translate(monster.x,monster.y+Math.sin(monster.anim*3)*2);ctx.scale(monster.face,1);const aggro=['hunt','chase','search','investigate'].includes(monster.mode);const shake=aggro?Math.sin(monster.anim*23)*2:Math.sin(monster.anim*2)*.6;ctx.translate(shake,0);
+ // Shadow and old cloth body
+ ctx.fillStyle='#00000037';ctx.beginPath();ctx.ellipse(0,25,31,11,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#3b3348';ctx.beginPath();ctx.moveTo(-22,-3);ctx.quadraticCurveTo(-34,7,-28,31);ctx.lineTo(-11,28);ctx.lineTo(-5,19);ctx.lineTo(7,32);ctx.lineTo(28,28);ctx.quadraticCurveTo(31,4,18,-5);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#777081';ctx.beginPath();ctx.ellipse(0,4,25,28,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#2b2536';ctx.lineWidth=2;ctx.stroke();
+ // torn collar / buttons
+ ctx.fillStyle='#cc8f91';ctx.beginPath();ctx.moveTo(-14,-2);ctx.lineTo(-3,9);ctx.lineTo(-12,14);ctx.lineTo(-20,1);ctx.fill();ctx.beginPath();ctx.moveTo(14,-2);ctx.lineTo(3,9);ctx.lineTo(12,14);ctx.lineTo(20,1);ctx.fill();
+ // cracked porcelain head
+ const headTilt=monster.mode==='search'?Math.sin(monster.anim*5)*.15:aggro?Math.sin(monster.anim*9)*.09:Math.sin(monster.anim)*.04;ctx.save();ctx.rotate(headTilt);ctx.fillStyle='#d5c3ac';ctx.beginPath();ctx.ellipse(0,-25,27,28,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#766675';ctx.lineWidth=2;ctx.stroke();
+ // hair stitches
+ ctx.fillStyle='#5b3a4b';ctx.beginPath();ctx.arc(-5,-47,19,Math.PI,Math.PI*1.9);ctx.lineTo(20,-35);ctx.quadraticCurveTo(7,-40,4,-29);ctx.fill();
+ // uneven glass eyes
+ ctx.fillStyle='#fff1d7';ctx.beginPath();ctx.ellipse(-10,-27,7,8,0,0,Math.PI*2);ctx.ellipse(10,-27,6,8,0,0,Math.PI*2);ctx.fill();ctx.fillStyle=aggro?'#d64759':'#9d4858';ctx.beginPath();ctx.arc(-9,-27,3.2,0,Math.PI*2);ctx.arc(10,-27,3.2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#161321';ctx.beginPath();ctx.arc(-9,-27,1.5,0,Math.PI*2);ctx.arc(10,-27,1.5,0,Math.PI*2);ctx.fill();
+ // mouth and porcelain crack
+ ctx.strokeStyle='#4a3445';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(-10,-12);ctx.quadraticCurveTo(0,-5,11,-13);ctx.stroke();ctx.strokeStyle='#756375';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(3,-47);ctx.lineTo(-1,-37);ctx.lineTo(5,-31);ctx.lineTo(0,-21);ctx.stroke();ctx.restore();
+ // arms
+ ctx.strokeStyle='#797183';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-19,3);ctx.lineTo(-32,15+Math.sin(monster.anim*8)*4);ctx.moveTo(19,3);ctx.lineTo(31,15-Math.sin(monster.anim*8)*4);ctx.stroke();ctx.lineCap='butt';
+ if(monster.mode==='search'){ctx.strokeStyle='#f1c77c';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-22,39+Math.sin(monster.anim*7)*3,Math.PI*1.08,Math.PI*1.92);ctx.stroke();}
+ ctx.restore();}
+function drawDefeatedDoll(){const x=mission.station===1?monster.x:monster.x,y=mission.station===1?monster.y:monster.y;ctx.save();ctx.translate(x,y+10);ctx.rotate(.9);ctx.globalAlpha=.75;ctx.fillStyle='#4c4256';ctx.beginPath();ctx.ellipse(0,4,29,17,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#d5c3ac';ctx.beginPath();ctx.ellipse(0,-2,21,20,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#736071';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#2c2636';ctx.beginPath();ctx.arc(-7,-3,3,0,Math.PI*2);ctx.arc(7,-3,3,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#66556a';ctx.beginPath();ctx.moveTo(-8,7);ctx.lineTo(8,8);ctx.stroke();ctx.restore();}
+function drawGas(){if(!mission?.gasReleased||mission.monsterDefeated)return;const progress=clamp(gasT/2.5,0,1);ctx.save();ctx.globalAlpha=.12+progress*.32;for(let i=0;i<18;i++){const x=((i*83+animT*18)%920)+35,y=((i*127+Math.sin(animT*1.7+i)*40+600)%570)+15;const r=18+progress*30+(i%5)*3;ctx.fillStyle=i%2?'#9bdcb9':'#d1f5d7';ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}ctx.restore();}
+function drawParticles(){for(const p of particles){ctx.globalAlpha=clamp(p.life,0,1);ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,p.size,p.size);}ctx.globalAlpha=1;}
+function drawFloating(){for(const f of floatingTexts){ctx.globalAlpha=clamp(f.life,0,1);ctx.font='900 24px Trebuchet MS';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#302638';ctx.strokeText(f.text,f.x,f.y);ctx.fillStyle=f.text.includes('LIFE')?'#f4d06e':'#fff3b9';ctx.fillText(f.text,f.x,f.y);}ctx.globalAlpha=1;ctx.textAlign='start';}
+function drawAtmosphere(){
+ // Corner vignette keeps the centre readable and makes the classrooms feel a little ominous.
+ const g=ctx.createRadialGradient(500,300,190,500,300,590);g.addColorStop(0,'#16152200');g.addColorStop(1,mission.station===1?'#3f24382b':'#243b2e2b');ctx.fillStyle=g;ctx.fillRect(22,22,W-44,H-44);
+ if(!mission.doorOpen&&mission.station===1){ctx.fillStyle='#443143';ctx.font='bold 11px Trebuchet MS';ctx.fillText('POWER OFF',889,225);}
+ if(player.hidden){roundRect(ctx,393,542,214,31,9,'#243b33ed','#b8d8c4',1);ctx.fillStyle='#e3f3d9';ctx.font='900 12px Trebuchet MS';ctx.textAlign='center';ctx.fillText('HIDDEN — STAY QUIET',500,562);ctx.textAlign='start';}
+}
+function drawContext(){if(screen!=='playing'||modal)return;const o=player.hidden?null:nearestInteractable();if(o){const tx=clamp(o.x+(o.w||0)/2,100,900),ty=clamp(o.y-12,65,530);ctx.save();ctx.globalAlpha=.94;roundRect(ctx,tx-76,ty-24,152,24,7,'#242334dd','#fcf0d0',1);ctx.fillStyle='#fff2d2';ctx.font='bold 10px Trebuchet MS';ctx.textAlign='center';ctx.fillText(getShortPrompt(o),tx,ty-8);ctx.textAlign='start';ctx.restore();}}
+function getShortPrompt(o){const m={clue:'E · READ CLUE',panel:'E · USE PANEL',drawer:'E · SEARCH DRAWER',mask:'E · EQUIP MASK',hide:'E · HIDE',door:mission.doorOpen?'E · OPEN DOOR':'LOCKED DOOR',doorBack:'E · RETURN',gasbutton:'E · PUSH HERE',child:'E · RESCUE'};return m[o.type]||'E · INTERACT';}
+
+// Buttons and keyboard events
+$('startBtn').addEventListener('click',startGame);$('instructionsStartBtn').addEventListener('click',startGame);$('menuInstructionsBtn').addEventListener('click',()=>showInstructions(true));$('instructionsBtn').addEventListener('click',()=>{if(screen==='menu')showInstructions(true);else{modal='instructions';showOverlay('instructionsOverlay');}});$('instructionsBackBtn').addEventListener('click',()=>{if(screen==='instructions'){screen='menu';showOverlay('menuOverlay');}else{closeModal();}updateHUD();});
+$('logBtn').addEventListener('click',()=>{if(screen==='playing'&&!modal)openLog();else if(modal==='log')closeModal();});$('restartBtn').addEventListener('click',()=>{if(screen==='menu'){startGame();return;}startGame();});$('puzzleCloseBtn').addEventListener('click',closeModal);$('inspectCloseBtn').addEventListener('click',closeModal);$('logCloseBtn').addEventListener('click',closeModal);$('endRestartBtn').addEventListener('click',startGame);$('endMenuBtn').addEventListener('click',returnToMenu);
+window.addEventListener('keydown',e=>{
+ const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();
+ if(k==='escape'){if(modal){closeModal();return;}if(screen==='instructions'){closeInstructions();return;}if(screen==='playing'&&!player.dead){openLog();return;}}
+ if(k==='e'){if(modal==='inspect'){closeModal();return;}if(modal==='log'){closeModal();return;}if(modal==='puzzle')return;if(!player.hidden)keys.e=true;else keys.e=true;return;}
+ if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(k))keys[k]=true;
+});
+window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});window.addEventListener('blur',()=>{keys={};});
+// Mouse interaction is handled by the puzzle cables and interface buttons; movement remains keyboard-driven.
+function frame(){const t=now(),dt=Math.min(.04,t-last);last=t;elapsed+=dt;update(dt);requestAnimationFrame(frame);}
+// Start on a fully drawn title screen; mission state is initialized only when Start Game is clicked.
+mission={score:0,lives:3,station:1,maskFound:false,maskEquipped:false,clues:{},log:[],rewards:{},milestones:{300:false,600:false},puzzles:{1:false,2:false},doorOpen:false,gasReady:false,gasReleased:false,monsterDefeated:false,rescued:{one:false,two:false},drawerSearched:{},won:false,missionNumber:0};player={x:90,y:300,r:13,dir:'down',moving:false,hidden:false,hideId:null,invuln:0,actionT:0,walkT:0,dead:false};monster={x:780,y:125,r:23,mode:'idle',target:{x:780,y:125},searchUntil:0,departUntil:0,alertStarted:0,face:1,anim:0};buildWorld();updateHUD();showOverlay('menuOverlay');draw();frame();
+})();
+</script>
+</body>
+</html>
