@@ -1,0 +1,1113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1020">
+  <meta name="description" content="Dual Fighters — a retro 8-bit tactical arcade duel.">
+  <title>Dual Fighters — Arcade Duel</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f4f6ff;
+      --muted: #9ca9c7;
+      --panel: #141d35;
+      --panel-2: #0f172b;
+      --line: #2b3b61;
+      --cyan: #39e5ff;
+      --cyan-dark: #1085a9;
+      --pink: #ff4d8d;
+      --orange: #ffb84a;
+      --green: #5df29b;
+      --red: #ff526b;
+      --purple: #a58bff;
+      --shadow: 0 10px 0 rgba(0, 0, 0, .22);
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: #080d19; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Courier New", Courier, monospace;
+      background:
+        linear-gradient(rgba(57,229,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(57,229,255,.035) 1px, transparent 1px),
+        radial-gradient(ellipse at top, #18264a 0%, #0b1224 48%, #070b15 100%);
+      background-size: 24px 24px, 24px 24px, auto;
+    }
+
+    button { font: inherit; }
+    button:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+    .app-shell { width: min(1120px, calc(100% - 28px)); margin: 0 auto; padding: 24px 0 38px; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:22px; }
+    .brand { display:flex; align-items:center; gap:12px; letter-spacing:2px; font-weight:900; }
+    .brand-mark { width:34px; height:34px; display:grid; place-items:center; color:#07101f; background:var(--cyan); box-shadow:4px 4px 0 #146079; font-size:19px; font-weight:900; }
+    .brand-name { font-size:15px; }
+    .brand-name span { color:var(--cyan); }
+    .top-tag { color:var(--muted); font-size:11px; letter-spacing:1.4px; text-align:right; }
+    .screen { display:none; animation: screenIn .24s ease-out; }
+    .screen.active { display:block; }
+    @keyframes screenIn { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
+
+    .panel { background:linear-gradient(180deg, rgba(23,33,60,.97), rgba(14,22,42,.97)); border:2px solid var(--line); box-shadow:var(--shadow); }
+    .eyebrow { color:var(--cyan); font-size:11px; letter-spacing:3px; text-transform:uppercase; }
+    .home-hero { position:relative; display:grid; grid-template-columns:1.12fr .88fr; gap:24px; align-items:center; padding:clamp(24px, 5vw, 54px); overflow:hidden; }
+    .home-hero:after { content:""; position:absolute; right:-70px; top:-95px; width:290px; height:290px; border:2px solid rgba(57,229,255,.12); transform:rotate(45deg); pointer-events:none; }
+    h1, h2, h3, p { margin-top:0; }
+    h1 { font-size:clamp(38px, 6.5vw, 76px); line-height:.97; letter-spacing:-3px; margin:14px 0 20px; text-shadow:5px 5px 0 #102c49; }
+    h1 .title-cyan { color:var(--cyan); display:block; }
+    .hero-copy { max-width:520px; color:#c0cbe1; font-size:14px; line-height:1.8; }
+    .hero-actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:28px; }
+    .pixel-btn { border:0; cursor:pointer; text-transform:uppercase; font-weight:900; letter-spacing:1.5px; padding:16px 23px; min-height:54px; transition:transform .08s, filter .15s, box-shadow .08s; }
+    .pixel-btn:active { transform:translate(3px,3px); box-shadow:1px 1px 0 rgba(0,0,0,.45); }
+    .primary-btn { color:#06101b; background:var(--cyan); box-shadow:5px 5px 0 #146079; }
+    .primary-btn:hover { filter:brightness(1.12); }
+    .secondary-btn { background:#263457; color:var(--ink); box-shadow:5px 5px 0 #0a1020; border:1px solid #42537c; }
+    .hero-note { font-size:10px; line-height:1.6; color:#8191b4; margin-top:22px; letter-spacing:.6px; }
+    .hero-art { display:flex; align-items:flex-end; justify-content:center; gap:22px; min-height:245px; position:relative; z-index:1; }
+    .versus { align-self:center; color:var(--orange); font-weight:900; font-size:24px; text-shadow:3px 3px #5d3028; }
+    .fighter-card { text-align:center; }
+    .fighter-card .fighter-sprite { transform:scale(1.16); transform-origin:bottom center; margin:0 auto 17px; }
+    .fighter-card small { display:block; margin-top:4px; color:var(--muted); font-size:10px; letter-spacing:1px; }
+    .fighter-label { font-size:12px; font-weight:900; letter-spacing:1.4px; }
+    .fighter-label.player { color:var(--cyan); }
+    .fighter-label.enemy { color:var(--pink); }
+    .stat-strip { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:18px; }
+    .stat-card { padding:16px 18px; border:1px solid var(--line); background:rgba(13,21,40,.86); }
+    .stat-card span { display:block; color:var(--muted); font-size:10px; letter-spacing:1.5px; text-transform:uppercase; }
+    .stat-card strong { display:block; color:var(--ink); font-size:clamp(20px,3vw,28px); margin-top:8px; }
+    .stat-card strong.cyan { color:var(--cyan); }
+    .stat-card strong.gold { color:var(--orange); }
+    .mini-rules { margin-top:18px; padding:18px 20px; display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+    .rule-item { color:#aebbd7; font-size:11px; line-height:1.7; }
+    .rule-item b { display:block; color:var(--ink); margin-bottom:4px; letter-spacing:1px; }
+
+    /* Small CSS pixel fighters */
+    .fighter-sprite { width:86px; height:112px; position:relative; image-rendering:pixelated; }
+    .fighter-sprite .head { position:absolute; left:29px; top:8px; width:28px; height:25px; background:var(--skin,#ffc58b); border:4px solid #10182c; box-shadow:0 -4px 0 var(--hair,#22243a); }
+    .fighter-sprite .visor { position:absolute; left:31px; top:18px; width:25px; height:7px; background:#10182c; z-index:2; }
+    .fighter-sprite .torso { position:absolute; left:23px; top:34px; width:40px; height:35px; background:var(--suit,var(--cyan)); border:4px solid #10182c; }
+    .fighter-sprite .belt { position:absolute; left:25px; top:57px; width:36px; height:7px; background:#f5f4ff; z-index:2; }
+    .fighter-sprite .arm { position:absolute; top:38px; width:15px; height:35px; background:var(--suit,var(--cyan)); border:4px solid #10182c; }
+    .fighter-sprite .arm.left { left:10px; transform:rotate(12deg); }
+    .fighter-sprite .arm.right { right:7px; transform:rotate(-18deg); }
+    .fighter-sprite .glove { position:absolute; width:17px; height:15px; top:62px; background:var(--glove,#f4f6ff); border:4px solid #10182c; z-index:3; }
+    .fighter-sprite .glove.left { left:5px; }
+    .fighter-sprite .glove.right { right:2px; }
+    .fighter-sprite .leg { position:absolute; top:66px; width:16px; height:29px; background:var(--suit,var(--cyan)); border:4px solid #10182c; }
+    .fighter-sprite .leg.left { left:25px; transform:rotate(5deg); }
+    .fighter-sprite .leg.right { right:20px; transform:rotate(-4deg); }
+    .fighter-sprite .boot { position:absolute; top:88px; width:23px; height:12px; background:#f4f6ff; border:4px solid #10182c; z-index:2; }
+    .fighter-sprite .boot.left { left:18px; }
+    .fighter-sprite .boot.right { right:12px; }
+    .fighter-sprite.enemy { --suit:var(--pink); --glove:#ffb7d1; --hair:#5a1b44; }
+    .fighter-sprite.player { --suit:var(--cyan); --glove:#b4f8ff; --hair:#0f536d; }
+    .fighter-sprite.enemy .visor { background:#37162f; }
+
+    .battle-heading { display:flex; justify-content:space-between; align-items:end; gap:16px; margin-bottom:16px; }
+    .battle-heading h2 { margin:7px 0 0; font-size:clamp(22px,4vw,34px); letter-spacing:-1px; }
+    .turn-badge { border:1px solid #485a81; background:#172340; padding:9px 12px; color:#c7d4f0; font-size:11px; letter-spacing:1px; white-space:nowrap; }
+    .arena { padding:clamp(16px,3vw,28px); }
+    .combatants { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+    .combatant { padding:17px; background:rgba(7,13,26,.55); border:1px solid #2a3a60; min-width:0; }
+    .combatant-top { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:13px; }
+    .combatant-name { font-size:12px; letter-spacing:1.1px; font-weight:900; }
+    .combatant-name.player { color:var(--cyan); }
+    .combatant-name.enemy { color:var(--pink); }
+    .hp-number { font-size:13px; font-weight:900; white-space:nowrap; }
+    .health-track { height:15px; background:#070b15; border:2px solid #405174; padding:2px; overflow:hidden; }
+    .health-fill { height:100%; width:100%; background:var(--green); transition:width .32s; }
+    .health-fill.enemy { background:var(--pink); }
+    .combatant-meta { margin-top:8px; display:flex; justify-content:space-between; gap:6px; color:#7f90b4; font-size:10px; }
+    .fighter-stage { min-height:145px; display:flex; justify-content:center; align-items:end; gap:10px; padding-top:12px; }
+    .fighter-stage .fighter-sprite { transform:scale(1.08); transform-origin:bottom center; }
+    .fighter-sprite.hit { animation:hit .28s steps(2,end); }
+    .fighter-sprite.attack { animation:attack .28s steps(2,end); }
+    .fighter-sprite.block { animation:block .28s steps(2,end); }
+    @keyframes hit { 0%,100%{filter:none;transform:translateX(0)} 25%,75%{filter:brightness(2);transform:translateX(-7px)} 50%{transform:translateX(7px)} }
+    @keyframes attack { 0%,100%{transform:translateX(0) scale(1.08)} 50%{transform:translateX(13px) scale(1.08)} }
+    @keyframes block { 0%,100%{filter:none} 50%{filter:drop-shadow(0 0 12px var(--cyan))} }
+    .arena-floor { height:7px; background:linear-gradient(90deg, transparent, #325475 13%, #325475 87%, transparent); margin-top:-4px; }
+    .timer-panel { margin-top:18px; padding:15px 17px; border:1px solid #2c3d63; background:#0b1428; }
+    .timer-row { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:10px; }
+    .timer-label { font-size:10px; letter-spacing:1.7px; color:#b6c4e2; }
+    .timer-number { font-size:20px; color:var(--cyan); font-weight:900; min-width:60px; text-align:right; }
+    .timer-track { height:11px; background:#050914; border:1px solid #3d4e70; overflow:hidden; }
+    .timer-fill { height:100%; width:100%; background:#39aaff; transition:width .06s linear, background-color .08s linear; }
+    .action-intro { display:flex; justify-content:space-between; align-items:end; gap:10px; margin:24px 0 12px; }
+    .action-intro h3 { font-size:13px; margin:0; letter-spacing:1.2px; }
+    .action-intro span { color:#8e9cbb; font-size:10px; }
+    .action-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+    .action-btn { position:relative; text-align:left; min-height:117px; padding:16px; border:2px solid #34476f; background:#172442; color:var(--ink); box-shadow:4px 4px 0 #070d1b; cursor:pointer; transition:transform .08s, border-color .12s, background .12s; }
+    .action-btn:hover:not(:disabled) { border-color:var(--cyan); background:#1d3156; }
+    .action-btn:active:not(:disabled) { transform:translate(2px,2px); box-shadow:2px 2px 0 #070d1b; }
+    .action-btn:disabled { opacity:.46; cursor:not-allowed; filter:saturate(.55); }
+    .action-btn .action-index { display:inline-grid; place-items:center; width:23px; height:23px; background:#2f416b; color:#dce8ff; font-size:10px; margin-bottom:11px; }
+    .action-btn .action-name { display:block; font-size:13px; font-weight:900; letter-spacing:1px; }
+    .action-btn .action-desc { display:block; margin-top:7px; color:#aab8d6; font-size:10px; line-height:1.5; }
+    .action-btn.light { border-color:#23728d; }
+    .action-btn.heavy { border-color:#7e4c8a; }
+    .action-btn.defend { border-color:#657147; }
+    .action-btn .cooldown-label { display:block; color:#ffc771; font-size:9px; margin-top:6px; letter-spacing:.6px; }
+    .battle-lower { display:grid; grid-template-columns:.85fr 1.15fr; gap:12px; margin-top:14px; }
+    .score-panel, .log-panel { padding:17px; border:1px solid #2a3a60; background:rgba(10,17,33,.82); }
+    .section-label { color:#8fa1c4; font-size:10px; letter-spacing:1.5px; margin-bottom:12px; text-transform:uppercase; }
+    .score-value { font-size:28px; color:var(--orange); font-weight:900; }
+    .score-subrow { display:flex; justify-content:space-between; gap:8px; margin-top:12px; font-size:10px; color:#a2b0cf; }
+    .score-subrow b { color:var(--ink); }
+    .streak-pill { display:inline-block; margin-top:12px; padding:7px 9px; border:1px solid #775b28; background:rgba(255,184,74,.08); color:#ffd58e; font-size:10px; }
+    .battle-log { display:flex; flex-direction:column-reverse; gap:8px; max-height:160px; overflow:auto; padding-right:3px; }
+    .log-line { color:#c5d0e8; font-size:10px; line-height:1.6; border-left:2px solid #36496f; padding-left:9px; overflow-wrap:anywhere; }
+    .log-line.latest { border-color:var(--cyan); color:#eef8ff; }
+    .log-line .log-turn { color:var(--cyan); margin-right:6px; }
+    .battle-footer { display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-top:14px; color:#7284aa; font-size:10px; }
+    .text-button { border:0; padding:5px 0; background:transparent; color:#a6b5d5; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
+
+    .results-wrap { width:min(860px,100%); margin:0 auto; }
+    .result-hero { text-align:center; padding:30px 22px 24px; border-bottom:1px solid #2b3b61; }
+    .result-icon { width:68px; height:68px; display:grid; place-items:center; margin:0 auto 18px; background:#1b294a; border:2px solid #4b638f; font-size:32px; box-shadow:5px 5px 0 rgba(0,0,0,.3); }
+    .result-kicker { font-size:10px; color:var(--muted); letter-spacing:3px; }
+    .result-title { margin:10px 0 8px; font-size:clamp(32px,6vw,54px); letter-spacing:-2px; font-weight:900; }
+    .result-title.victory { color:var(--green); text-shadow:4px 4px #164b42; }
+    .result-title.defeat { color:var(--pink); text-shadow:4px 4px #52213e; }
+    .result-title.draw { color:var(--orange); text-shadow:4px 4px #52391f; }
+    .result-subtitle { color:#a9b8d6; line-height:1.7; font-size:12px; margin:0; }
+    .results-content { padding:22px; }
+    .results-metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+    .result-metric { padding:15px; border:1px solid #304166; background:#0e172d; }
+    .result-metric span { display:block; color:#8f9fbe; font-size:9px; letter-spacing:1.4px; text-transform:uppercase; }
+    .result-metric strong { display:block; font-size:24px; margin-top:8px; color:var(--cyan); overflow-wrap:anywhere; }
+    .results-section-title { font-size:12px; letter-spacing:1.6px; margin:24px 0 12px; color:#dae3f6; }
+    .stats-table { width:100%; border-collapse:collapse; font-size:11px; }
+    .stats-table td { padding:11px 12px; border-bottom:1px solid #29395c; }
+    .stats-table td:first-child { color:#a6b5d1; }
+    .stats-table td:last-child { text-align:right; font-weight:900; color:#f4f6ff; }
+    .results-actions { display:flex; justify-content:center; flex-wrap:wrap; gap:13px; margin-top:25px; }
+    .result-footnote { text-align:center; margin:18px 0 0; color:#7d8cac; font-size:10px; line-height:1.7; }
+    .footer-note { text-align:center; padding-top:22px; color:#536486; font-size:9px; letter-spacing:1px; }
+
+    @media (max-width:760px) {
+      .home-hero { grid-template-columns:1fr; padding:27px 22px; }
+      .hero-art { min-height:210px; }
+      .home-hero:after { right:-120px; top:auto; bottom:-140px; }
+      .mini-rules { grid-template-columns:1fr; gap:14px; }
+      .rule-item { display:grid; grid-template-columns:110px 1fr; gap:10px; }
+      .rule-item b { margin:0; }
+      .battle-lower { grid-template-columns:1fr; }
+      .fighter-stage { min-height:125px; }
+      .app-shell { width:min(100% - 18px,1120px); padding-top:15px; }
+      .top-tag { font-size:9px; }
+    }
+    @media (max-width:500px) {
+      .topbar { align-items:flex-start; }
+      .brand-name { font-size:12px; }
+      .top-tag { max-width:125px; line-height:1.5; }
+      .stat-strip { gap:7px; }
+      .stat-card { padding:12px 10px; }
+      .stat-card span { font-size:8px; letter-spacing:.7px; }
+      .combatants { gap:8px; }
+      .combatant { padding:11px 9px; }
+      .combatant-top { align-items:flex-start; flex-direction:column; gap:5px; }
+      .combatant-name { font-size:10px; }
+      .fighter-stage .fighter-sprite { transform:scale(.87); transform-origin:bottom center; margin-bottom:-12px; }
+      .fighter-stage { min-height:106px; }
+      .action-grid { grid-template-columns:1fr; }
+      .action-btn { min-height:83px; display:grid; grid-template-columns:28px 1fr; grid-template-rows:auto auto; column-gap:10px; align-items:center; padding:11px 13px; }
+      .action-btn .action-index { grid-row:1 / span 2; margin:0; }
+      .action-btn .action-name { align-self:end; }
+      .action-btn .action-desc { margin-top:3px; align-self:start; }
+      .action-btn .cooldown-label { grid-column:2; }
+      .action-intro { align-items:flex-start; flex-direction:column; }
+      .results-content { padding:15px; }
+      .results-metrics { grid-template-columns:1fr 1fr; }
+      .result-metric:last-child { grid-column:span 2; }
+      .result-metric strong { font-size:21px; }
+      .pixel-btn { flex:1; padding:14px 13px; font-size:11px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; transition-duration:.01ms !important; }
+    }
+  
+
+    /* Reference-inspired 8-bit landscape theme: pixel sky, grass, arena HUD and chunky buttons. */
+    :root {
+      --ink: #eff9f2;
+      --muted: #b8d0d1;
+      --panel: #17334a;
+      --panel-2: #102739;
+      --line: #31576a;
+      --cyan: #ffe66d;
+      --cyan-dark: #94661e;
+      --pink: #ff6466;
+      --orange: #ffcf4d;
+      --green: #70e26a;
+      --red: #ff4f59;
+      --purple: #a6a2ff;
+      --shadow: 0 8px 0 rgba(29, 67, 55, .28);
+    }
+    html { background:#55c5ed; }
+    body {
+      color:#173b37;
+      background:
+        radial-gradient(ellipse at 17% 10%, #f8ffff 0 20px, transparent 22px),
+        radial-gradient(ellipse at 22% 8%, #f8ffff 0 28px, transparent 30px),
+        radial-gradient(ellipse at 27% 11%, #f8ffff 0 21px, transparent 23px),
+        radial-gradient(ellipse at 74% 16%, #f8ffff 0 20px, transparent 22px),
+        radial-gradient(ellipse at 79% 13%, #f8ffff 0 27px, transparent 29px),
+        linear-gradient(180deg, #55c4ed 0%, #c7f5f1 100%);
+      background-attachment:fixed;
+    }
+    .app-shell { position:relative; }
+    .brand-mark {
+      color:#3d4f62; background:#bfd9e9; border:3px solid #48657a;
+      box-shadow:4px 4px 0 #345064; image-rendering:pixelated;
+    }
+    .brand-name { color:#173e38; text-shadow:1px 1px rgba(255,255,255,.4); }
+    .brand-name span { color:#9b541d; }
+    .top-tag { color:#254f55; font-weight:900; text-shadow:1px 1px rgba(255,255,255,.35); }
+    .eyebrow { color:#17684a; font-weight:900; }
+    .panel { box-shadow:8px 8px 0 rgba(35,78,58,.25); }
+    .home-hero {
+      color:#183c35;
+      background:
+        radial-gradient(ellipse at 15% 20%, #f9ffff 0 20px, transparent 22px),
+        radial-gradient(ellipse at 21% 17%, #f9ffff 0 28px, transparent 30px),
+        radial-gradient(ellipse at 28% 21%, #f9ffff 0 19px, transparent 21px),
+        radial-gradient(ellipse at 82% 15%, #f9ffff 0 18px, transparent 20px),
+        radial-gradient(ellipse at 87% 12%, #f9ffff 0 26px, transparent 28px),
+        linear-gradient(to bottom, #67cfef 0%, #baf0ed 54%, #a3df7b 54%, #58ab49 72%, #4e9a3e 76%, #754b35 76%, #65402f 100%);
+      border:4px solid #367547;
+      box-shadow:8px 8px 0 #397447;
+    }
+    .home-hero:after {
+      content:""; position:absolute; top:auto; right:0; bottom:0; left:0;
+      width:auto; height:27%; border:0; transform:none; pointer-events:none;
+      background:repeating-linear-gradient(90deg,rgba(22,84,48,.12) 0 5px,transparent 5px 13px);
+    }
+    .hero-copy { color:#244b4a; }
+    .hero-note { color:#2d5d58; font-weight:900; }
+    h1 { color:#17483c; text-shadow:4px 4px 0 #ecf8c9; }
+    h1 .title-cyan { color:#ffd84f; text-shadow:4px 4px 0 #844b24; }
+    .hero-art { background:rgba(255,255,255,.13); border-bottom:4px solid rgba(45,111,56,.25); }
+    .fighter-label.player { color:#075c78; }
+    .fighter-label.enemy { color:#a93447; }
+    .fighter-card small { color:#27574f; font-weight:900; }
+    .versus { color:#fff15e; -webkit-text-stroke:1px #8d4d20; text-shadow:3px 3px #723b29; font-size:27px; }
+    .pixel-btn { border:3px solid #314e66; image-rendering:pixelated; }
+    .primary-btn { color:#253c4d; background:#c0dbe9; box-shadow:5px 5px 0 #395970; border-color:#66879a; }
+    .primary-btn:hover { filter:brightness(1.08); }
+    .secondary-btn { color:#fff7bb; background:#347d52; border-color:#215a3e; box-shadow:5px 5px 0 #234e3c; }
+    .stat-card { background:#d0f0b2; border:3px solid #458c49; box-shadow:4px 4px 0 rgba(43,90,51,.25); }
+    .stat-card span { color:#315e4e; font-weight:900; }
+    .stat-card strong { color:#164e3b; }
+    .stat-card strong.cyan { color:#1b6881; }
+    .stat-card strong.gold { color:#a65718; }
+    .mini-rules.panel { background:#bde79b; border:3px solid #438a4d; }
+    .rule-item { color:#315f4d; }
+    .rule-item b { color:#183e31; }
+
+    .battle-heading h2 { color:#fff2a0; text-shadow:3px 3px #81451f; }
+    .battle-heading .eyebrow { color:#176547; }
+    .turn-badge { color:#fff08a; background:#142033; border:2px solid #51657b; box-shadow:3px 3px 0 rgba(27,59,55,.28); font-weight:900; }
+    .arena.panel { color:#f2f8ff; background:linear-gradient(180deg,#14283b,#0a1625); border:4px solid #304b5c; box-shadow:8px 8px 0 rgba(31,68,57,.25); }
+    .combatants {
+      position:relative; min-height:300px; overflow:hidden; isolation:isolate;
+      display:grid; grid-template-columns:1fr 1fr; gap:0; align-items:stretch;
+      border:3px solid #244e55;
+      background:linear-gradient(180deg,#51c5ec 0%,#b9eef0 100%);
+    }
+    .combatants:before {
+      content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+      background:
+        radial-gradient(ellipse at 15% 20%,#faffff 0 16px,transparent 18px),
+        radial-gradient(ellipse at 20% 17%,#faffff 0 24px,transparent 26px),
+        radial-gradient(ellipse at 26% 20%,#faffff 0 16px,transparent 18px),
+        radial-gradient(ellipse at 72% 15%,#faffff 0 17px,transparent 19px),
+        radial-gradient(ellipse at 77% 12%,#faffff 0 25px,transparent 27px),
+        radial-gradient(ellipse at 83% 16%,#faffff 0 16px,transparent 18px),
+        linear-gradient(180deg,#51c5ec 0%,#b9eef0 100%);
+    }
+    .scene-ground {
+      position:absolute; left:0; right:0; bottom:0; height:25%; z-index:1; pointer-events:none;
+      border-top:5px solid #277d37;
+      background:
+        repeating-linear-gradient(90deg,rgba(169,221,92,.35) 0 6px,transparent 6px 14px),
+        linear-gradient(to bottom,#4ca742 0 20%,#2d813e 20% 30%,#805137 30% 100%);
+      box-shadow:inset 0 8px 0 rgba(184,239,91,.45);
+    }
+    .scene-tree { position:absolute; bottom:17%; width:115px; height:140px; z-index:1; pointer-events:none; }
+    .scene-tree:before { content:""; position:absolute; left:49px; bottom:0; width:17px; height:74px; background:#815139; border:3px solid #593c2d; }
+    .scene-tree:after {
+      content:""; position:absolute; left:10px; top:0; width:88px; height:83px;
+      background:#83c943; border:6px solid #317b35; clip-path:polygon(25% 0,75% 0,83% 10%,94% 10%,100% 30%,94% 43%,100% 58%,84% 76%,70% 91%,31% 91%,15% 78%,0 59%,7% 40%,0 26%,12% 11%);
+      box-shadow:inset -8px -8px 0 rgba(32,111,42,.28);
+    }
+    .tree-left { left:0; }
+    .tree-right { right:0; transform:scaleX(-1); }
+    .scene-cloud { position:absolute; z-index:1; height:18px; background:#fbffff; box-shadow:0 -12px 0 #fbffff,14px -20px 0 #fbffff,30px -12px 0 #fbffff,45px -5px 0 #fbffff; opacity:.93; pointer-events:none; }
+    .cloud-one { top:20%; left:28%; width:39px; }
+    .cloud-two { top:11%; left:55%; width:33px; transform:scale(.8); }
+    .cloud-three { top:30%; right:20%; width:30px; transform:scale(.72); }
+    .arena-vs {
+      position:absolute; z-index:3; left:50%; top:42%; transform:translate(-50%,-50%) rotate(-5deg);
+      padding:3px 8px; color:#fff16b; font-weight:900; font-size:20px; line-height:1;
+      -webkit-text-stroke:1px #8e3b1f; text-shadow:2px 2px #713b2b, -1px -1px #fff;
+      background:rgba(16,34,46,.38); border:2px solid rgba(255,255,255,.7); box-shadow:3px 3px 0 rgba(0,0,0,.25);
+      pointer-events:none;
+    }
+    .combatant { position:relative; z-index:2; padding:12px 12px 0; min-width:0; display:flex; flex-direction:column; background:rgba(14,32,42,.12); border:0; }
+    .combatant + .combatant { border-left:2px dashed rgba(35,77,77,.28); }
+    .combatant-top { padding:7px 8px; margin-bottom:6px; background:rgba(10,26,42,.84); border:2px solid #577786; }
+    .combatant-name.player { color:#67e5ff; }
+    .combatant-name.enemy { color:#ff8186; }
+    .hp-number { color:#fff8cb; }
+    .health-track { background:#101a2a; border:2px solid #f0f5f3; height:16px; }
+    .health-fill { background:linear-gradient(180deg,#a9f85b,#4bc45d); }
+    .health-fill.enemy { background:linear-gradient(180deg,#ff8b85,#eb3e55); }
+    .combatant-meta { color:#15444a; font-weight:900; text-shadow:1px 1px rgba(255,255,255,.25); }
+    .fighter-stage { position:relative; z-index:2; min-height:176px; flex:1; padding-top:5px; padding-bottom:14px; align-items:flex-end; }
+    .fighter-stage .fighter-sprite { transform:scale(1.22); transform-origin:bottom center; margin-bottom:4px; }
+    .arena-floor { display:none; }
+    .timer-panel { background:#101b2a; border:2px solid #40596d; box-shadow:4px 4px 0 rgba(0,0,0,.18); }
+    .timer-label { color:#e0edf8; font-weight:900; }
+    .timer-number { text-shadow:2px 2px #000; }
+    .timer-track { height:13px; border:2px solid #c9d9df; }
+    .action-intro h3 { color:#fff09a; }
+    .action-intro span { color:#b9cad4; }
+    .action-btn { border:3px solid #567187; background:linear-gradient(180deg,#28445b,#172e43); box-shadow:4px 4px 0 #07111c; }
+    .action-btn:hover:not(:disabled) { border-color:#ffec7b; background:linear-gradient(180deg,#3b5f76,#24435b); }
+    .action-btn.light { border-color:#3a9db3; }
+    .action-btn.heavy { border-color:#b77bd1; }
+    .action-btn.defend { border-color:#8aaa56; }
+    .action-btn .action-index { background:#c0dbe9; color:#1d4154; border:1px solid #6c8da2; }
+    .score-panel, .log-panel { background:#101b2a; border:2px solid #40596d; }
+    .section-label { color:#b8cfdd; }
+    .score-value { color:#ffdb59; text-shadow:2px 2px #624a22; }
+    .score-subrow { color:#b8cad7; }
+    .score-subrow b { color:#fff; }
+    .streak-pill { border-color:#a57934; color:#ffe29a; }
+    .battle-log { scrollbar-color:#59758a #101b2a; }
+    .log-line { color:#d4e2ea; border-left-color:#587087; }
+    .log-line.latest { border-color:#ffdf5c; color:#fff8d9; }
+    .log-line .log-turn { color:#ffe66d; }
+    .battle-footer { color:#9eb9c9; }
+    .text-button { color:#c4e8f7; }
+
+    .results-wrap.panel {
+      color:#24453c; border:4px solid #39764b;
+      background:
+        radial-gradient(ellipse at 13% 10%,#fbffff 0 18px,transparent 20px),
+        radial-gradient(ellipse at 19% 7%,#fbffff 0 25px,transparent 27px),
+        radial-gradient(ellipse at 25% 11%,#fbffff 0 17px,transparent 19px),
+        linear-gradient(to bottom,#61cbee 0%,#bceef0 56%,#a5de7d 56%,#7ac451 66%,#489b43 72%,#764a35 72%,#61402f 100%);
+      box-shadow:8px 8px 0 rgba(35,78,58,.28);
+    }
+    .result-hero { border-bottom:2px solid rgba(42,104,63,.3); }
+    .result-icon { color:#fff1a0; background:#315d51; border:3px solid #214b42; box-shadow:5px 5px 0 #396d48; }
+    .result-kicker { color:#2c6551; font-weight:900; }
+    .result-title.victory { color:#ffe15a; text-shadow:4px 4px #8a4e21; }
+    .result-title.defeat { color:#fff2cf; text-shadow:4px 4px #99413e; }
+    .result-title.draw { color:#fff4b3; text-shadow:4px 4px #815128; }
+    .result-subtitle { color:#204b45; font-weight:800; }
+    .results-content { background:rgba(196,239,186,.96); }
+    .result-metric { background:#d9f0c3; border:2px solid #4c9754; box-shadow:3px 3px 0 rgba(31,91,49,.18); }
+    .result-metric span { color:#315b4c; font-weight:900; }
+    .result-metric strong { color:#14513e; }
+    .results-section-title { color:#164e3c; text-shadow:1px 1px rgba(255,255,255,.4); }
+    .stats-table td { border-bottom:1px solid rgba(40,104,60,.25); }
+    .stats-table td:first-child { color:#31594a; font-weight:700; }
+    .stats-table td:last-child { color:#173e32; }
+    .result-footnote { color:#2c594c; font-weight:700; }
+    .footer-note { color:#214e52; }
+
+    @media (max-width:760px) {
+      .combatants { min-height:270px; }
+      .scene-tree { transform:scale(.75); transform-origin:bottom; }
+      .tree-left { left:-20px; }
+      .tree-right { right:-20px; transform:scaleX(-1) scale(.75); }
+      .fighter-stage { min-height:155px; }
+      .arena-vs { font-size:16px; padding:3px 5px; }
+    }
+    @media (max-width:500px) {
+      .combatants { min-height:245px; }
+      .combatant { padding:8px 6px 0; }
+      .combatant-top { padding:6px 5px; }
+      .combatant-meta { font-size:8px; }
+      .fighter-stage { min-height:141px; }
+      .fighter-stage .fighter-sprite { transform:scale(.93); margin-bottom:0; }
+      .scene-tree { bottom:17%; }
+      .scene-cloud { opacity:.65; }
+      .arena-vs { top:43%; }
+      .home-hero { padding:22px 16px; }
+      .hero-art { gap:12px; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark">DF</div><div class="brand-name">DUAL <span>FIGHTERS</span></div></div>
+      <div class="top-tag">8-BIT ARCADE DUEL<br>ONE TURN CAN CHANGE EVERYTHING</div>
+    </header>
+
+    <main>
+      <!-- HOME SCREEN -->
+      <section id="home-screen" class="screen active" aria-labelledby="home-title">
+        <div class="home-hero panel">
+          <div>
+            <div class="eyebrow">Insert courage · Start match</div>
+            <h1 id="home-title">DUAL <span class="title-cyan">FIGHTERS</span></h1>
+            <p class="hero-copy">Read your rival. Time your attacks. Make every turn count. Choose between a quick Light Attack, a powerful Heavy Attack, or a defensive play — but remember, your opponent is learning.</p>
+            <div class="hero-actions">
+              <button id="play-button" class="pixel-btn primary-btn">▶ PLAY</button>
+              <button id="how-to-button" class="pixel-btn secondary-btn">HOW TO PLAY</button>
+            </div>
+            <p class="hero-note">MOUSE + TOUCH CONTROLS ONLY · 5-SECOND TURNS · NO SERVER REQUIRED</p>
+          </div>
+          <div class="hero-art" aria-label="Two fighters facing off">
+            <div class="fighter-card">
+              <div class="fighter-sprite player" aria-hidden="true"><i class="head"></i><i class="visor"></i><i class="torso"></i><i class="belt"></i><i class="arm left"></i><i class="arm right"></i><i class="glove left"></i><i class="glove right"></i><i class="leg left"></i><i class="leg right"></i><i class="boot left"></i><i class="boot right"></i></div>
+              <div class="fighter-label player">PLAYER 01</div><small>READY TO FIGHT</small>
+            </div>
+            <div class="versus">VS</div>
+            <div class="fighter-card">
+              <div class="fighter-sprite enemy" aria-hidden="true"><i class="head"></i><i class="visor"></i><i class="torso"></i><i class="belt"></i><i class="arm left"></i><i class="arm right"></i><i class="glove left"></i><i class="glove right"></i><i class="leg left"></i><i class="leg right"></i><i class="boot left"></i><i class="boot right"></i></div>
+              <div class="fighter-label enemy">CPU 02</div><small>ADAPTIVE RIVAL</small>
+            </div>
+          </div>
+        </div>
+        <div class="stat-strip">
+          <div class="stat-card"><span>Cumulative score</span><strong id="home-score">0</strong></div>
+          <div class="stat-card"><span>High score</span><strong id="home-high-score" class="cyan">0</strong></div>
+          <div class="stat-card"><span>Longest win streak</span><strong id="home-best-streak" class="gold">0</strong></div>
+        </div>
+        <div class="mini-rules panel" id="home-rules">
+          <div class="rule-item"><b>01 / CHOOSE</b><span>Pick one action before the five-second timer ends.</span></div>
+          <div class="rule-item"><b>02 / OUTSMART</b><span>The CPU studies your last three moves and adapts.</span></div>
+          <div class="rule-item"><b>03 / SURVIVE</b><span>Reach 0 HP before your rival — and build your streak.</span></div>
+        </div>
+      </section>
+
+      <!-- BATTLE SCREEN -->
+      <section id="battle-screen" class="screen" aria-labelledby="battle-title">
+        <div class="battle-heading">
+          <div><div class="eyebrow">Fight in progress</div><h2 id="battle-title">THE DUEL</h2></div>
+          <div class="turn-badge">TURN <span id="turn-number">1</span></div>
+        </div>
+        <div class="arena panel">
+          <div class="combatants" id="combatants-stage">
+            <span class="scene-tree tree-left" aria-hidden="true"></span>
+            <span class="scene-tree tree-right" aria-hidden="true"></span>
+            <span class="scene-cloud cloud-one" aria-hidden="true"></span>
+            <span class="scene-cloud cloud-two" aria-hidden="true"></span>
+            <span class="scene-cloud cloud-three" aria-hidden="true"></span>
+            <span class="scene-ground" aria-hidden="true"></span>
+            <div class="arena-vs" aria-hidden="true">VS</div>
+            <div class="combatant">
+              <div class="combatant-top"><span class="combatant-name player">PLAYER 01</span><span id="player-hp-number" class="hp-number">100 / 100 HP</span></div>
+              <div class="health-track" role="progressbar" aria-label="Player health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" id="player-hp-progress"><div id="player-health-fill" class="health-fill"></div></div>
+              <div class="combatant-meta"><span>FIGHTER: YOU</span><span id="player-status">ALL SYSTEMS READY</span></div>
+              <div class="fighter-stage"><div id="player-battle-sprite" class="fighter-sprite player" aria-hidden="true"><i class="head"></i><i class="visor"></i><i class="torso"></i><i class="belt"></i><i class="arm left"></i><i class="arm right"></i><i class="glove left"></i><i class="glove right"></i><i class="leg left"></i><i class="leg right"></i><i class="boot left"></i><i class="boot right"></i></div></div>
+              <div class="arena-floor"></div>
+            </div>
+            <div class="combatant">
+              <div class="combatant-top"><span class="combatant-name enemy">CPU 02</span><span id="ai-hp-number" class="hp-number">100 / 100 HP</span></div>
+              <div class="health-track" role="progressbar" aria-label="Computer health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" id="ai-hp-progress"><div id="ai-health-fill" class="health-fill enemy"></div></div>
+              <div class="combatant-meta"><span>FIGHTER: CPU</span><span id="ai-status">OBSERVING...</span></div>
+              <div class="fighter-stage"><div id="ai-battle-sprite" class="fighter-sprite enemy" aria-hidden="true"><i class="head"></i><i class="visor"></i><i class="torso"></i><i class="belt"></i><i class="arm left"></i><i class="arm right"></i><i class="glove left"></i><i class="glove right"></i><i class="leg left"></i><i class="leg right"></i><i class="boot left"></i><i class="boot right"></i></div></div>
+              <div class="arena-floor"></div>
+            </div>
+          </div>
+
+          <div class="timer-panel" aria-live="polite">
+            <div class="timer-row"><span id="timer-label" class="timer-label">SELECT YOUR ACTION</span><span id="timer-number" class="timer-number">5.0s</span></div>
+            <div class="timer-track"><div id="timer-fill" class="timer-fill"></div></div>
+          </div>
+
+          <div class="action-intro"><h3>YOUR MOVE — CHOOSE NOW</h3><span>Computer choice stays hidden until resolution.</span></div>
+          <div class="action-grid">
+            <button id="light-button" class="action-btn light" data-action="light">
+              <span class="action-index">01</span><span class="action-name">LIGHT ATTACK</span><span class="action-desc">10 DAMAGE · +1 POINT ON HIT</span>
+            </button>
+            <button id="heavy-button" class="action-btn heavy" data-action="heavy">
+              <span class="action-index">02</span><span class="action-name">HEAVY ATTACK</span><span class="action-desc">20 DAMAGE · +2 POINTS ON HIT</span><span class="cooldown-label" id="heavy-cooldown-label"></span>
+            </button>
+            <button id="defend-button" class="action-btn defend" data-action="defend">
+              <span class="action-index">03</span><span class="action-name">DEFEND</span><span class="action-desc">BLOCK LIGHT · SPECIAL VS HEAVY</span><span class="cooldown-label" id="defend-cooldown-label"></span>
+            </button>
+          </div>
+
+          <div class="battle-lower">
+            <div class="score-panel">
+              <div class="section-label">YOUR SCORE</div>
+              <div class="score-value" id="battle-cumulative-score">0</div>
+              <div class="score-subrow"><span>MATCH POINTS</span><b id="battle-match-points">0</b></div>
+              <div class="score-subrow"><span>HIGH SCORE</span><b id="battle-high-score">0</b></div>
+              <div class="score-subrow"><span>WIN STREAK</span><b id="battle-streak">0</b></div>
+              <div class="streak-pill">BEST STREAK: <strong id="battle-best-streak">0</strong></div>
+            </div>
+            <div class="log-panel">
+              <div class="section-label">COMBAT LOG / LAST EVENTS</div>
+              <div id="battle-log" class="battle-log" aria-live="polite"><div class="log-line latest">The match is ready. Choose your first action.</div></div>
+            </div>
+          </div>
+          <div class="battle-footer"><span>TURN RESOLVES SIMULTANEOUSLY</span><button id="return-home-button" class="text-button">Exit to menu</button></div>
+        </div>
+      </section>
+
+      <!-- RESULTS SCREEN -->
+      <section id="results-screen" class="screen" aria-labelledby="result-title">
+        <div class="results-wrap panel">
+          <div class="result-hero">
+            <div id="result-icon" class="result-icon" aria-hidden="true">★</div>
+            <div class="result-kicker">MATCH COMPLETE</div>
+            <h2 id="result-title" class="result-title victory">VICTORY!</h2>
+            <p id="result-subtitle" class="result-subtitle">You won the duel. A new challenger awaits.</p>
+          </div>
+          <div class="results-content">
+            <div class="results-metrics">
+              <div class="result-metric"><span>Match points</span><strong id="result-match-points">0</strong></div>
+              <div class="result-metric"><span>Cumulative score</span><strong id="result-cumulative-score">0</strong></div>
+              <div class="result-metric"><span>High score</span><strong id="result-high-score">0</strong></div>
+            </div>
+            <h3 class="results-section-title">FINAL FIGHT STATUS</h3>
+            <table class="stats-table"><tbody>
+              <tr><td>Your remaining health</td><td id="result-player-hp">100 / 100 HP</td></tr>
+              <tr><td>Computer remaining health</td><td id="result-ai-hp">100 / 100 HP</td></tr>
+              <tr><td>Current winning streak</td><td id="result-current-streak">0</td></tr>
+              <tr><td>Longest winning streak</td><td id="result-best-streak">0</td></tr>
+            </tbody></table>
+            <h3 class="results-section-title">YOUR COMBAT STATISTICS</h3>
+            <table class="stats-table"><tbody>
+              <tr><td>Light Attacks used</td><td id="stat-light">0</td></tr>
+              <tr><td>Heavy Attacks used</td><td id="stat-heavy">0</td></tr>
+              <tr><td>Successful Defends (blocked Light Attacks)</td><td id="stat-defend">0</td></tr>
+              <tr><td>Special Defends vs Heavy Attack</td><td id="stat-special-defend">0</td></tr>
+              <tr><td>Timeouts</td><td id="stat-timeouts">0</td></tr>
+              <tr><td>Turns completed</td><td id="stat-turns">0</td></tr>
+            </tbody></table>
+            <div class="results-actions">
+              <button id="continue-button" class="pixel-btn primary-btn">▶ CONTINUE</button>
+              <button id="results-home-button" class="pixel-btn secondary-btn">EXIT TO MENU</button>
+            </div>
+            <p class="result-footnote">Your score and records are saved in this browser. Continuing starts a fresh match with both fighters at 100 HP.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="footer-note">DUAL FIGHTERS · BUILT FOR THE ARCADE SPIRIT</footer>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const STORAGE_KEY = 'dualFightersSave_v1';
+      const MAX_HP = 100;
+      const TURN_SECONDS = 5;
+      const ACTIONS = ['light', 'heavy', 'defend'];
+
+      const $ = (id) => document.getElementById(id);
+      const screens = {
+        home: $('home-screen'),
+        battle: $('battle-screen'),
+        results: $('results-screen')
+      };
+
+      const state = {
+        phase: 'home', // home | playing | resolving | results
+        playerHP: MAX_HP,
+        aiHP: MAX_HP,
+        turn: 1,
+        playerCooldowns: { heavy: 0, defend: 0 },
+        aiCooldowns: { heavy: 0, defend: 0 },
+        hiddenAIAction: null,
+        turnResolved: false,
+        timerStartedAt: 0,
+        timerInterval: null,
+        nextTurnTimeout: null,
+        matchPoints: 0,
+        computerMatchPoints: 0,
+        cumulativeScore: 0,
+        highScore: 0,
+        currentStreak: 0,
+        bestStreak: 0,
+        playerHistory: [],
+        logs: [],
+        stats: freshStats(),
+        lastOutcome: null
+      };
+
+      function freshStats() {
+        return { light: 0, heavy: 0, successfulDefends: 0, specialDefends: 0, timeouts: 0, turns: 0 };
+      }
+
+      function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+
+      function safeNumber(value, fallback = 0) {
+        return Number.isFinite(value) && value >= 0 ? Math.floor(value) : fallback;
+      }
+
+      function loadSave() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          const data = JSON.parse(raw);
+          if (!data || typeof data !== 'object') return;
+          state.cumulativeScore = safeNumber(data.cumulativeScore, 0);
+          state.highScore = Math.max(state.cumulativeScore, safeNumber(data.highScore, 0));
+          state.currentStreak = safeNumber(data.currentStreak, 0);
+          state.bestStreak = Math.max(state.currentStreak, safeNumber(data.bestStreak, 0));
+        } catch (error) {
+          // If browser storage is unavailable or malformed, start with safe defaults.
+          state.cumulativeScore = 0;
+          state.highScore = 0;
+          state.currentStreak = 0;
+          state.bestStreak = 0;
+        }
+      }
+
+      function saveProgress() {
+        const data = {
+          cumulativeScore: state.cumulativeScore,
+          highScore: state.highScore,
+          currentStreak: state.currentStreak,
+          bestStreak: state.bestStreak
+        };
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+        catch (error) { /* The game still works when storage is blocked or full. */ }
+      }
+
+      function showScreen(name) {
+        Object.entries(screens).forEach(([key, el]) => el.classList.toggle('active', key === name));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function setActionButtonsEnabled(enabled) {
+        const actions = [
+          { id: 'light-button', name: 'light' },
+          { id: 'heavy-button', name: 'heavy' },
+          { id: 'defend-button', name: 'defend' }
+        ];
+        actions.forEach(({ id, name }) => {
+          const button = $(id);
+          let cooldown = 0;
+          if (name === 'heavy') cooldown = state.playerCooldowns.heavy;
+          if (name === 'defend') cooldown = state.playerCooldowns.defend;
+          button.disabled = !enabled || cooldown > 0;
+        });
+        $('heavy-cooldown-label').textContent = state.playerCooldowns.heavy > 0 ? 'COOLDOWN · UNAVAILABLE THIS TURN' : 'READY';
+        $('defend-cooldown-label').textContent = state.playerCooldowns.defend > 0 ? 'COOLDOWN · UNAVAILABLE THIS TURN' : 'READY';
+      }
+
+      function renderHomeStats() {
+        $('home-score').textContent = state.cumulativeScore.toLocaleString();
+        $('home-high-score').textContent = state.highScore.toLocaleString();
+        $('home-best-streak').textContent = state.bestStreak.toLocaleString();
+      }
+
+      function renderScore() {
+        $('battle-cumulative-score').textContent = state.cumulativeScore.toLocaleString();
+        $('battle-match-points').textContent = state.matchPoints.toLocaleString();
+        $('battle-high-score').textContent = state.highScore.toLocaleString();
+        $('battle-streak').textContent = state.currentStreak.toLocaleString();
+        $('battle-best-streak').textContent = state.bestStreak.toLocaleString();
+      }
+
+      function renderHealth() {
+        $('player-hp-number').textContent = `${state.playerHP} / ${MAX_HP} HP`;
+        $('ai-hp-number').textContent = `${state.aiHP} / ${MAX_HP} HP`;
+        $('player-health-fill').style.width = `${(state.playerHP / MAX_HP) * 100}%`;
+        $('ai-health-fill').style.width = `${(state.aiHP / MAX_HP) * 100}%`;
+        $('player-hp-progress').setAttribute('aria-valuenow', String(state.playerHP));
+        $('ai-hp-progress').setAttribute('aria-valuenow', String(state.aiHP));
+        $('player-status').textContent = state.playerHP <= 25 ? 'CRITICAL HP' : 'FIGHTING';
+        $('ai-status').textContent = state.aiHP <= 25 ? 'CRITICAL HP' : 'ANALYZING';
+      }
+
+      function renderTurn() {
+        $('turn-number').textContent = String(state.turn);
+        renderHealth();
+        renderScore();
+        setActionButtonsEnabled(state.phase === 'playing' && !state.turnResolved);
+      }
+
+      function addLog(message, type = '') {
+        const turnLabel = state.stats.turns ? state.stats.turns : state.turn;
+        state.logs.push({ turn: turnLabel, message, type });
+        if (state.logs.length > 22) state.logs.shift();
+        const log = $('battle-log');
+        log.replaceChildren();
+        const latestItems = state.logs.slice(-8).reverse();
+        latestItems.forEach((item, index) => {
+          const line = document.createElement('div');
+          line.className = `log-line${index === 0 ? ' latest' : ''}`;
+          const turn = document.createElement('span');
+          turn.className = 'log-turn';
+          turn.textContent = `T${item.turn}`;
+          line.append(turn, document.createTextNode(item.message));
+          log.appendChild(line);
+        });
+      }
+
+      function resetTimerDisplay() {
+        $('timer-number').textContent = `${TURN_SECONDS.toFixed(1)}s`;
+        $('timer-fill').style.width = '100%';
+        $('timer-fill').style.backgroundColor = 'hsl(210, 90%, 58%)';
+        $('timer-label').textContent = 'SELECT YOUR ACTION';
+      }
+
+      function getAvailableActions(cooldowns) {
+        return ACTIONS.filter((action) => {
+          if (action === 'heavy' && cooldowns.heavy > 0) return false;
+          if (action === 'defend' && cooldowns.defend > 0) return false;
+          return true;
+        });
+      }
+
+      function predictPlayerAction() {
+        const recent = state.playerHistory.slice(-3);
+        if (!recent.length) return null;
+        const counts = { light: 0, heavy: 0, defend: 0 };
+        recent.forEach((action) => counts[action]++);
+        const max = Math.max(...Object.values(counts));
+        // Resolve ties in favor of the most recent action among the tied candidates.
+        for (let i = recent.length - 1; i >= 0; i--) {
+          if (counts[recent[i]] === max) return recent[i];
+        }
+        return recent[recent.length - 1];
+      }
+
+      function counterFor(predictedAction, available) {
+        let preferred;
+        if (predictedAction === 'light') {
+          preferred = available.includes('defend') ? 'defend' : (available.includes('heavy') ? 'heavy' : 'light');
+        } else if (predictedAction === 'heavy') {
+          // Under the custom Heavy-vs-Defend rule, defending takes 10 damage,
+          // so mirror Heavy when legal; otherwise use Light rather than Defend.
+          preferred = available.includes('heavy') ? 'heavy' : 'light';
+        } else {
+          preferred = available.includes('heavy') ? 'heavy' : 'light';
+        }
+        return available.includes(preferred) ? preferred : available[0];
+      }
+
+      function chooseAIAction() {
+        const available = getAvailableActions(state.aiCooldowns);
+        const predicted = predictPlayerAction();
+        let counterProbability = .30;
+        if (state.currentStreak >= 4) counterProbability = .70;
+        else if (state.currentStreak >= 2) counterProbability = .50;
+
+        // AI uses only completed prior actions; its choice is locked before this turn's player input.
+        if (predicted && Math.random() < counterProbability) {
+          return counterFor(predicted, available);
+        }
+
+        // Otherwise make a legal, varied choice. The AI never reads the current hidden player choice.
+        return available[Math.floor(Math.random() * available.length)];
+      }
+
+      function actionName(action) {
+        if (action === 'light') return 'Light Attack';
+        if (action === 'heavy') return 'Heavy Attack';
+        if (action === 'defend') return 'Defend';
+        return 'No action (timeout)';
+      }
+
+      function calculateCombat(playerAction, aiAction) {
+        let damageToPlayer = 0;
+        let damageToAI = 0;
+        let playerPoints = 0;
+        let computerPoints = 0;
+        let message = '';
+        let extraMessages = [];
+
+        const isAttack = (action) => action === 'light' || action === 'heavy';
+        const damageFor = (action) => action === 'heavy' ? 20 : 10;
+        const pointsFor = (action) => action === 'heavy' ? 2 : 1;
+
+        if (!playerAction) {
+          if (aiAction === 'light') {
+            damageToPlayer = 10;
+            computerPoints = 1;
+            message = `Time out! CPU Light Attack hit for 10 damage. CPU +1 point.`;
+          } else if (aiAction === 'heavy') {
+            damageToPlayer = 20;
+            computerPoints = 2;
+            message = `Time out! CPU Heavy Attack hit for 20 damage. CPU +2 points.`;
+          } else {
+            message = 'Time out! You missed your action. CPU chose Defend, so no damage was dealt.';
+          }
+          return { damageToPlayer, damageToAI, playerPoints, computerPoints, message, extraMessages };
+        }
+
+        if (isAttack(playerAction) && isAttack(aiAction)) {
+          damageToPlayer = damageFor(aiAction);
+          damageToAI = damageFor(playerAction);
+          playerPoints = pointsFor(playerAction);
+          computerPoints = pointsFor(aiAction);
+          message = `Both attacks connected: you used ${actionName(playerAction)}, CPU used ${actionName(aiAction)}.`;
+          extraMessages.push(`You took ${damageToPlayer} damage and dealt ${damageToAI}. You +${playerPoints}; CPU +${computerPoints}.`);
+        } else if (isAttack(playerAction) && aiAction === 'defend') {
+          if (playerAction === 'light') {
+            computerPoints = 1;
+            message = 'CPU Defend blocked your Light Attack. No damage. CPU +1 point.';
+          } else {
+            damageToAI = 10;
+            playerPoints = 1;
+            computerPoints = 1;
+            message = 'Special clash! Your Heavy Attack beats Defend: CPU takes 10 damage, you take 0. Both +1 point.';
+          }
+        } else if (playerAction === 'defend' && isAttack(aiAction)) {
+          if (aiAction === 'light') {
+            playerPoints = 1;
+            message = 'Your Defend blocked the CPU Light Attack. No damage. You +1 point.';
+          } else {
+            damageToPlayer = 10;
+            playerPoints = 1;
+            computerPoints = 1;
+            message = 'Special clash! CPU Heavy Attack vs your Defend: you take 10 damage, CPU takes 0. Both +1 point.';
+          }
+        } else {
+          message = 'Both fighters chose Defend. No damage and no points.';
+        }
+
+        return { damageToPlayer, damageToAI, playerPoints, computerPoints, message, extraMessages };
+      }
+
+      function tickCooldowns(cooldowns, usedAction) {
+        if (cooldowns.heavy > 0) cooldowns.heavy--;
+        if (cooldowns.defend > 0) cooldowns.defend--;
+        if (usedAction === 'heavy') cooldowns.heavy = 1;
+        if (usedAction === 'defend') cooldowns.defend = 1;
+      }
+
+      function updatePlayerScore(points) {
+        state.matchPoints += points;
+        state.cumulativeScore += points;
+        if (state.cumulativeScore > state.highScore) state.highScore = state.cumulativeScore;
+        saveProgress();
+      }
+
+      function playSpriteEffect(el, effectClass) {
+        el.classList.remove('hit', 'attack', 'block');
+        // Force a reflow so a repeated effect can replay.
+        void el.offsetWidth;
+        el.classList.add(effectClass);
+        window.setTimeout(() => el.classList.remove(effectClass), 330);
+      }
+
+      function beginTurn() {
+        // A completed turn sets phase to "resolving" while its result is shown.
+        // The scheduled next turn must be allowed to transition back into "playing".
+        if (state.phase !== 'playing' && state.phase !== 'resolving') return;
+        state.phase = 'playing';
+        state.turnResolved = false;
+        state.hiddenAIAction = chooseAIAction(); // Locked before the player acts.
+        state.timerStartedAt = performance.now();
+        resetTimerDisplay();
+        renderTurn();
+        $('timer-label').textContent = 'SELECT YOUR ACTION';
+        clearInterval(state.timerInterval);
+        state.timerInterval = window.setInterval(updateTimer, 35);
+      }
+
+      function updateTimer() {
+        if (state.phase !== 'playing' || state.turnResolved) return;
+        const elapsed = (performance.now() - state.timerStartedAt) / 1000;
+        const remaining = Math.max(0, TURN_SECONDS - elapsed);
+        const fraction = remaining / TURN_SECONDS;
+        const hue = Math.round(210 * fraction); // Blue at start, red at zero.
+        $('timer-number').textContent = `${remaining.toFixed(1)}s`;
+        $('timer-number').style.color = `hsl(${hue}, 90%, 65%)`;
+        $('timer-fill').style.width = `${fraction * 100}%`;
+        $('timer-fill').style.backgroundColor = `hsl(${hue}, 90%, 58%)`;
+        if (remaining <= 0) {
+          clearInterval(state.timerInterval);
+          resolveTurn(null, true);
+        }
+      }
+
+      function choosePlayerAction(action) {
+        if (state.phase !== 'playing' || state.turnResolved) return;
+        // Enforce the deadline even if a background tab delays the timer interval callback.
+        if ((performance.now() - state.timerStartedAt) / 1000 >= TURN_SECONDS) {
+          resolveTurn(null, true);
+          return;
+        }
+        if (!ACTIONS.includes(action)) return;
+        if (action === 'heavy' && state.playerCooldowns.heavy > 0) return;
+        if (action === 'defend' && state.playerCooldowns.defend > 0) return;
+        resolveTurn(action, false);
+      }
+
+      function resolveTurn(playerAction, timedOut) {
+        if (state.phase !== 'playing' || state.turnResolved) return;
+        state.turnResolved = true;
+        state.phase = 'resolving';
+        clearInterval(state.timerInterval);
+        const aiAction = state.hiddenAIAction;
+        state.stats.turns++;
+
+        if (timedOut) state.stats.timeouts++;
+        else if (playerAction === 'light') state.stats.light++;
+        else if (playerAction === 'heavy') state.stats.heavy++;
+        else if (playerAction === 'defend' && aiAction === 'light') state.stats.successfulDefends++;
+        else if (playerAction === 'defend' && aiAction === 'heavy') state.stats.specialDefends++;
+
+        const result = calculateCombat(playerAction, aiAction);
+        state.playerHP = clamp(state.playerHP - result.damageToPlayer, 0, MAX_HP);
+        state.aiHP = clamp(state.aiHP - result.damageToAI, 0, MAX_HP);
+        updatePlayerScore(result.playerPoints);
+        state.computerMatchPoints += result.computerPoints;
+
+        // Cooldowns decrease once per completed turn, then newly used actions receive a one-turn cooldown.
+        tickCooldowns(state.playerCooldowns, playerAction);
+        tickCooldowns(state.aiCooldowns, aiAction);
+
+        if (playerAction) {
+          state.playerHistory.push(playerAction);
+          if (state.playerHistory.length > 30) state.playerHistory = state.playerHistory.slice(-30);
+        }
+
+        addLog(`You: ${actionName(playerAction)} · CPU: ${actionName(aiAction)}.`, 'actions');
+        addLog(result.message, 'outcome');
+        result.extraMessages.forEach((msg) => addLog(msg));
+        if (result.damageToPlayer > 0) playSpriteEffect($('player-battle-sprite'), 'hit');
+        if (result.damageToAI > 0) playSpriteEffect($('ai-battle-sprite'), 'hit');
+        if (playerAction === 'defend' && result.damageToPlayer === 0) playSpriteEffect($('player-battle-sprite'), 'block');
+        if (aiAction === 'defend' && result.damageToAI === 0) playSpriteEffect($('ai-battle-sprite'), 'block');
+        if (playerAction === 'light' || playerAction === 'heavy') playSpriteEffect($('player-battle-sprite'), 'attack');
+        if (aiAction === 'light' || aiAction === 'heavy') playSpriteEffect($('ai-battle-sprite'), 'attack');
+
+        state.turn++;
+        renderTurn();
+        $('timer-label').textContent = timedOut ? 'TIME OUT — YOU MISSED YOUR TURN!' : 'ACTIONS RESOLVED';
+        $('timer-number').textContent = timedOut ? 'TIME' : 'DONE';
+        $('timer-fill').style.width = '0%';
+        setActionButtonsEnabled(false);
+
+        const outcome = determineOutcome();
+        if (outcome) {
+          finishMatch(outcome);
+        } else {
+          state.nextTurnTimeout = window.setTimeout(beginTurn, 850);
+        }
+      }
+
+      function determineOutcome() {
+        if (state.playerHP <= 0 && state.aiHP <= 0) return 'draw';
+        if (state.aiHP <= 0) return 'victory';
+        if (state.playerHP <= 0) return 'defeat';
+        return null;
+      }
+
+      function finishMatch(outcome) {
+        if (state.phase === 'results') return;
+        clearInterval(state.timerInterval);
+        clearTimeout(state.nextTurnTimeout);
+        state.phase = 'results';
+        state.lastOutcome = outcome;
+        if (outcome === 'victory') {
+          state.currentStreak++;
+          if (state.currentStreak > state.bestStreak) state.bestStreak = state.currentStreak;
+        } else if (outcome === 'defeat') {
+          state.currentStreak = 0;
+        }
+        // A draw intentionally leaves the active streak unchanged.
+        saveProgress();
+        renderResults(outcome);
+        showScreen('results');
+      }
+
+      function renderResults(outcome) {
+        const title = $('result-title');
+        title.className = `result-title ${outcome}`;
+        if (outcome === 'victory') {
+          title.textContent = 'VICTORY!';
+          $('result-icon').textContent = '★';
+          $('result-subtitle').textContent = 'You won the duel. Keep the streak alive against the next challenger.';
+        } else if (outcome === 'defeat') {
+          title.textContent = 'DEFEAT!';
+          $('result-icon').textContent = '×';
+          $('result-subtitle').textContent = 'The CPU took this match. Study the fight and try a new strategy.';
+        } else {
+          title.textContent = 'DRAW!';
+          $('result-icon').textContent = '＝';
+          $('result-subtitle').textContent = 'Both fighters fell on the same turn. Your winning streak stays unchanged.';
+        }
+        $('result-match-points').textContent = state.matchPoints.toLocaleString();
+        $('result-cumulative-score').textContent = state.cumulativeScore.toLocaleString();
+        $('result-high-score').textContent = state.highScore.toLocaleString();
+        $('result-player-hp').textContent = `${state.playerHP} / ${MAX_HP} HP`;
+        $('result-ai-hp').textContent = `${state.aiHP} / ${MAX_HP} HP`;
+        $('result-current-streak').textContent = String(state.currentStreak);
+        $('result-best-streak').textContent = String(state.bestStreak);
+        $('stat-light').textContent = String(state.stats.light);
+        $('stat-heavy').textContent = String(state.stats.heavy);
+        $('stat-defend').textContent = String(state.stats.successfulDefends);
+        $('stat-special-defend').textContent = String(state.stats.specialDefends);
+        $('stat-timeouts').textContent = String(state.stats.timeouts);
+        $('stat-turns').textContent = String(state.stats.turns);
+      }
+
+      function startMatch() {
+        clearInterval(state.timerInterval);
+        clearTimeout(state.nextTurnTimeout);
+        state.phase = 'playing';
+        state.playerHP = MAX_HP;
+        state.aiHP = MAX_HP;
+        state.turn = 1;
+        state.playerCooldowns = { heavy: 0, defend: 0 };
+        state.aiCooldowns = { heavy: 0, defend: 0 };
+        state.hiddenAIAction = null;
+        state.turnResolved = false;
+        state.matchPoints = 0;
+        state.computerMatchPoints = 0;
+        state.stats = freshStats();
+        state.logs = [];
+        showScreen('battle');
+        $('battle-log').replaceChildren();
+        addLog('New match started. Both fighters have 100 HP.');
+        addLog('The CPU will study your recent moves. Choose carefully.');
+        renderTurn();
+        beginTurn();
+      }
+
+      function exitToHome() {
+        clearInterval(state.timerInterval);
+        clearTimeout(state.nextTurnTimeout);
+        state.phase = 'home';
+        state.turnResolved = true;
+        state.hiddenAIAction = null;
+        saveProgress();
+        renderHomeStats();
+        showScreen('home');
+      }
+
+      function showHowToPlay() {
+        const rules = $('home-rules');
+        rules.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        rules.animate([{ outline: '2px solid rgba(57,229,255,.95)' }, { outline: '2px solid transparent' }], { duration: 850, iterations: 2 });
+      }
+
+      $('play-button').addEventListener('click', startMatch);
+      $('how-to-button').addEventListener('click', showHowToPlay);
+      $('light-button').addEventListener('click', () => choosePlayerAction('light'));
+      $('heavy-button').addEventListener('click', () => choosePlayerAction('heavy'));
+      $('defend-button').addEventListener('click', () => choosePlayerAction('defend'));
+      $('continue-button').addEventListener('click', startMatch);
+      $('results-home-button').addEventListener('click', exitToHome);
+      $('return-home-button').addEventListener('click', exitToHome);
+
+      loadSave();
+      renderHomeStats();
+      renderScore();
+    })();
+  </script>
+</body>
+</html>
