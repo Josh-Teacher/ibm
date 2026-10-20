@@ -41,7 +41,7 @@
       pointer-events: none;
       z-index: -2;
     }
-    .space-scene { transform: scale(1.025); }
+    .space-scene { transform: scale(1.08); }
     .space, .sparkles {
       position: absolute;
       inset: 0;
@@ -58,13 +58,13 @@
       opacity: .06;
     }
     .atmosphere { opacity: .18; }
-    .motion-ready { animation: space-drift 150s ease-in-out infinite alternate; }
+    .motion-ready { animation: space-drift 32s ease-in-out infinite alternate; }
     .motion-ready .sparkle { animation: star-shimmer var(--period) ease-in-out var(--delay) infinite; }
     .motion-ready .atmosphere { animation: atmosphere-breathe 18s ease-in-out -6s infinite alternate; }
     .is-paused, .is-paused .sparkle, .is-paused .atmosphere { animation-play-state: paused; }
     @keyframes space-drift {
-      from { transform: scale(1.025) translate(-.28%, .18%); }
-      to { transform: scale(1.032) translate(.28%, -.18%); }
+      from { transform: scale(1.08) translate(-1.6%, .8%); }
+      to { transform: scale(1.10) translate(1.6%, -.8%); }
     }
     @keyframes star-shimmer {
       0%, 100% { opacity: .035; }
@@ -291,11 +291,49 @@
     .session-note { color: var(--muted); font-size: 13px; }
     #notice { margin-top: 18px; }
     @media (max-width: 420px) { .signout { font-size: 10px; } }
+    .story, .hint p { white-space: pre-line; }
+    .terminal.is-briefing { width: min(100%, 800px); }
+    .is-briefing .content { padding: 26px 34px; }
+    .briefing-kicker { margin: 0 0 12px; color: var(--muted); font-size: 11px; letter-spacing: 1px; }
+    .briefing-reader { position: relative; height: min(46svh, 420px); min-height: 220px; max-height: 52svh; overflow-y: auto; scrollbar-color: var(--edge) transparent; padding-right: 12px; }
+    .briefing-reader p { margin: 0 0 19px; font-size: 15px; line-height: 1.85; }
+    .briefing-reader:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+    .reading-status { color: var(--muted); font-size: 11px; margin: 14px 0; min-height: 20px; }
+    .briefing-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+    .briefing-actions .verify { flex: 1 1 200px; }
+    .footer-controls { flex-wrap: wrap; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+    .resource-link { margin: 0 0 24px; }
+    @media (max-width: 640px) { .is-briefing .content { padding: 22px; } .briefing-reader { max-height: 56svh; } }
+
+
+
+    .terminal.is-system-files { width: min(100%, 800px); }
+    .file-console { min-height: 310px; color: var(--text); padding: 5px 0 18px; }
+    .file-menu { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0 0 20px; font: inherit; font-size: 14px; line-height: 2; min-height: 140px; }
+    #filePrompt { display: flex; align-items: center; gap: 12px; }
+    .console-label { color: var(--accent); font-size: 14px; }
+    .console-entry { display: inline-flex; align-items: center; }
+    #fileNumber { width: 1.1ch; min-width: 1.1ch; flex: none; border: 0; box-shadow: none; padding: 0; background: transparent; caret-color: transparent; outline: none; }
+    #fileNumber:placeholder-shown { width: 0; }
+    #filePrompt:focus-within { outline: 1px solid var(--edge); outline-offset: 9px; }
+    .console-cursor, .is-typing .typing-active::after { display: inline-block; content: ''; width: .6em; height: 1.1em; background: var(--accent); vertical-align: -.15em; animation: prompt-blink 1.1s steps(1) infinite; }
+    @keyframes prompt-blink { 0%, 48% { opacity: 1; } 49%, 100% { opacity: 0; } }
+    #typingCopy p:empty { display: none; }
+    .system-file-frame { width: 100%; height: 55svh; min-height: 320px; border: 1px solid var(--edge); background: #07101b; }
+    .directive { margin-bottom: 26px; padding-left: 15px; border-left: 2px solid var(--accent); }
+    .directive p { white-space: pre-line; margin: 0; font-size: 14px; }
+    .transit-flow { opacity: 1; }
+    .transit-scene .sparkles { opacity: 0; }
+    .transit-scene #space { opacity: .18; }
+    .space-scene.transit-scene { animation-name: none; transform: none; }
+    @media (prefers-reduced-motion: reduce) { .console-cursor, .is-typing .typing-active::after { animation: none; } }
+
 </style>
 </head>
 <body>
   <div class="space-scene" id="spaceScene" aria-hidden="true">
-    <canvas class="space" id="space"></canvas><div class="sparkles" id="sparkles"></div><canvas class="space atmosphere" id="atmosphere"></canvas>
+    <canvas class="space" id="space"></canvas><canvas class="space transit-flow" id="transitFlow" hidden></canvas><div class="sparkles" id="sparkles"></div><canvas class="space atmosphere" id="atmosphere"></canvas>
   </div>
   <div class="vignette" aria-hidden="true"></div>
   <main class="terminal" aria-labelledby="terminalTitle">
@@ -310,6 +348,7 @@
     <footer class="bottom"><span>TERRA GALACTIC FORCE</span><div class="footer-controls">
       <button class="motion-toggle" id="motionToggle" type="button" aria-pressed="false" aria-label="Resume background animation">MOTION OFF</button>
       <button class="music-toggle" id="musicToggle" type="button" aria-pressed="false" aria-label="Turn background music on" hidden>SOUND OFF</button>
+      <button class="signout" id="systemFilesButton" type="button" hidden>VIEW SYSTEM FILES</button>
       <button class="signout" id="signOut" type="button" hidden>SIGN OUT</button>
     </div></footer>
   </main>
@@ -319,8 +358,8 @@
 function createDataDetectivesConnection(config) {
   'use strict';
   const protocol = 'dd-bridge-v1';
-  const apiVersion = 2;
-  const arity = { signOn: 3, getCurrent: 1, verifyCurrent: 4, chooseOutcome: 4, closeTransmission: 3, signOut: 1 };
+  const apiVersion = 4;
+  const arity = { signOn: 3, getCurrent: 1, verifyCurrent: 4, chooseOutcome: 4, closeTransmission: 3, signOut: 1, getSystemFiles: 1, getSystemFile: 2, advanceOpening: 4 };
   let current = null;
   function connectionError(code, message) {
     const error = new Error(message + ' [' + code + ']');
@@ -456,12 +495,12 @@ function createDataDetectivesConnection(config) {
 }
 
     // Public endpoint; credentials and answer keys remain private.
-    const DD_CONNECTION = createDataDetectivesConnection({"appUrl": "https://script.google.com/macros/s/AKfycbwi_H-rPrzF78c7QlLCdxI5l9BeGCEKp-M76L_W9ICzRTvnPRnn-OqlcZ6CR78lbYlPQw/exec", "clientOrigin": "https://josh-teacher.github.io"});
+    const DD_CONNECTION = createDataDetectivesConnection({"appUrl": "https://script.google.com/macros/s/AKfycby1bady_K943bqHLl_blv9zYgRZuFKywsLktRpUbLZod9s0aM3vcoTB_JicNeoG5bzm6A/exec", "clientOrigin": "https://josh-teacher.github.io"});
   </script>
   <script>
     (() => {
       'use strict';
-      const BOOT = {"classes": [{"key": "da_mon", "label": "Data Analysis (Mon)"}, {"key": "da_wed", "label": "Data Analysis (Wed)"}], "theme": {"accent": "#89dce7", "text": "#d0e1e6", "muted": "#92afb8", "edge": "#335965", "button": "#142a33", "hover": "#203e47", "glow": "#3677aa26"}, "scene": {"seed": 56447, "kind": "nebula", "direction": 0, "colors": [[95, 54, 160], [40, 88, 160]], "strength": 0.92}, "build": "", "apiVersion": 2, "ready": false};
+      const BOOT = {"classes": [{"key": "da_mon", "label": "Data Analysis (Mon)"}, {"key": "da_wed", "label": "Data Analysis (Wed)"}], "theme": {"accent": "#89dce7", "text": "#d0e1e6", "muted": "#92afb8", "edge": "#335965", "button": "#142a33", "hover": "#203e47", "glow": "#3677aa26"}, "scene": {"seed": 56447, "kind": "nebula", "direction": 0, "colors": [[95, 54, 160], [40, 88, 160]], "strength": 0.92}, "build": "", "apiVersion": 4, "ready": false};
       const PREVIEW = false;
 
       const canvas = document.getElementById('space');
@@ -475,6 +514,7 @@ function createDataDetectivesConnection(config) {
       function updateMotion() {
         spaceScene.classList.add('motion-ready');
         spaceScene.classList.toggle('is-paused', !motionEnabled || document.hidden);
+        syncTransitAnimation();
         motionButton.textContent = motionEnabled ? 'MOTION ON' : 'MOTION OFF';
         motionButton.setAttribute('aria-pressed', String(motionEnabled));
         motionButton.setAttribute('aria-label', motionEnabled ? 'Pause background animation' : 'Resume background animation');
@@ -486,6 +526,78 @@ function createDataDetectivesConnection(config) {
       document.addEventListener('visibilitychange', updateMotion);
       window.addEventListener('pageshow', updateMotion);
       let scene = BOOT.scene;
+      // Forward transit: a dense blue-white star tunnel anchored to the viewport centre.
+      // Clue scenes use a slower, layered drift against their existing nebula/planets.
+      const transitCanvas = document.getElementById('transitFlow');
+      let transitFrame = 0, transitLastTime = 0, transitElapsed = 0;
+      const transitStars = Array.from({ length: 1600 }, (_, i) => ({
+        angle: i * 2.3999632297, phase: ((i * 317) % 997) / 997,
+        depth: .35 + ((i * 73) % 97) / 100
+      }));
+      function paintTransit(delta = 0) {
+        const ctx = transitCanvas.getContext('2d');
+        if (!ctx) return;
+        const width = window.innerWidth, height = window.innerHeight;
+        const scale = Math.min(window.devicePixelRatio || 1, 2);
+        if (transitCanvas.width !== Math.round(width * scale) || transitCanvas.height !== Math.round(height * scale)) {
+          transitCanvas.width = Math.round(width * scale); transitCanvas.height = Math.round(height * scale);
+        }
+        ctx.setTransform(scale, 0, 0, scale, 0, 0);
+        ctx.clearRect(0, 0, width, height);
+        transitElapsed += delta;
+        if (scene.kind === 'transit') {
+          // No offset or camera drift: every ray points back to the exact screen centre.
+          const cx = width * .5, cy = height * .5;
+          const veil = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.hypot(width, height) * .55);
+          veil.addColorStop(0, 'rgba(1,3,12,.96)');
+          veil.addColorStop(.3, 'rgba(2,6,23,.91)');
+          veil.addColorStop(1, 'rgba(2,5,18,.84)');
+          ctx.fillStyle = veil; ctx.fillRect(0, 0, width, height);
+          const count = Math.min(transitStars.length, Math.max(560, Math.round(width * height / 800)));
+          for (let i = 0; i < count; i++) {
+            const star = transitStars[i];
+            const p = (star.phase + transitElapsed * (.27 + star.depth * .14)) % 1;
+            const dx = Math.cos(star.angle), dy = Math.sin(star.angle);
+            // Match each ray's lifetime to its screen edge, including wide and phone views.
+            const edge = Math.min(width * .5 / Math.max(.001, Math.abs(dx)), height * .5 / Math.max(.001, Math.abs(dy)));
+            const r = (.012 + Math.pow(p, 1.4)) * edge * 1.23;
+            const tail = Math.min(r, (3 + Math.pow(p, 2.5) * edge * .26) * (.55 + star.depth));
+            const alpha = Math.min(1, p * 7) * Math.min(1, (1 - p) * 11) * (.38 + star.depth * .42);
+            const x = cx + dx * r, y = cy + dy * r;
+            const startX = cx + dx * (r - tail), startY = cy + dy * (r - tail);
+            ctx.strokeStyle = `rgba(${58 + Math.round(star.depth * 47)},${94 + Math.round(star.depth * 62)},255,${alpha * .48})`;
+            ctx.lineWidth = 1.6 + p * star.depth * 2.6;
+            ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(x, y); ctx.stroke();
+            ctx.strokeStyle = i % 5 === 0 ? `rgba(222,239,255,${alpha})` : `rgba(113,165,255,${alpha})`;
+            ctx.lineWidth = .45 + p * star.depth * 1.15;
+            ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(x, y); ctx.stroke();
+          }
+        } else {
+          // Noticeable parallax, about 4–13 pixels/second; no flashing or fast streaks.
+          for (let i = 0; i < 78; i++) {
+            const star = transitStars[i], speed = 4 + star.depth * 7;
+            const x = ((star.phase * width + transitElapsed * speed) % (width + 32)) - 16;
+            const y = ((i * .61803398875 % 1) * height + Math.sin(transitElapsed * .08 + i) * 4);
+            ctx.fillStyle = `rgba(182,218,255,${.23 + star.depth * .22})`;
+            ctx.beginPath(); ctx.arc(x, y, .55 + star.depth * .6, 0, Math.PI * 2); ctx.fill();
+          }
+        }
+      }
+      function syncTransitAnimation() {
+        cancelAnimationFrame(transitFrame); transitFrame = 0; transitLastTime = 0;
+        spaceScene.classList.toggle('transit-scene', scene.kind === 'transit');
+        transitCanvas.hidden = false;
+        paintTransit();
+        if (!motionEnabled || document.hidden) return;
+        function frame(now) {
+          if (!motionEnabled || document.hidden) { transitFrame = 0; return; }
+          const delta = transitLastTime ? Math.min((now - transitLastTime) / 1000, .05) : 0;
+          transitLastTime = now; paintTransit(delta);
+          transitFrame = requestAnimationFrame(frame);
+        }
+        transitFrame = requestAnimationFrame(frame);
+      }
+
       function hash(x, y) {
         const n = Math.sin(x * 127.1 + y * 311.7 + scene.seed * .01) * 43758.5453;
         return n - Math.floor(n);
@@ -553,12 +665,12 @@ function createDataDetectivesConnection(config) {
           if (bright > .973) {
             const glow = ctx.createRadialGradient(x, y, 0, x, y, 7);
             glow.addColorStop(0, '#dfefffbd');
-            glow.addColorStop(.25, '#7aa6ef66');
+            glow.addColorStop(.25, scene.kind === 'transit' ? '#72bfff88' : '#7aa6ef66');
             glow.addColorStop(1, '#6b8bc900');
             ctx.fillStyle = glow;
             ctx.fillRect(x - 7, y - 7, 14, 14);
           }
-          ctx.fillStyle = `rgba(${190 + Math.round(bright * 60)},${205 + Math.round(bright * 44)},255,${.26 + bright * .68})`;
+          ctx.fillStyle = scene.kind === 'transit' ? `rgba(${130 + Math.round(bright * 80)},${190 + Math.round(bright * 55)},255,${.12 + bright * .35})` : `rgba(${190 + Math.round(bright * 60)},${205 + Math.round(bright * 44)},255,${.26 + bright * .68})`;
           ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.fill();
           if (bright > .985) {
             const sparkle = document.createElement('span');
@@ -642,7 +754,7 @@ function createDataDetectivesConnection(config) {
         cancelAnimationFrame(repaint);
         repaint = requestAnimationFrame(() => {
           const size = `${window.innerWidth}:${window.innerHeight}:${window.devicePixelRatio}`;
-          if (size !== lastSize) { paintSpace(); lastSize = size; }
+          if (size !== lastSize) { paintSpace(); paintTransit(); lastSize = size; }
         });
       }
       window.addEventListener('resize', schedulePaint, { passive: true });
@@ -650,12 +762,12 @@ function createDataDetectivesConnection(config) {
       schedulePaint();
 
       function setBackdrop(nextScene) {
-        if (JSON.stringify(scene) !== JSON.stringify(nextScene)) { scene = nextScene; lastSize = ''; schedulePaint(); }
+        if (JSON.stringify(scene) !== JSON.stringify(nextScene)) { scene = nextScene; lastSize = ''; schedulePaint(); syncTransitAnimation(); }
       }
 
       const content = document.getElementById('terminalContent');
       const REMOTE = DD_CONNECTION;
-      const CLIENT_BUILD = '2026-10-05.1';
+      const CLIENT_BUILD = '2026-10-21.system-files.1';
       const linkStatus = document.getElementById('connectionStatus');
       const retryConnection = document.getElementById('retryConnection');
       const notice = document.getElementById('notice');
@@ -671,6 +783,174 @@ function createDataDetectivesConnection(config) {
       let busy = false;
       let draft = null;
       let currentAudio = '';
+
+      const systemFilesButton = document.getElementById('systemFilesButton');
+      const terminal = document.querySelector('main.terminal');
+      let openingView = null, openingRun = null;
+      let openingReadPosition = { key: '', index: 0 };
+      const TEXT_DELAY = 32;
+      function stopOpeningText() {
+        if (openingRun) {
+          clearTimeout(openingRun.timer);
+          openingReadPosition = { key: openingRun.key, index: openingRun.index };
+        }
+        openingRun = null;
+      }
+      function completeOpeningText() {
+        const run = openingRun;
+        if (!run || run.index < run.characters.length) return;
+        clearTimeout(run.timer);
+        run.host.classList.remove('is-typing');
+        const next = content.querySelector('[data-opening-next]');
+        if (next) { next.hidden = false; next.disabled = busy; }
+        content.querySelector('#readingStatus').textContent = 'Transmission complete. Continue when you are ready.';
+      }
+      function typeOpeningText(host, key, paragraphs) {
+        const characters = [];
+        const outputs = [];
+        host.replaceChildren();
+        // Only received characters enter the DOM. There is no hidden full-text copy.
+        for (const text of paragraphs) {
+          const paragraph = document.createElement('p');
+          const node = document.createTextNode('');
+          paragraph.appendChild(node); host.appendChild(paragraph); outputs.push(node);
+          for (const character of Array.from(text)) characters.push({ node, character });
+        }
+        const remembered = openingReadPosition.key === key ? openingReadPosition.index : 0;
+        const pane = content.querySelector('#openingCopy');
+        const run = { key, host, characters, index: Math.min(remembered, characters.length), timer: 0, follow: true };
+        openingRun = run;
+        for (let i = 0; i < run.index; i++) characters[i].node.appendData(characters[i].character);
+        host.classList.add('is-typing');
+        pane.addEventListener('wheel', () => { run.follow = false; }, { passive: true });
+        pane.addEventListener('touchstart', () => { run.follow = false; }, { passive: true });
+        function next() {
+          if (openingRun !== run || document.hidden) return;
+          if (run.index >= characters.length) { completeOpeningText(); return; }
+          const current = characters[run.index++];
+          current.node.appendData(current.character);
+          outputs.forEach(node => node.parentElement.classList.toggle('typing-active', node === current.node));
+          if (run.follow) pane.scrollTop = pane.scrollHeight;
+          run.timer = setTimeout(next, TEXT_DELAY + (/[.!?]/.test(current.character) ? 150 : /[,;:]/.test(current.character) ? 60 : 0));
+        }
+        run.next = next;
+        if (run.index === characters.length) completeOpeningText(); else next();
+      }
+      function renderOpening(view) {
+        stopOpeningText(); openingView = view;
+        const opening = view.opening;
+        if (!opening || !Array.isArray(opening.screens) || !Number.isInteger(opening.index) ||
+          opening.index < 0 || opening.index >= opening.screens.length) throw new Error('Induction content unavailable.');
+        const screen = opening.screens[opening.index];
+        terminal.classList.add('is-briefing'); terminal.classList.remove('is-system-files');
+        systemFilesButton.hidden = true;
+        title.textContent = screen.title;
+        access.textContent = 'ANALYST INDUCTION · ' + (opening.index + 1) + ' / ' + opening.screens.length;
+        content.innerHTML = `<p class="briefing-kicker">${escapeText(screen.period)} · FORWARD VIEW / TRANSIT ARCHIVE</p>` +
+          '<section class="briefing-reader" id="openingCopy" tabindex="0" aria-label="Induction transmission"><div id="typingCopy" role="log" aria-live="off"></div></section>' +
+          '<p id="readingStatus" class="reading-status" role="status">Receiving induction transmission…</p>' +
+          `<div class="briefing-actions"><button class="verify" type="button" data-opening-next hidden>${opening.index === opening.screens.length - 1 ? 'BEGIN RESOURCE REVIEW' : 'CONTINUE INDUCTION'}</button></div>`;
+        typeOpeningText(content.querySelector('#typingCopy'), opening.version + ':' + screen.id, screen.paragraphs);
+      }
+
+      let systemConsole = null, menuTimer = 0, fileAbort = null;
+      function stopSystemFiles() {
+        clearTimeout(menuTimer); menuTimer = 0;
+        if (fileAbort) fileAbort.abort(); fileAbort = null;
+      }
+      function renderSystemFiles(view) {
+        stopSystemFiles(); stopOpeningText(); openingView = null;
+        systemConsole = { view, mode: 'menu' };
+        terminal.classList.remove('is-briefing'); terminal.classList.add('is-system-files');
+        systemFilesButton.hidden = true;
+        title.textContent = 'System files'; access.textContent = 'TGF-0980 / LOCAL ARCHIVE';
+        const files = view.files || [];
+        const lines = ['TGF SYSTEM FILE DIRECTORY', '', ...files.map(file => file.number + '. ' + file.title), '',
+          files.length ? 'Enter the number of the file to view, then press Enter.' : 'No system files have been released.'];
+        content.innerHTML = '<section class="file-console" aria-label="System file directory"><pre class="file-menu" id="fileMenu"></pre>' +
+          '<form id="filePrompt" data-action="systemFile" novalidate hidden><label class="console-label" for="fileNumber">FILE &gt;</label>' +
+          '<span class="console-entry"><input id="fileNumber" name="fileNumber" type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="File number"><span class="console-cursor" aria-hidden="true"></span></span></form></section>' +
+          '<div class="briefing-actions"><button class="verify" type="button" data-files-return>RETURN TO INVESTIGATION</button></div>';
+        const text = lines.join('\n'), menu = content.querySelector('#fileMenu');
+        let position = 0;
+        function next() {
+          if (!systemConsole || systemConsole.mode !== 'menu' || document.hidden) return;
+          menu.textContent = text.slice(0, ++position);
+          if (position < text.length) menuTimer = setTimeout(next, 12);
+          else if (files.length) {
+            const prompt = content.querySelector('#filePrompt'); prompt.hidden = false;
+            const input = content.querySelector('#fileNumber'); input.disabled = busy; if (!busy) input.focus({ preventScroll: true });
+          }
+        }
+        next();
+      }
+      function allowedSystemFileUrl(value) {
+        try {
+          const root = new URL(systemConsole.view.filesBaseUrl);
+          const url = new URL(value, root);
+          if (url.origin !== root.origin || !url.pathname.startsWith(root.pathname) || !/\.html$/i.test(url.pathname) || url.username || url.password || url.search || url.hash) return '';
+          // Preview uses its neighboring files. Production always reads the public GitHub folder.
+          return url.href;
+        } catch (_) { return ''; }
+      }
+      async function openSystemFiles() {
+        if (busy || !sessionToken || document.hidden) return;
+        const input = content.querySelector('#answer');
+        if (input) draft = { ticket: currentTicket, answer: input.value };
+        const mine = ++generation;
+        setBusy(true); showNotice('');
+        try {
+          const reply = checkReply(await rpc('getSystemFiles', sessionToken));
+          if (mine !== generation || document.hidden) return;
+          currentTicket = ''; applyView(reply.view);
+        } catch (error) {
+          if (mine === generation) { if (error.code === 'LOGIN_REQUIRED') clearSession(error.message); else showFailure(error); }
+        } finally { if (mine === generation) setBusy(false); }
+      }
+      async function openSystemFile(number) {
+        if (busy || !systemConsole || !systemConsole.view.files.some(file => String(file.number) === number)) return;
+        const mine = ++generation;
+        stopSystemFiles(); setBusy(true); showNotice('');
+        const shell = '<div class="briefing-actions"><button class="verify" type="button" data-files-menu>FILE DIRECTORY</button>' +
+          '<button class="verify" type="button" data-files-return>RETURN TO INVESTIGATION</button></div>';
+        try {
+          const reply = await rpc('getSystemFile', sessionToken, number);
+          if (mine !== generation || document.hidden) return;
+          if (reply && reply.code === 'INVALID_FILE') { renderSystemFiles(systemConsole.view); return; }
+          checkReply(reply);
+          const url = allowedSystemFileUrl(reply.file.url);
+          if (!url) throw new Error('File source unavailable.');
+          systemConsole.mode = 'file'; systemConsole.number = number;
+          title.textContent = reply.file.title;
+          content.innerHTML = '<p class="session-note" role="status">Opening system file…</p>' + shell;
+          fileAbort = new AbortController();
+          const timeout = setTimeout(() => fileAbort && fileAbort.abort(), 15000);
+          let response, html;
+          try {
+            response = await fetch(url, { signal: fileAbort.signal, credentials: 'omit', redirect: 'error' });
+            if (!response.ok || !/text\/html/i.test(response.headers.get('content-type') || '') || Number(response.headers.get('content-length')) > 2000000) throw new Error('File source unavailable.');
+            html = await response.text();
+            if (html.length > 2000000) throw new Error('File source unavailable.');
+          } finally { clearTimeout(timeout); }
+          if (mine !== generation || document.hidden) return;
+          fileAbort = null;
+          content.innerHTML = '<iframe class="system-file-frame" id="systemFileFrame" sandbox="" referrerpolicy="no-referrer"></iframe>' + shell;
+          const frame = content.querySelector('#systemFileFrame'); frame.title = reply.file.title;
+          // Read-only HTML documents cannot run scripts, submit forms, or navigate this terminal.
+          frame.srcdoc = '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">' +
+            '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src data: https:; base-uri \'none\'; form-action \'none\'">' + html;
+        } catch (error) {
+          if (mine !== generation || document.hidden) return;
+          if (error.code === 'LOGIN_REQUIRED') clearSession(error.message);
+          else content.innerHTML = '<p class="session-note" role="status">This system file is temporarily unavailable.</p>' + shell;
+        } finally { if (mine === generation) setBusy(false); }
+      }
+      async function returnFromSystemFiles() {
+        stopSystemFiles(); systemConsole = null; currentTicket = '';
+        terminal.classList.remove('is-system-files');
+        await refreshCurrent();
+      }
+      systemFilesButton.addEventListener('click', openSystemFiles);
 
       function escapeText(value) {
         return String(value == null ? '' : value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
@@ -707,7 +987,8 @@ function createDataDetectivesConnection(config) {
         retryConnection.hidden = true;
         try {
           const boot = REMOTE ? await REMOTE.connect() : BOOT;
-          if (boot.apiVersion !== 2 || !boot.ready) {
+          if (boot.apiVersion !== 4) { const error = new Error('Update the terminal client and Apps Script deployment together. [UPDATE_REQUIRED]'); error.code = 'UPDATE_REQUIRED'; throw error; }
+          if (!boot.ready) {
             const error = new Error('Terminal setup is incomplete. Please contact your instructor. [SETUP_REQUIRED]');
             error.code = 'SETUP_REQUIRED';
             throw error;
@@ -733,6 +1014,7 @@ function createDataDetectivesConnection(config) {
         content.querySelectorAll('input, select, button').forEach(control => { control.disabled = value; });
         signOutButton.disabled = value;
         retryConnection.disabled = value;
+        systemFilesButton.disabled = value;
       }
       function setTheme(theme) {
         ['accent', 'text', 'muted', 'edge', 'button', 'hover', 'glow'].forEach(key => {
@@ -783,6 +1065,8 @@ function createDataDetectivesConnection(config) {
         return `<form id="answerForm" data-action="verify" onsubmit="return false" method="post"><label class="answer-label" for="answer">${escapeText(label)}</label><div class="input-row"><input id="answer" name="answer" type="text" maxlength="512" autocomplete="off" autocapitalize="off" spellcheck="false" required placeholder="${escapeText(placeholder)}"><button class="verify" type="submit">VERIFY</button></div></form>`;
       }
       function showSignOn(message = '') {
+        stopOpeningText(); openingView = null; openingReadPosition = { key: '', index: 0 };
+        stopSystemFiles(); systemConsole = null; terminal.classList.remove('is-briefing', 'is-system-files'); systemFilesButton.hidden = true;
         generation++;
         busy = false;
         signOutButton.disabled = false;
@@ -810,21 +1094,31 @@ function createDataDetectivesConnection(config) {
         showSignOn(message || 'Session ended. Please sign on again.');
       }
       function applyView(view) {
-        const allowed = ['clue', 'waiting', 'decision', 'key', 'transmission', 'completeKeep', 'completeShare'];
+        const allowed = ['systemFiles', 'opening', 'clue', 'waiting', 'decision', 'key', 'transmission', 'completeKeep', 'completeShare'];
         if (!view || !allowed.includes(view.kind) || typeof view.ticket !== 'string') throw new Error('Terminal response unavailable.');
-        const same = currentTicket === view.ticket && content.childElementCount > 0;
+        const same = currentTicket === view.ticket && content.childElementCount > 0 &&
+          (view.kind !== 'opening' || (openingView && openingView.opening.version === view.opening.version && openingView.opening.index === view.opening.index));
         currentTicket = view.ticket;
         setLinkStatus('LINK READY');
         retryConnection.hidden = true;
         signOutButton.hidden = false;
         setTheme(view.theme);
         setBackdrop(view.scene);
+        if (same && view.kind === 'opening') return;
         title.textContent = view.title || 'Terra Galactic Force Terminal';
         access.textContent = view.access || 'GENERAL ACCESS';
         resetAudio(view.audioUrl);
         if (same) return;
+        if (view.kind === 'systemFiles') { renderSystemFiles(view); return; }
+        if (view.kind === 'opening') { renderOpening(view); return; }
+        stopOpeningText(); openingView = null; stopSystemFiles(); systemConsole = null; terminal.classList.remove('is-briefing', 'is-system-files'); systemFilesButton.hidden = false;
         if (view.kind === 'clue') {
-          content.innerHTML = `<section aria-labelledby="storyLabel"><h2 class="section-label" id="storyLabel">STORY UPDATE</h2><p class="story">${escapeText(view.story)}</p></section><aside class="hint" aria-labelledby="hintLabel"><h2 class="section-label" id="hintLabel">HINT</h2><p>${escapeText(view.hint)}</p></aside>${answerForm('Clue answer', 'Enter your finding...')}`;
+          const assignment = view.assignment && typeof view.assignment === 'object' && safeHttpsUrl(view.assignment.url);
+          content.innerHTML = `<section aria-labelledby="storyLabel"><h2 class="section-label" id="storyLabel">STORY UPDATE</h2><p class="story">${escapeText(view.story)}</p></section>` +
+            `<aside class="directive" aria-labelledby="directiveLabel"><h2 class="section-label" id="directiveLabel">DIRECTIVE</h2><p>${escapeText(view.directive)}</p></aside>` +
+            (assignment ? `<section class="resource-link" aria-labelledby="assignmentLabel"><h2 class="section-label" id="assignmentLabel">ASSIGNMENT</h2><a href="${escapeText(assignment)}" target="_blank" rel="noopener noreferrer">${escapeText(view.assignment.title || 'Open assignment')}</a></section>` : '') +
+            (typeof view.hint === 'string' && view.hint.trim() ? `<aside class="hint" aria-labelledby="hintLabel"><h2 class="section-label" id="hintLabel">HINT</h2><p>${escapeText(view.hint)}</p></aside>` : '') +
+            answerForm('Clue answer', 'Enter your finding...');
         } else if (view.kind === 'key') {
           content.innerHTML = `<p class="story">${escapeText(view.text)}</p>${answerForm('Level 2 encryption key', view.prompt)}`;
         } else if (view.kind === 'decision') {
@@ -842,6 +1136,7 @@ function createDataDetectivesConnection(config) {
         draft = null;
       }
       function showReconnect(message) {
+        stopOpeningText(); openingView = null; stopSystemFiles(); systemConsole = null; terminal.classList.remove('is-briefing', 'is-system-files'); systemFilesButton.hidden = true;
         generation++;
         busy = false;
         signOutButton.disabled = false;
@@ -851,7 +1146,8 @@ function createDataDetectivesConnection(config) {
         resetAudio('');
       }
       async function refreshCurrent(quiet = false) {
-        if (!sessionToken || document.hidden || busy || PREVIEW) return;
+        if (!sessionToken || document.hidden || busy || PREVIEW || (quiet && (openingView || systemConsole))) return;
+        if (systemConsole && !quiet) { await openSystemFiles(); return; }
         const mine = ++generation;
         setBusy(true);
         if (!quiet) showNotice('Establishing terminal connection...');
@@ -917,8 +1213,19 @@ function createDataDetectivesConnection(config) {
         const form = event.target;
         if (form.dataset.action === 'signOn') submitSignOn(form);
         else if (form.dataset.action === 'verify') performAction('verifyCurrent', form.elements.answer.value);
+        else if (form.dataset.action === 'systemFile') openSystemFile(form.elements.fileNumber.value);
+      });
+      content.addEventListener('input', event => {
+        if (event.target.id !== 'fileNumber' || !systemConsole) return;
+        const value = event.target.value;
+        if (!systemConsole.view.files.some(file => String(file.number) === value)) event.target.value = '';
       });
       content.addEventListener('click', event => {
+        if (event.target.closest('[data-files-return]') && !busy) { returnFromSystemFiles(); return; }
+        if (event.target.closest('[data-files-menu]') && !busy && systemConsole) { title.textContent = 'System files'; renderSystemFiles(systemConsole.view); return; }
+        if (event.target.closest('[data-opening-next]') && openingView && !busy && openingRun && openingRun.index === openingRun.characters.length) {
+          performAction('advanceOpening', openingView.opening.screens[openingView.opening.index].id); return;
+        }
         const choice = event.target.closest('[data-choice]');
         if (choice) { performAction('chooseOutcome', choice.dataset.choice); return; }
         if (event.target.closest('[data-close-transmission]')) { performAction('closeTransmission'); return; }
@@ -953,6 +1260,7 @@ function createDataDetectivesConnection(config) {
         if (!sessionToken) return;
         const input = content.querySelector('#answer');
         if (input) draft = { ticket: currentTicket, answer: input.value };
+        stopOpeningText(); stopSystemFiles();
         generation++;
         busy = false;
         currentTicket = '';
