@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Bike Road Challenge</title>
+<style>
+:root{--ink:#17243a;--muted:#63718a;--green:#1f9d69;--paper:#f4f8f5;--orange:#ffb547}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px;background:radial-gradient(circle at 15% 10%,#d9f4e6,transparent 35%),linear-gradient(135deg,#eef4ff,#f8fbf7);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink)}
+.app{width:min(100%,980px);display:grid;grid-template-columns:minmax(280px,1fr) minmax(300px,420px);gap:22px;align-items:center}
+.intro{padding:18px 8px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;color:#14784f;background:#dcf7e9;border-radius:99px;padding:7px 12px;font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+h1{font-size:clamp(32px,5vw,54px);line-height:1.03;margin:18px 0 14px;letter-spacing:-.04em}
+h1 span{color:#159766}
+.intro p{color:var(--muted);line-height:1.65;max-width:470px}
+.tips{display:grid;gap:10px;margin:22px 0}
+.tip{display:flex;align-items:flex-start;gap:11px;background:#ffffffb8;border:1px solid #e2ebe6;padding:12px 14px;border-radius:15px;font-size:14px;line-height:1.45}
+.tip b{display:block;margin-bottom:2px}
+.tip-icon{width:32px;height:32px;display:grid;place-items:center;border-radius:10px;background:#e0f8eb;flex-shrink:0}
+kbd{font:700 12px system-ui;background:#fff;border:1px solid #d5dfdc;border-bottom-width:3px;border-radius:6px;padding:2px 7px}
+.game-shell{background:#fff;padding:10px;border-radius:28px;box-shadow:0 24px 65px #233d321f;border:1px solid #e6eee8}
+.hud{display:flex;justify-content:space-between;gap:8px;padding:8px 7px 12px}
+.stat{flex:1;background:#f2f7f4;border-radius:13px;padding:9px 12px}
+.stat small{display:block;color:#778578;font-weight:800;font-size:10px;letter-spacing:.09em;text-transform:uppercase}
+.stat strong{display:block;font-size:22px;line-height:1.25}
+.game-area{position:relative;overflow:hidden;border-radius:19px;background:#75c99a;aspect-ratio: 0.70;max-height:590px}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px;background:#102b2478;backdrop-filter:blur(5px)}
+.panel{width:min(100%,300px);background:#fff;border-radius:21px;padding:23px 20px;text-align:center;box-shadow:0 15px 45px #092b2233}
+.panel .emoji{font-size:38px}
+.panel h2{font-size:24px;margin:7px 0}
+.panel p{font-size:13px;line-height:1.55;color:#64716d;margin:8px 0 16px}
+.primary{border:0;background:#159766;color:#fff;font-weight:850;font-size:15px;border-radius:12px;padding:13px 18px;width:100%;cursor:pointer;box-shadow:0 4px 0 #0b7049;transition:transform .08s,filter .15s}
+.primary:active{transform:translateY(2px);box-shadow:0 2px 0 #0b7049;filter:brightness(.95)}
+.hidden{display:none!important}
+.controls{display:flex;gap:12px;padding:12px 4px 3px}
+.move{flex:1;border:0;border-radius:13px;background:#eaf6ef;color:#146d4a;font-size:24px;font-weight:900;padding:10px;cursor:pointer;touch-action:manipulation;box-shadow:inset 0 -3px #cce8d7}
+.move:active{background:#d5f0e0;transform:translateY(1px)}
+.help{text-align:center;color:#8a958f;font-size:11px;padding:5px 0 2px}
+.message{min-height:22px;text-align:center;font-size:12px;font-weight:750;color:#2e7758;padding:2px 0 0}
+@media(max-width:760px){body{padding:10px;align-items:flex-start}.app{grid-template-columns:1fr;gap:8px;max-width:460px}.intro{padding:8px 6px 0}.intro h1{font-size:34px;margin:12px 0 8px}.intro p{font-size:13px;margin:0}.tips{display:none}.game-shell{padding:8px;border-radius:22px}.game-area{max-height:58vh;aspect-ratio:.73}.eyebrow{font-size:10px}.intro .eyebrow{padding:5px 9px}}
+</style>
+</head>
+<body>
+<main class="app">
+  <section class="intro">
+    <div class="eyebrow">🚲 Road safety arcade</div>
+    <h1>Bike Road<br><span>Challenge</span></h1>
+    <p>Ride smart, watch both directions, and see how many bicycles you can pass safely. One crash ends the ride—stay alert!</p>
+    <div class="tips">
+      <div class="tip"><div class="tip-icon">👀</div><div><b>Look both ways</b>Traffic can travel with you or come toward you.</div></div>
+      <div class="tip"><div class="tip-icon">↔️</div><div><b>Pick your lane</b>Use <kbd>←</kbd> and <kbd>→</kbd> to move between the two lanes.</div></div>
+      <div class="tip"><div class="tip-icon">🛡️</div><div><b>Ride within the road</b>Leave space and avoid every bicycle.</div></div>
+    </div>
+  </section>
+  <section class="game-shell" aria-label="Bike Road Challenge game">
+    <div class="hud">
+      <div class="stat"><small>Score</small><strong id="score">0</strong></div>
+      <div class="stat"><small>Best ride</small><strong id="best">0</strong></div>
+      <div class="stat"><small>Traffic</small><strong id="speed">120</strong></div>
+    </div>
+    <div class="game-area" id="gameArea">
+      <canvas id="game" aria-label="Two lane bicycle road game"></canvas>
+      <div class="overlay" id="startOverlay">
+        <div class="panel">
+          <div class="emoji">🚲</div><h2>Ready to ride?</h2>
+          <p>Pass bicycles safely and avoid traffic from both directions. A collision ends your ride.</p>
+          <button class="primary" id="startBtn">Start ride →</button>
+        </div>
+      </div>
+      <div class="overlay hidden" id="overOverlay">
+        <div class="panel">
+          <div class="emoji" id="overEmoji">💥</div><h2>Ride over</h2>
+          <p id="reason">You collided with another bicycle.</p>
+          <div style="display:flex;justify-content:space-around;margin:12px 0 16px">
+            <div><small style="color:#78867f">FINAL SCORE</small><div id="finalScore" style="font-size:26px;font-weight:900">0</div></div>
+            <div><small style="color:#78867f">BEST RIDE</small><div id="finalBest" style="font-size:26px;font-weight:900">0</div></div>
+          </div>
+          <p id="safetyTip">Watch the traffic ahead and keep a safe distance.</p>
+          <button class="primary" id="restartBtn">Ride again ↻</button>
+        </div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="move" id="leftBtn" aria-label="Move to left lane">← <span style="font-size:12px">LEFT</span></button>
+      <button class="move" id="rightBtn" aria-label="Move to right lane"><span style="font-size:12px">RIGHT</span> →</button>
+    </div>
+    <div class="message" id="message">Choose your lane carefully.</div>
+    <div class="help">Keyboard: ← → &nbsp; • &nbsp; Tap arrows on mobile</div>
+  </section>
+</main>
+<script>
+(() => {
+  "use strict";
+  const canvas = document.getElementById("game"), ctx = canvas.getContext("2d");
+  const area = document.getElementById("gameArea");
+  const scoreEl = document.getElementById("score"), bestEl = document.getElementById("best"), speedEl = document.getElementById("speed");
+  const startOverlay = document.getElementById("startOverlay"), overOverlay = document.getElementById("overOverlay");
+  const message = document.getElementById("message");
+  let W=350,H=500,dpr=1, state="ready", score=0, best=readBest(), playerLane=0;
+  let traffic=[], spawnTimer=0, roadOffset=0, lastTime=0, elapsed=0, baseSpeed=120, trafficSpeed=120, spawnInterval=1.8, crashReason="", crashTip="";
+  const player = { y:0, w:28, h:46 };
+  function readBest(){ try { const n=Number(localStorage.getItem("bikeRoadBest")); return Number.isFinite(n)&&n>=0?Math.floor(n):0; } catch(e){return 0;} }
+  function saveBest(){ try{localStorage.setItem("bikeRoadBest",String(best));}catch(e){} }
+  function resize(){
+    const r=area.getBoundingClientRect(); W=Math.max(260,r.width); H=Math.max(330,r.height); dpr=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=Math.round(W*dpr); canvas.height=Math.round(H*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
+    player.y=H*.78; draw();
+  }
+  function road(){return {x:W*.13,w:W*.74,laneW:W*.37};}
+  function laneX(lane){const r=road();return r.x+r.laneW*(lane+.5);}
+  function reset(){
+    score=0; playerLane=0; traffic=[]; spawnTimer=.65; roadOffset=0; elapsed=0; trafficSpeed=baseSpeed; spawnInterval=1.8; crashReason="";crashTip="";
+    state="playing"; scoreEl.textContent="0"; speedEl.textContent="120"; message.textContent="Watch traffic in both directions."; startOverlay.classList.add("hidden");overOverlay.classList.add("hidden");lastTime=performance.now();requestAnimationFrame(loop);
+  }
+  function spawn(){
+    // Keep a clear reaction window; never spawn close to the player.
+    const lane=Math.random()<.5?0:1;
+    const direction=Math.random()<.48?"same":"oncoming";
+    const y=-54;
+    if(traffic.some(b=>b.lane===lane && b.y<100)) return;
+    traffic.push({lane,direction,y,w:25,h:40,speed:trafficSpeed*(direction==="oncoming"?1.55:.55),passed:false,color:["#f5b544","#f27f6f","#70b8f2","#bd91ec"][Math.floor(Math.random()*4)]});
+  }
+  function difficulty(){
+    const steps=Math.floor(score/5); trafficSpeed=Math.min(baseSpeed*Math.pow(1.1,steps),baseSpeed*2);
+    spawnInterval=Math.max(.9,1.8-.1*steps); speedEl.textContent=Math.round(trafficSpeed);
+  }
+  function endGame(reason,tip,emoji="💥"){
+    if(state!=="playing")return; state="over";crashReason=reason;crashTip=tip;
+    document.getElementById("reason").textContent=reason;document.getElementById("safetyTip").textContent=tip;document.getElementById("overEmoji").textContent=emoji;
+    document.getElementById("finalScore").textContent=score;
+    if(score>best){best=score;saveBest();} bestEl.textContent=best;document.getElementById("finalBest").textContent=best;
+    overOverlay.classList.remove("hidden");message.textContent="Ride ended. Learn from the close calls.";
+  }
+  function changeLane(lane){if(state!=="playing")return;if(lane===0||lane===1)playerLane=lane;}
+  function hit(a,b){
+    // Actual axis-aligned collision boxes with a small visual padding.
+    return Math.abs(a.x-b.x)<(a.w+b.w)*.38 && Math.abs(a.y-b.y)<(a.h+b.h)*.38;
+  }
+  function loop(now){
+    if(state!=="playing")return;
+    const dt=Math.min((now-lastTime)/1000,.035);lastTime=now;elapsed+=dt;roadOffset=(roadOffset+dt*trafficSpeed)%54;spawnTimer-=dt;
+    if(spawnTimer<=0){spawn();spawnTimer=spawnInterval*(.85+Math.random()*.3);}
+    const px=laneX(playerLane), py=player.y;
+    const p={x:px,y:py,w:player.w,h:player.h};
+    for(let i=traffic.length-1;i>=0;i--){
+      const b=traffic[i];b.y+=b.speed*dt;
+      if(hit(p,{x:laneX(b.lane),y:b.y,w:b.w,h:b.h})){
+        const oncoming=b.direction==="oncoming";
+        endGame(oncoming?"You collided with oncoming traffic.":"You collided with another bicycle.",oncoming?"Always pay attention to traffic coming from the opposite direction.":"Watch the traffic ahead and keep a safe distance.");draw();return;
+      }
+      if(!b.passed && b.y-b.h/2>py+player.h/2){
+        b.passed=true;score++;scoreEl.textContent=score;difficulty();
+      }
+      if(b.y>H+70)traffic.splice(i,1);
+    }
+    draw();requestAnimationFrame(loop);
+  }
+  function bike(x,y,scale,color,flip=false,isPlayer=false){
+    ctx.save();ctx.translate(x,y);ctx.scale(scale,scale*(flip?-1:1));
+    ctx.lineCap="round";ctx.lineJoin="round";
+    const wheel="#172b36",frame=isPlayer?"#fff":color;
+    // Wheels and bicycle frame
+    ctx.lineWidth=2.8;ctx.strokeStyle=wheel;
+    ctx.beginPath();ctx.ellipse(-9,12,6,10,0,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.ellipse(9,12,6,10,0,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle=frame;ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(-9,12);ctx.lineTo(-2,0);ctx.lineTo(9,12);ctx.lineTo(-9,12);ctx.lineTo(4,-1);ctx.lineTo(9,12);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(-2,0);ctx.lineTo(-5,-5);ctx.moveTo(-8,-5);ctx.lineTo(-2,-5);ctx.moveTo(4,-1);ctx.lineTo(7,-7);ctx.moveTo(4,-7);ctx.lineTo(10,-7);ctx.stroke();
+    // Rider head, body and direction marker
+    ctx.fillStyle=isPlayer?"#ffd166":"#263b4a";ctx.beginPath();ctx.arc(0,-10,4,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=isPlayer?"#ffd166":"#263b4a";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(-2,1);ctx.stroke();
+    ctx.fillStyle=isPlayer?"#fff":"#17243a";ctx.beginPath();ctx.moveTo(0,-19);ctx.lineTo(-4,-13);ctx.lineTo(4,-13);ctx.closePath();ctx.fill();
+    if(isPlayer){ctx.shadowColor="#f6b940";ctx.shadowBlur=8;ctx.strokeStyle="#ffd166";ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(0,0,20,0,Math.PI*2);ctx.stroke();}
+    ctx.restore();
+  }
+  function draw(){
+    if(!ctx)return;
+    ctx.clearRect(0,0,W,H);
+    // Green roadside with moving grass dashes
+    ctx.fillStyle="#8bd5a6";ctx.fillRect(0,0,W,H);
+    ctx.fillStyle="#70c58f";for(let y=-20+(roadOffset%46);y<H;y+=46){ctx.fillRect(W*.035,y,5,18);ctx.fillRect(W*.91,y+12,5,14);}
+    const r=road();ctx.fillStyle="#4a5960";ctx.fillRect(r.x,0,r.w,H);
+    ctx.fillStyle="#dce5d9";ctx.fillRect(r.x-3,0,3,H);ctx.fillRect(r.x+r.w,0,3,H);
+    // Slight road texture
+    ctx.fillStyle="#56656b";for(let y=-25+(roadOffset%70);y<H;y+=70){ctx.fillRect(r.x+10,y,2,20);ctx.fillRect(r.x+r.w-12,y+30,2,16);}
+    ctx.fillStyle="#f3f0ce";
+    for(let y=-54+(roadOffset%54);y<H;y+=54)ctx.fillRect(r.x+r.laneW-1.5,y,3,29);
+    // Traffic bicycles
+    for(const b of traffic)bike(laneX(b.lane),b.y,Math.min(W/350,1.12),b.color,b.direction==="oncoming",false);
+    // Player is deliberately fixed in lower road area
+    bike(laneX(playerLane),player.y,Math.min(W/350,1.12),"#fff",false,true);
+    // subtle lane labels at the top
+    ctx.font="800 10px system-ui";ctx.textAlign="center";ctx.fillStyle="#ffffffa8";
+    ctx.fillText("LANE 1",laneX(0),18);ctx.fillText("LANE 2",laneX(1),18);
+  }
+  document.getElementById("startBtn").addEventListener("click",reset);
+  document.getElementById("restartBtn").addEventListener("click",reset);
+  document.getElementById("leftBtn").addEventListener("pointerdown",e=>{e.preventDefault();changeLane(0);});
+  document.getElementById("rightBtn").addEventListener("pointerdown",e=>{e.preventDefault();changeLane(1);});
+  window.addEventListener("keydown",e=>{
+    if(["ArrowLeft","ArrowRight"," "].includes(e.key))e.preventDefault();
+    if(e.key==="ArrowLeft")changeLane(0);if(e.key==="ArrowRight")changeLane(1);
+    if((e.key==="Enter"||e.key===" ")&&state==="ready")reset();
+    if((e.key==="Enter"||e.key===" ")&&state==="over")reset();
+  },{passive:false});
+  window.addEventListener("resize",resize);
+  bestEl.textContent=best;resize();
+})();
+</script>
+</body>
+</html>
