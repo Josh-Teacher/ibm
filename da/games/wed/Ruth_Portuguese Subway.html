@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#18233e" />
+<title>PortugueseSubway — Brazilian Portuguese Adventure</title>
+<style>
+  :root {
+    --ink:#18233e; --muted:#59647c; --paper:#fffaf0; --cream:#f5ebd6;
+    --blue:#2f69a2; --blue-dark:#214d7b; --mint:#a7e5cf; --green:#2b8a67;
+    --yellow:#ffd66b; --coral:#f07869; --line:#d7cbb3; --shadow:#121a2c;
+  }
+  * { box-sizing:border-box; }
+  html { background:#151e34; }
+  body { margin:0; min-height:100vh; color:var(--ink); font-family:ui-rounded,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:linear-gradient(180deg,#202c49 0%,#131b2d 100%); }
+  button,input { font:inherit; }
+  button { cursor:pointer; }
+  button:focus-visible,input:focus-visible { outline:4px solid #ffb84d; outline-offset:3px; }
+  button:disabled { cursor:not-allowed; opacity:.48; filter:grayscale(.25); }
+  .pixel, .pixel-card { image-rendering:pixelated; }
+  .app { width:min(1120px,100%); margin:0 auto; padding:clamp(10px,2.3vw,26px); }
+  .screen { display:none; animation:screenIn .22s ease-out both; }
+  .screen.active { display:block; }
+  @keyframes screenIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+  .panel { background:var(--paper); border:4px solid var(--ink); box-shadow:7px 7px 0 var(--shadow); border-radius:8px; }
+  .eyebrow { color:var(--blue); font-size:.76rem; font-weight:900; text-transform:uppercase; letter-spacing:.13em; }
+  h1,h2,h3,p { margin-top:0; }
+  h1 { line-height:1.02; letter-spacing:-.045em; }
+  .muted { color:var(--muted); }
+  .pixel-button { border:3px solid var(--ink); border-radius:5px; padding:12px 17px; font-weight:900; color:var(--ink); background:var(--yellow); box-shadow:4px 4px 0 var(--ink); transition:transform .12s,box-shadow .12s; }
+  .pixel-button:hover:not(:disabled) { transform:translate(2px,2px); box-shadow:2px 2px 0 var(--ink); }
+  .pixel-button:active:not(:disabled) { transform:translate(4px,4px); box-shadow:0 0 0 var(--ink); }
+  .pixel-button.secondary { background:#e7edf4; }
+  .pixel-button.green { background:var(--mint); }
+  .pixel-button.coral { background:#ffd4c9; }
+  .btn-row { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
+  .small-note { font-size:.88rem; line-height:1.5; color:var(--muted); }
+
+  /* Title screen and four-wagon train button */
+  .title-panel { overflow:hidden; padding:clamp(20px,5vw,54px) clamp(15px,4vw,45px) 34px; background:var(--paper); position:relative; }
+  .title-panel:before { content:""; position:absolute; width:180px;height:180px;right:-46px;top:-60px;opacity:.22;background:repeating-linear-gradient(0deg,var(--blue) 0 8px,transparent 8px 16px),repeating-linear-gradient(90deg,var(--blue) 0 8px,transparent 8px 16px); }
+  .title-brand { position:relative; z-index:1; max-width:660px; }
+  .title-brand h1 { font-size:clamp(2.6rem,8vw,5.7rem); margin:9px 0 14px; }
+  .title-brand h1 span { color:var(--blue); }
+  .title-brand p { max-width:600px; font-size:clamp(1rem,2vw,1.17rem); line-height:1.7; }
+  .title-deco { position:absolute; right:5%; bottom:20%; font-size:3.7rem; filter:drop-shadow(4px 4px 0 #ddcda7); transform:rotate(8deg); }
+  .exit-signs { display:flex; justify-content:center; gap:clamp(80px,22vw,260px); margin-top:42px; margin-bottom:7px; font-size:.72rem; font-weight:1000; letter-spacing:.12em; color:#fff; }
+  .exit-signs span { background:#d45d4b; border:3px solid var(--ink); box-shadow:3px 3px 0 var(--ink); padding:4px 11px; }
+  .train-play { position:relative; z-index:2; width:100%; border:0; padding:0; background:transparent; color:inherit; display:block; }
+  .train-play:focus-visible { outline:4px solid #ffad35; outline-offset:7px; border-radius:8px; }
+  .wagons { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:clamp(4px,1.1vw,12px); align-items:end; padding:0 4px 7px; }
+  .wagon { min-height:clamp(91px,17vw,158px); border:4px solid var(--ink); border-bottom-width:8px; border-radius:9px 9px 3px 3px; position:relative; display:flex; align-items:center; justify-content:center; background:#75b8d9; box-shadow:inset 0 -13px 0 rgba(24,35,62,.14); animation:trainBob 1.9s ease-in-out infinite; }
+  .wagon:nth-child(2) { background:#f6c75f; animation-delay:.12s; }
+  .wagon:nth-child(3) { background:#a6dfc8; animation-delay:.24s; }
+  .wagon:nth-child(4) { background:#f18b7b; animation-delay:.36s; }
+  .wagon:after { content:""; position:absolute; height:10px; width:24%; border:3px solid var(--ink); border-radius:50%; background:#e9f1ee; bottom:-16px; left:12%; box-shadow:clamp(38px,7vw,75px) 0 0 -1px var(--ink); }
+  .wagon-letter { position:relative; z-index:2; font-size:clamp(2.5rem,8.5vw,6rem); line-height:1; font-weight:1000; text-shadow:3px 3px 0 rgba(255,255,255,.5); }
+  .wagon-open .window-row { position:absolute; inset:12px 9px auto; height:36%; display:flex; justify-content:center; gap:5px; }
+  .train-window { background:#e6f2f6; border:3px solid var(--ink); flex:1; max-width:40px; border-radius:4px 4px 0 0; height:100%; position:relative; overflow:hidden; }
+  .mini-passenger { position:absolute; width:14px;height:22px; left:50%;bottom:-3px; transform:translateX(-50%); background:#6b4b3a; border:2px solid var(--ink); }
+  .mini-passenger:before { content:""; position:absolute;width:10px;height:10px;top:-10px;left:0;background:#e4a67f;border:1px solid var(--ink); }
+  .mini-passenger:nth-child(2) { background:#3f8a77; transform:translateX(-140%); }
+  .wagon-open .wagon-letter { align-self:flex-end; margin-bottom:3px; }
+  .train-play-text { font-weight:950; margin-top:27px; font-size:1.05rem; }
+  @keyframes trainBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+  .title-bottom { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; border-top:2px dashed var(--line); margin-top:27px; padding-top:17px; font-size:.84rem; color:var(--muted); }
+
+  /* Character choice */
+  .menu-panel { padding:clamp(18px,4vw,36px); }
+  .menu-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; flex-wrap:wrap; }
+  .menu-heading h2 { font-size:clamp(1.8rem,4vw,2.65rem); margin:7px 0 8px; }
+  .character-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:clamp(12px,2.4vw,24px); margin:27px 0; }
+  .character-choice { width:100%; text-align:left; background:#f2e8d4; border:4px solid var(--line); border-radius:7px; padding:18px; color:var(--ink); box-shadow:4px 4px 0 #cfc1a7; transition:border-color .15s,transform .15s,background .15s; }
+  .character-choice:hover { transform:translateY(-2px); }
+  .character-choice.selected { background:#e4f5ec; border-color:var(--green); box-shadow:4px 4px 0 var(--green); }
+  .character-preview { min-height:183px; border:3px dashed #cbbd9f; border-radius:6px; background:linear-gradient(#d7e9e6 0 65%,#c3d8cc 65%); display:flex; align-items:flex-end; justify-content:center; overflow:hidden; margin-bottom:15px; }
+  .character-choice strong { display:block; font-size:1.25rem; margin-bottom:4px; }
+  .character-choice p { margin-bottom:0; line-height:1.5; font-size:.91rem; color:var(--muted); }
+  .character-choice .select-hint { margin-top:12px; font-size:.78rem; font-weight:900; text-transform:uppercase; color:var(--blue); }
+  .difficulty-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:15px; margin:24px 0 28px; }
+  .difficulty-choice { padding:18px; border:3px solid var(--line); background:#f5eddd; border-radius:6px; text-align:left; color:var(--ink); box-shadow:3px 3px 0 #cfc1a7; min-height:190px; transition:transform .15s,border-color .15s; }
+  .difficulty-choice:hover { transform:translateY(-2px); }
+  .difficulty-choice.selected { border-color:var(--blue); background:#e7f0fa; box-shadow:3px 3px 0 var(--blue); }
+  .difficulty-choice .level { font-size:.73rem; color:var(--blue); font-weight:1000; letter-spacing:.12em; text-transform:uppercase; }
+  .difficulty-choice h3 { margin:9px 0 8px; font-size:1.35rem; }
+  .difficulty-choice p { margin:0; font-size:.9rem; color:var(--muted); line-height:1.5; }
+
+  /* Gameplay HUD and station scene */
+  .game-wrap { display:flex; flex-direction:column; gap:15px; }
+  .hud { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; }
+  .stat { background:#273652; color:#fff9e9; border:3px solid #0d1424; box-shadow:3px 3px 0 #0d1424; border-radius:5px; padding:10px 12px; min-width:0; }
+  .stat span { display:block; font-size:.68rem; font-weight:900; color:#c9d6e9; text-transform:uppercase; letter-spacing:.09em; margin-bottom:4px; }
+  .stat strong { font-size:clamp(1rem,2.3vw,1.4rem); letter-spacing:.02em; font-variant-numeric:tabular-nums; }
+  .life-icons { color:#ff8e7d; letter-spacing:2px; white-space:nowrap; font-size:1.2rem!important; }
+  .ticket-pill { display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border:2px solid #b9a46f; background:#fff1bc; color:#58451a; border-radius:4px; font-size:.83rem; font-weight:900; }
+  .station-scene { position:relative; min-height:205px; overflow:hidden; border:4px solid var(--ink); border-radius:7px; background:#b6d8dc; box-shadow:5px 5px 0 var(--shadow); }
+  .scene-ceiling { height:26px; background:repeating-linear-gradient(90deg,#3b4c69 0 28px,#526886 28px 32px); border-bottom:5px solid var(--ink); }
+  .scene-bricks { position:absolute; inset:31px 0 39px; background:linear-gradient(90deg,transparent 0 49%,rgba(41,66,91,.1) 49% 51%,transparent 51%),repeating-linear-gradient(0deg,#dce7dc 0 28px,#adc6c7 28px 31px); }
+  .scene-bricks:after { content:""; position:absolute; inset:0; opacity:.22; background:repeating-linear-gradient(90deg,transparent 0 47px,#456778 47px 49px); }
+  .station-sign { position:absolute; top:46px; right:15px; max-width:60%; border:3px solid var(--ink); padding:7px 12px; background:#fdf1bf; box-shadow:3px 3px 0 var(--ink); font-weight:1000; font-size:clamp(.8rem,2.5vw,1.1rem); z-index:2; }
+  .station-sign small { display:block; font-size:.58rem; letter-spacing:.12em; margin-top:2px; color:var(--blue); }
+  .scene-exit { position:absolute; left:14px; top:48px; background:#d95c4d; border:3px solid var(--ink); color:#fff; font-size:.63rem; font-weight:1000; padding:3px 7px; z-index:2; }
+  .platform { position:absolute; left:0; right:0; height:40px; bottom:0; border-top:5px solid var(--ink); background:repeating-linear-gradient(90deg,#786e71 0 23px,#8b8282 23px 26px); }
+  .platform:before { content:""; position:absolute; left:0;right:0;top:0;height:7px;background:repeating-linear-gradient(90deg,#f7d264 0 23px,#1c2940 23px 26px); }
+  .avatar-position { position:absolute; z-index:4; left:var(--avatar-left,8%); bottom:22px; transition:left .4s steps(7,end); width:clamp(75px,11vw,110px); height:clamp(100px,14vw,138px); display:flex; align-items:flex-end; justify-content:center; }
+  .scene-pipe { position:absolute; height:70px; width:18px; right:6%; bottom:31px; background:#a0b4b1; border:4px solid var(--ink); }
+  .scene-door { position:absolute; right:10%; bottom:35px; width:54px;height:88px; border:4px solid var(--ink); background:#7cb7cd; box-shadow:inset 0 0 0 5px #a3d4de; }
+  .scene-door:before { content:""; position:absolute; left:50%;top:0;bottom:0;border-left:3px solid var(--ink); }
+  .scene-door.open { animation:doorOpen .35s steps(3,end) forwards; }
+  @keyframes doorOpen { to { transform:scaleX(.55); transform-origin:right; opacity:.65; } }
+  .turnstile { position:absolute; z-index:3; left:86%; bottom:33px; width:24px; height:62px; border:3px solid var(--ink); background:#efc66b; box-shadow:3px 2px 0 rgba(24,35,62,.3); }
+  .turnstile-post { position:absolute; left:6px; bottom:0; width:7px; height:18px; border:2px solid var(--ink); background:var(--blue); }
+  .turnstile-arm { position:absolute; left:9px; bottom:19px; width:39px; height:8px; border:2px solid var(--ink); background:#df685b; transform-origin:3px 4px; transition:transform .32s steps(4,end),background .2s; }
+  .turnstile-light { position:absolute; right:1px; top:3px; width:6px; height:6px; border:1px solid var(--ink); background:#e9564c; }
+  .turnstile:after { content:"TURNSTILE"; position:absolute; top:-19px; left:-19px; width:62px; text-align:center; color:var(--ink); font-size:7px; font-weight:1000; letter-spacing:.02em; }
+  .turnstile.open .turnstile-arm { transform:rotate(-72deg); background:#81d7ac; }
+  .turnstile.open .turnstile-light { background:#4be08f; }
+  .progress-panel { background:#263550; color:#fff7df; border:3px solid #0d1424; border-radius:5px; padding:12px 14px; }
+  .progress-line { height:12px; display:grid; grid-template-columns:repeat(10,1fr); gap:4px; margin-top:10px; }
+  .progress-segment { border:2px solid #111b2f; background:#65748c; border-radius:2px; }
+  .progress-segment.done { background:#6de0b2; }
+  .progress-segment.current { background:var(--yellow); animation:currentPulse .9s ease-in-out infinite alternate; }
+  @keyframes currentPulse { from{opacity:.6} to{opacity:1} }
+  .game-columns { display:grid; grid-template-columns:minmax(0,1.55fr) minmax(255px,.85fr); gap:15px; align-items:start; }
+  .lesson-panel,.task-panel { padding:clamp(15px,2.4vw,25px); }
+  .location-heading { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:10px; border-bottom:2px dashed var(--line); padding-bottom:13px; margin-bottom:18px; }
+  .location-heading h2 { margin:4px 0 0; font-size:clamp(1.45rem,3vw,2.05rem); }
+  .checkpoint-badge { background:#e1edf7; color:var(--blue-dark); border:2px solid #aec7df; border-radius:4px; padding:5px 8px; font-size:.74rem; font-weight:1000; white-space:nowrap; }
+  .lesson-heading { font-size:1.25rem; margin-bottom:5px; }
+  .lesson-explanation { line-height:1.65; color:#37425a; }
+  .lesson-items { display:flex; flex-direction:column; gap:10px; margin:18px 0; }
+  .lesson-item { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px; align-items:center; border:2px solid #e0d5c0; background:#fffdf7; border-radius:5px; padding:12px; }
+  .lesson-item .pt { font-size:1.1rem; font-weight:950; margin-bottom:3px; overflow-wrap:anywhere; }
+  .lesson-item .en { font-size:.9rem; color:var(--muted); line-height:1.45; }
+  .lesson-item .note { margin-top:5px; color:#4c5a6e; font-size:.82rem; line-height:1.45; }
+  .audio-button { background:#e2effc; border:2px solid #87aaca; border-radius:4px; color:#214f7d; min-width:46px; min-height:43px; font-weight:950; }
+  .audio-button:hover { background:#cde4fa; }
+  .audio-controls { display:flex; flex-wrap:wrap; align-items:center; gap:9px; margin-top:13px; }
+  .audio-status { background:#f3e9d4; border-left:4px solid #cc9e48; padding:9px 11px; margin-top:14px; font-size:.82rem; line-height:1.5; color:#524a38; }
+  .audio-status.good { background:#e2f4eb; border-color:#399875; }
+  .slow-toggle { display:inline-flex; gap:7px; align-items:center; font-size:.82rem; font-weight:800; color:var(--muted); }
+  .slow-toggle input { accent-color:var(--blue); width:17px;height:17px; }
+  .task-panel h3 { font-size:1.22rem; margin-bottom:9px; }
+  .question-prompt { line-height:1.65; font-size:1rem; font-weight:750; white-space:pre-line; }
+  .context-block { border-left:4px solid var(--blue); background:#eaf1f5; margin:12px 0; padding:10px 12px; line-height:1.6; }
+  .answer-options { display:flex; flex-direction:column; gap:8px; margin:16px 0; }
+  .answer-option { display:flex; width:100%; align-items:flex-start; gap:10px; text-align:left; border:2px solid #d2c6ae; border-radius:5px; background:#fffdf8; color:var(--ink); padding:11px 12px; line-height:1.4; }
+  .answer-option .option-key { flex:0 0 25px; height:25px; display:grid; place-items:center; border:2px solid #b7ad9a; border-radius:3px; font-size:.76rem; font-weight:1000; background:#f4ead6; }
+  .answer-option.selected { border-color:var(--blue); background:#e7f1fd; box-shadow:inset 4px 0 0 var(--blue); }
+  .answer-option.selected .option-key { background:var(--blue); color:white; border-color:var(--blue); }
+  .text-answer { width:100%; border:3px solid #b9b09d; border-radius:4px; padding:12px; background:#fffdf8; color:var(--ink); margin:15px 0 11px; }
+  .hint-box { background:#fff0bd; border:2px dashed #bd9736; padding:11px 12px; border-radius:4px; margin:12px 0; font-size:.9rem; line-height:1.5; }
+  .feedback-box { padding:13px; border-radius:5px; margin:15px 0; border:3px solid; line-height:1.55; }
+  .feedback-box.correct { background:#ddf5e8; border-color:#45a27b; }
+  .feedback-box.incorrect { background:#ffe4dd; border-color:#d97668; }
+  .feedback-box strong { display:block; margin-bottom:3px; }
+  .submit-area { display:flex; flex-direction:column; gap:10px; margin-top:16px; }
+  .hint-action { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-top:14px; padding-top:13px; border-top:2px dashed var(--line); }
+  .hint-action .small-note { font-size:.78rem; }
+  .inventory-card { background:#283956; color:white; border:3px solid #101a2d; padding:13px 15px; border-radius:5px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .inventory-card strong { display:block; margin-bottom:3px; }
+  .inventory-ticket { font-size:1.1rem; padding:5px 9px; background:#ffe38b; border:2px solid #8f6f21; color:#543f0b; border-radius:3px; white-space:nowrap; }
+  .footer-controls { color:#d7e0ed; font-size:.8rem; text-align:center; line-height:1.7; padding:3px 0; }
+
+  /* Character art */
+  .avatar-svg { width:100%; max-height:100%; height:auto; shape-rendering:crispEdges; image-rendering:pixelated; overflow:visible; }
+  .sprite-shadow { fill:#506b6b; opacity:.35; }
+  .sprite .eye { fill:#18233e; }
+  .sprite .brow { fill:#49352c; }
+  .sprite .nose { fill:#b96d56; }
+  .sprite .mouth { fill:#8e4145; }
+  .sprite .blush { fill:#ef9b8a; opacity:.72; }
+  .sprite .boy-hair { fill:#3c2b2b; }
+  .sprite .girl-hair { fill:#4c3027; }
+  .sprite .skin { fill:#e8b08a; }
+  .sprite .skin-shadow { fill:#ce8e6d; }
+  .sprite .uniform-main { fill:#2f69a2; }
+  .sprite .uniform-dark { fill:#214d7b; }
+  .sprite .uniform-light { fill:#e9f2f4; }
+  .sprite .pants { fill:#34435d; }
+  .sprite .shoe { fill:#252b39; }
+  .sprite .bag { fill:#edbd50; }
+  .sprite .girl-uniform { fill:#c95f66; }
+  .sprite .girl-dark { fill:#8a3d58; }
+  .sprite .girl-skirt { fill:#355f85; }
+  .sprite .hair-tie { fill:#ffd66b; }
+  .sprite .arm,.sprite .leg { transform-box:fill-box; }
+  .sprite .eyes { animation:blink 4.8s linear infinite; transform-box:fill-box; transform-origin:center; }
+  @keyframes blink { 0%,44%,47%,88%,91%,100%{opacity:1} 45%,46%,89%,90%{opacity:.1} }
+  .character-boy .arm-left { transform-origin:top right; }
+  .character-boy .arm-right { transform-origin:top left; }
+  .character-boy .leg-left { transform-origin:top center; }
+  .character-boy .leg-right { transform-origin:top center; }
+  .character-girl .arm-left { transform-origin:top right; }
+  .character-girl .arm-right { transform-origin:top left; }
+  .character-girl .leg-left { transform-origin:top center; }
+  .character-girl .leg-right { transform-origin:top center; }
+  .state-idle .body-core { animation:boyBreath 2.4s ease-in-out infinite; transform-origin:50% 80%; }
+  .character-girl.state-idle .body-core { animation:gGirlBreath 2.7s ease-in-out infinite; }
+  @keyframes boyBreath { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-1px)} }
+  @keyframes gGirlBreath { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-1.5px) rotate(.2deg)} }
+  .character-boy.state-walk .leg-left { animation:boyLegL .28s steps(2,end) infinite; }
+  .character-boy.state-walk .leg-right { animation:boyLegR .28s steps(2,end) infinite; }
+  .character-boy.state-walk .arm-left { animation:boyArmL .28s steps(2,end) infinite; }
+  .character-boy.state-walk .arm-right { animation:boyArmR .28s steps(2,end) infinite; }
+  .character-girl.state-walk .leg-left { animation:girlLegL .32s steps(2,end) infinite; }
+  .character-girl.state-walk .leg-right { animation:girlLegR .32s steps(2,end) infinite; }
+  .character-girl.state-walk .arm-left { animation:girlArmL .32s steps(2,end) infinite; }
+  .character-girl.state-walk .arm-right { animation:girlArmR .32s steps(2,end) infinite; }
+  @keyframes boyLegL { 0%,100%{transform:rotate(14deg)} 50%{transform:rotate(-14deg)} }
+  @keyframes boyLegR { 0%,100%{transform:rotate(-14deg)} 50%{transform:rotate(14deg)} }
+  @keyframes boyArmL { 0%,100%{transform:rotate(-13deg)} 50%{transform:rotate(13deg)} }
+  @keyframes boyArmR { 0%,100%{transform:rotate(13deg)} 50%{transform:rotate(-13deg)} }
+  @keyframes girlLegL { 0%,100%{transform:rotate(11deg)} 50%{transform:rotate(-11deg)} }
+  @keyframes girlLegR { 0%,100%{transform:rotate(-11deg)} 50%{transform:rotate(11deg)} }
+  @keyframes girlArmL { 0%,100%{transform:rotate(-17deg)} 50%{transform:rotate(10deg)} }
+  @keyframes girlArmR { 0%,100%{transform:rotate(10deg)} 50%{transform:rotate(-17deg)} }
+  .state-learning .sprite-head { animation:learnNod .55s ease-in-out infinite alternate; transform-origin:center bottom; }
+  .character-girl.state-learning .sprite-head { animation:girlNod .7s ease-in-out infinite alternate; }
+  @keyframes learnNod { to{transform:rotate(-3deg) translateY(1px)} }
+  @keyframes girlNod { to{transform:rotate(3deg) translateY(1px)} }
+  .state-correct .arm-left,.state-correct .arm-right { animation:cheer .25s ease-in-out 3 alternate; }
+  .character-girl.state-correct .arm-left { animation:cheerGirl .3s ease-in-out 3 alternate; }
+  @keyframes cheer { to{transform:rotate(-35deg) translateY(-4px)} }
+  @keyframes cheerGirl { to{transform:rotate(-25deg) translateY(-6px)} }
+  .state-wrong .sprite-head { animation:wrongTilt .3s ease-in-out 2 alternate; }
+  @keyframes wrongTilt { to{transform:rotate(3deg) translateY(2px)} }
+  .state-win { animation:winBounce .45s steps(2,end) infinite alternate; }
+  @keyframes winBounce { to{transform:translateY(-8px)} }
+  .state-win .arm-left,.state-win .arm-right { animation:cheer .25s ease-in-out infinite alternate; }
+  .state-walk .avatar-svg { animation:walkBounce .28s steps(2,end) infinite; }
+  @keyframes walkBounce { 50%{transform:translateY(-3px)} }
+
+  /* End screens */
+  .end-panel { padding:clamp(20px,4vw,42px); }
+  .end-title { font-size:clamp(2.5rem,7vw,4.7rem); margin:8px 0; letter-spacing:-.05em; }
+  .end-title.win { color:#237d5c; }
+  .end-summary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:22px 0; }
+  .summary-card { border:2px solid #dfd2bb; background:#fffdf7; border-radius:5px; padding:13px; }
+  .summary-card h3 { font-size:1rem; margin-bottom:5px; }
+  .summary-card p { font-size:.88rem; line-height:1.5; margin-bottom:9px; color:var(--muted); }
+  .replay-list { display:flex; flex-wrap:wrap; gap:8px; }
+  .replay-list .audio-button { font-size:.78rem; min-height:35px; padding:4px 8px; }
+  .end-stats { display:flex; flex-wrap:wrap; gap:10px; margin:20px 0; }
+  .end-stat { background:#263652; color:white; border:3px solid var(--ink); padding:10px 14px; border-radius:4px; }
+  .end-stat span { display:block; color:#c8d6ea; font-size:.72rem; font-weight:900; text-transform:uppercase; letter-spacing:.09em; }
+  .end-stat strong { font-size:1.25rem; }
+  .end-character { width:125px;height:155px; float:right; margin:0 0 8px 14px; position:relative; overflow:hidden; border:3px solid var(--ink); border-radius:6px; background:linear-gradient(#b8dce1 0 62%,#9cbbb3 62%); }
+  .end-character:before { content:""; position:absolute; z-index:0; right:4px; bottom:0; width:35%; height:78%; border:3px solid var(--ink); background:linear-gradient(90deg,#cbe8e8 0 45%,#6ca6bf 45% 55%,#cbe8e8 55%); }
+  .end-character .avatar-svg { position:relative; z-index:1; }
+  #endAvatar .state-win { animation:boardTrain .8s steps(5,end) 1 both; }
+  @keyframes boardTrain { 0%{transform:translateX(-15px);opacity:.5} 65%{transform:translateX(7px);opacity:1} 100%{transform:translateX(0) translateY(-5px);opacity:1} }
+  .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+  @media (max-width:780px) {
+    .game-columns { grid-template-columns:1fr; }
+    .task-panel { order:0; }
+    .lesson-panel { order:1; }
+    .hud { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .difficulty-grid { grid-template-columns:1fr; }
+    .difficulty-choice { min-height:0; }
+    .difficulty-choice h3 { font-size:1.2rem; }
+    .title-deco { opacity:.22; right:3%; bottom:22%; }
+  }
+  @media (max-width:520px) {
+    .character-grid { grid-template-columns:1fr; }
+    .character-preview { min-height:158px; }
+    .wagons { gap:3px; }
+    .wagon { border-width:3px; border-bottom-width:7px; }
+    .wagon-letter { font-size:clamp(2rem,13vw,3.6rem); }
+    .wagon-open .window-row { inset:8px 5px auto; height:30%; gap:2px; }
+    .train-window { border-width:2px; }
+    .train-play-text { font-size:.93rem; }
+    .station-scene { min-height:175px; }
+    .station-sign { right:8px; top:39px; }
+    .scene-exit { top:42px; left:8px; }
+    .avatar-position { bottom:20px; }
+    .end-summary { grid-template-columns:1fr; }
+    .end-character { width:92px;height:118px; }
+  }
+  @media (prefers-reduced-motion:reduce) {
+    *,*:before,*:after { animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; scroll-behavior:auto!important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <section id="titleScreen" class="screen active" aria-labelledby="gameTitle">
+    <div class="panel title-panel">
+      <div class="title-brand">
+        <div class="eyebrow">A tiny adventure in a big language</div>
+        <h1 id="gameTitle">Portuguese<span>Subway</span></h1>
+        <p>Catch your train to school by learning real Brazilian Portuguese. Study, listen, recall what you learned, keep your lives, and earn your way through ten station checkpoints.</p>
+      </div>
+      <div class="title-deco" aria-hidden="true">🚇</div>
+      <div class="exit-signs" aria-hidden="true"><span>EXIT</span><span>EXIT</span></div>
+      <button class="train-play" id="playButton" aria-label="Play PortugueseSubway">
+        <div class="wagons" aria-hidden="true">
+          <div class="wagon"><span class="wagon-letter">P</span></div>
+          <div class="wagon wagon-open">
+            <div class="window-row"><span class="train-window"><i class="mini-passenger"></i><i class="mini-passenger"></i></span><span class="train-window"><i class="mini-passenger"></i></span></div>
+            <span class="wagon-letter">L</span>
+          </div>
+          <div class="wagon"><span class="wagon-letter">A</span></div>
+          <div class="wagon"><span class="wagon-letter">Y</span></div>
+        </div>
+        <div class="train-play-text">▶ BOARD THE LEARNING TRAIN</div>
+      </button>
+      <div class="title-bottom"><span>10 checkpoints · 3 lives · 10-minute journey</span><span>Brazilian Portuguese (PT-BR)</span><span>Best with sound enabled</span></div>
+    </div>
+  </section>
+
+  <section id="characterScreen" class="screen" aria-labelledby="characterHeading">
+    <div class="panel menu-panel">
+      <div class="menu-heading"><div><div class="eyebrow">Step 1 of 2</div><h2 id="characterHeading">Choose your student</h2><p class="muted">Pick your traveller. Each student has their own look and movement style.</p></div><button class="pixel-button secondary" id="backToTitle">← Back</button></div>
+      <div class="character-grid">
+        <button class="character-choice" data-character="boy" aria-pressed="false">
+          <div class="character-preview"><div style="width:130px;height:164px;display:flex;align-items:flex-end;justify-content:center" id="boyPreview"></div></div>
+          <strong>Mateus</strong><p>Short textured hair, a blue school jacket, and a sunny yellow backpack.</p><div class="select-hint">Click to select Mateus</div>
+        </button>
+        <button class="character-choice" data-character="girl" aria-pressed="false">
+          <div class="character-preview"><div style="width:130px;height:164px;display:flex;align-items:flex-end;justify-content:center" id="girlPreview"></div></div>
+          <strong>Beatriz</strong><p>Long tied-back hair, a coral school top, a pleated skirt, and a yellow hair tie.</p><div class="select-hint">Click to select Beatriz</div>
+        </button>
+      </div>
+      <div class="btn-row"><button id="toDifficulty" class="pixel-button green" disabled>Choose difficulty →</button><span class="small-note">The selected character stays with you for the whole journey.</span></div>
+    </div>
+  </section>
+
+  <section id="difficultyScreen" class="screen" aria-labelledby="difficultyHeading">
+    <div class="panel menu-panel">
+      <div class="menu-heading"><div><div class="eyebrow">Step 2 of 2</div><h2 id="difficultyHeading">Choose your Portuguese level</h2><p class="muted">Every level has its own five-lesson curriculum and five active-recall checkpoints.</p></div><button class="pixel-button secondary" id="backToCharacters">← Character</button></div>
+      <div class="difficulty-grid">
+        <button class="difficulty-choice" data-difficulty="easy" aria-pressed="false"><div class="level">Level 01 · Start here</div><h3>Easy</h3><p><strong>Absolute Beginner</strong><br>Greetings, daily words, numbers, simple present-tense sentences, and sound foundations.</p></button>
+        <button class="difficulty-choice" data-difficulty="intermediate" aria-pressed="false"><div class="level">Level 02 · Build fluency</div><h3>Intermediate</h3><p><strong>Conversational Independence</strong><br>Subjunctive forms, conditional time, nuanced verbs, connectors, false friends, and everyday tasks.</p></button>
+        <button class="difficulty-choice" data-difficulty="difficult" aria-pressed="false"><div class="level">Level 03 · Fine-tune</div><h3>Difficult</h3><p><strong>Advanced Portuguese</strong><br>Personal infinitive, pronoun placement, crase, regência, idioms, slang, irony, and regional nuance.</p></button>
+      </div>
+      <div class="btn-row"><button id="startJourney" class="pixel-button green" disabled>Start the journey →</button><span class="small-note">The 10:00 timer starts with checkpoint 1, not before.</span></div>
+    </div>
+  </section>
+
+  <section id="gameScreen" class="screen" aria-label="PortugueseSubway game">
+    <div class="game-wrap">
+      <div class="hud" aria-label="Game statistics">
+        <div class="stat"><span>Time remaining</span><strong id="timerDisplay">10:00</strong></div>
+        <div class="stat"><span>Score</span><strong id="scoreDisplay">0/10</strong></div>
+        <div class="stat"><span>Lives</span><strong id="livesDisplay" class="life-icons" aria-label="3 lives">♥ ♥ ♥</strong></div>
+        <div class="stat"><span>Subway ticket</span><strong id="ticketHud">Not yet earned</strong></div>
+      </div>
+
+      <div class="station-scene" aria-label="Pixel art station scene">
+        <div class="scene-ceiling"></div><div class="scene-bricks"></div>
+        <div class="scene-exit">EXIT</div>
+        <div class="station-sign" id="sceneSign">STATION ENTRANCE<small>LINE 10 · SCHOOL BOUND</small></div>
+        <div class="turnstile" id="turnstileGate" aria-label="Turnstile gate"><span class="turnstile-post"></span><span class="turnstile-arm"></span><span class="turnstile-light"></span></div>
+        <div class="scene-door" id="sceneDoor" aria-hidden="true"></div><div class="scene-pipe" aria-hidden="true"></div>
+        <div class="avatar-position" id="avatarPosition"><div id="gameAvatar" style="width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center"></div></div>
+        <div class="platform"></div>
+      </div>
+
+      <div class="progress-panel"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><strong>Journey to the train</strong><span id="progressText">Checkpoint 1 of 10</span></div><div id="progressLine" class="progress-line" aria-label="Checkpoint progress"></div></div>
+
+      <div class="game-columns">
+        <article class="panel lesson-panel" id="lessonPanel" aria-live="polite"></article>
+        <aside class="panel task-panel" id="taskPanel" aria-live="polite"></aside>
+      </div>
+      <div class="inventory-card"><div><strong>Inventory &amp; route</strong><span id="inventoryMessage">No ticket yet. Complete the ticket-machine lesson at checkpoint 3.</span></div><div id="inventoryTicket" class="inventory-ticket">🎟 Empty</div></div>
+      <div class="footer-controls">Keyboard: ↑ / ↓ choose an answer · Enter submit or continue · ← / → move only where the route is unlocked. Mouse and touch controls work too.</div>
+    </div>
+  </section>
+
+  <section id="endScreen" class="screen" aria-labelledby="endTitle">
+    <div class="panel end-panel" id="endPanel"></div>
+  </section>
+</div>
+<script>
+(() => {
+  'use strict';
+
+  const locations = [
+    'Station entrance','Information sign','Ticket machine','Ticket receipt area','Station map area',
+    'Platform direction sign','Boarding information area','Turnstile','Train boarding area','Subway car entrance'
+  ];
+  const levelNames = { easy:'Easy — Absolute Beginner', intermediate:'Intermediate — Conversational Independence', difficult:'Difficult — Advanced Portuguese' };
+  const levelDescriptions = {
+    easy:'Short practical phrases, visual support, and sound foundations.',
+    intermediate:'Connected ideas, context-sensitive grammar, and everyday conversation.',
+    difficult:'Register, idiomatic meaning, and precise choices in real-world Brazilian Portuguese.'
+  };
+
+  const curriculum = {
+    easy: [
+      {
+        title:'Warm greetings & good manners', topic:'Greetings and polite expressions',
+        explanation:'Brazilian Portuguese greetings often depend on the time of day. “Por favor” means “please.” In standard usage, a speaker traditionally says “obrigado” (masculine) or “obrigada” (feminine) to say thank you.',
+        items:[
+          {pt:'Oi! / Olá!',en:'Hi! / Hello!',note:'“Oi” is very common in relaxed Brazilian conversation.'},
+          {pt:'Bom dia!',en:'Good morning!',note:'Used in the morning.'},
+          {pt:'Por favor',en:'Please',note:'Use it when making a polite request.'},
+          {pt:'Obrigado / Obrigada',en:'Thank you',note:'The traditional ending agrees with the speaker: obrigado (masculine), obrigada (feminine).'}
+        ],
+        practice:{type:'choice',prompt:'You walk into a bakery at 9 a.m. Which greeting fits best?',options:['Boa noite!','Bom dia!','Tchau!'],answer:'Bom dia!',explanation:'“Bom dia” is the everyday Brazilian Portuguese greeting for the morning.',hint:{easy:'It literally means “good day” and is used before the afternoon.'}},
+        review:{type:'text',prompt:'Type the Brazilian Portuguese expression meaning “please.”',accepted:['por favor'],displayAnswer:'por favor',explanation:'“Por favor” is a polite expression used in requests.',hint:{easy:'Two words: por … favor.'}}
+      },
+      {
+        title:'Food, objects & everyday wants',topic:'Food, objects, and simple requests',
+        explanation:'Nouns are often easiest to remember in short useful phrases. In Brazilian Portuguese, “Eu quero…” means “I want…”. The noun usually follows it: “Eu quero um café.”',
+        items:[
+          {pt:'Água',en:'Water',note:'The acute accent marks the stressed syllable: Á-gua.'},
+          {pt:'Café',en:'Coffee',note:'Also means a café or coffee shop, depending on context.'},
+          {pt:'Pão',en:'Bread / roll',note:'The ão ending is nasal; you will practise it again later.'},
+          {pt:'Arroz · livro · mesa · casa',en:'Rice · book · table · house',note:'Try saying each word aloud, then recall it without looking.'},
+          {pt:'Eu quero um café.',en:'I want a coffee.',note:'A useful everyday sentence. “Um” means “a / one” with a masculine noun.'}
+        ],
+        practice:{type:'choice',prompt:'You want to order coffee. Which sentence says “I want a coffee”?',options:['Eu tenho uma casa.','Eu quero um café.','Eu vou para casa.'],answer:'Eu quero um café.',explanation:'“Quero” is the “I” form of querer (to want); café means coffee.',hint:{easy:'Find the sentence with “quero,” the “I want” form.'}},
+        review:{type:'text',prompt:'Type the Portuguese word for “bread.”',accepted:['pão','pao'],displayAnswer:'pão',explanation:'“Pão” means bread. Its nasal ão ending is a useful Brazilian Portuguese sound pattern.',hint:{easy:'It has three letters and ends in ão.'}}
+      },
+      {
+        title:'Numbers, colours & days',topic:'Everyday words for counting and planning',
+        explanation:'Numbers, colours, and weekday names help you handle simple plans. “Segunda-feira” is Monday and “sábado” is Saturday. Weekdays are usually written in lowercase in Portuguese.',
+        items:[
+          {pt:'Um · dois · três',en:'One · two · three',note:'“Três” has an accent on ê.'},
+          {pt:'Azul · vermelho · verde',en:'Blue · red · green',note:'Colour words can change form to agree with the noun.'},
+          {pt:'Segunda-feira',en:'Monday',note:'Literally “second day.”'},
+          {pt:'Sábado',en:'Saturday',note:'The accent marks the stressed first syllable.'}
+        ],
+        practice:{type:'choice',prompt:'Which word means “Saturday” in Brazilian Portuguese?',options:['Segunda-feira','Sábado','Verde'],answer:'Sábado',explanation:'“Sábado” means Saturday; “segunda-feira” means Monday, and “verde” means green.',hint:{easy:'It starts with S and has an acute accent on the first a.'}},
+        review:{type:'text',prompt:'Type the Portuguese word for the number 3.',accepted:['três','tres'],displayAnswer:'três',explanation:'“Três” means three. In standard spelling, it takes an accent on ê.',hint:{easy:'It starts with tr- and ends in -ês.'}}
+      },
+      {
+        title:'Five essential present-tense verbs',topic:'Ser, estar, ter, ir, and querer',
+        explanation:'Learn these verbs inside complete sentences. “Ser” often describes identity, “estar” a current state or location, “ter” possession, “ir” going, and “querer” wanting. These are useful starting patterns, not one-word rules for every situation.',
+        items:[
+          {pt:'Eu sou estudante.',en:'I am a student.',note:'Sou is the “I” form of ser.'},
+          {pt:'Estou bem.',en:'I am well.',note:'Estou is the “I” form of estar; it describes how you feel here.'},
+          {pt:'Eu tenho um livro.',en:'I have a book.',note:'Tenho is the “I” form of ter.'},
+          {pt:'Eu vou para casa.',en:'I am going home.',note:'Vou is the “I” form of ir.'},
+          {pt:'Eu quero um café.',en:'I want a coffee.',note:'Quero is the “I” form of querer.'}
+        ],
+        practice:{type:'choice',prompt:'A friend asks how you are feeling right now. Which answer means “I am well”?',options:['Eu sou estudante.','Estou bem.','Eu tenho um livro.'],answer:'Estou bem.',explanation:'“Estou bem” describes your current state: “I’m well.” “Sou estudante” describes who you are.',hint:{easy:'Look for “estou,” a form of estar used for a current state.'}},
+        review:{type:'text',prompt:'Complete the sentence: “Eu ___ um livro.” (I have a book.)',accepted:['tenho'],displayAnswer:'tenho',explanation:'“Tenho” is the first-person singular form of ter: eu tenho, “I have.”',hint:{easy:'The verb is ter. The answer begins with t and ends with -enho.'}}
+      },
+      {
+        title:'Hear the sounds: ão, ões, ç, nh & lh',topic:'Brazilian Portuguese pronunciation foundations',
+        explanation:'Brazilian Portuguese spelling gives helpful clues, but some sounds need practice. ão and ões are nasal endings; ç is pronounced like s; nh is similar to the “ny” sound in canyon; lh is a palatal sound often approximated as “ly.” Actual pronunciation varies a little by region.',
+        items:[
+          {pt:'Pão',en:'Bread',note:'Listen for the nasal ão ending.'},
+          {pt:'Canções',en:'Songs',note:'The ões ending is nasal and plural.'},
+          {pt:'Maçã',en:'Apple',note:'ç represents an s sound; ã is nasal.'},
+          {pt:'Banho',en:'Bath',note:'nh is one combined consonant sound.'},
+          {pt:'Filho',en:'Son',note:'lh is one consonant sound, not a separate l + h.'}
+        ],
+        practice:{type:'choice',prompt:'Which word contains the Brazilian Portuguese spelling pattern “nh”?',options:['Pão','Banho','Maçã'],answer:'Banho',explanation:'“Banho” contains nh, a digraph that represents one consonant sound.',hint:{easy:'Choose the word for “bath.” It has four letters.'}},
+        review:{type:'text',prompt:'Type the word meaning “son.” Pay attention to the “lh” spelling.',accepted:['filho'],displayAnswer:'filho',explanation:'“Filho” means son. The letters lh work together to represent one consonant sound.',hint:{easy:'It begins with fi- and ends in -lho.'}}
+      }
+    ],
+    intermediate: [
+      {
+        title:'Wishes, uncertainty & imagined situations',topic:'Present and imperfect subjunctive',
+        explanation:'The subjunctive lets you present something as desired, uncertain, or hypothetical rather than as a plain fact. After “Espero que…”, Portuguese commonly uses the present subjunctive: “venha.” In an unreal or remote “if” clause, “Se eu tivesse tempo, viajaria” pairs the imperfect subjunctive with a conditional.',
+        items:[
+          {pt:'Espero que você venha.',en:'I hope you come / will come.',note:'“Venha” is present subjunctive after the expression of hope.'},
+          {pt:'Se eu tivesse tempo, viajaria.',en:'If I had time, I would travel.',note:'“Tivesse” frames a hypothetical situation; “viajaria” gives the imagined result.'},
+          {pt:'É melhor que ela descanse.',en:'It is better that she rest.',note:'A recommendation can trigger the subjunctive.'}
+        ],
+        practice:{type:'choice',prompt:'Why does the sentence use “venha” here?\n“Espero que você venha.”',options:['It reports a completed past action.','It expresses a hope, so the subjunctive fits.','It is the infinitive form of vir.'],answer:'It expresses a hope, so the subjunctive fits.',explanation:'“Espero que” expresses a wish or hope and is commonly followed by the present subjunctive: venha.',hint:{intermediate:'Notice the expression of hope before “que.”'}},
+        review:{type:'text',prompt:'Complete the hypothetical sentence: “Se eu ___ tempo, viajaria.” (If I had time, I would travel.)',accepted:['tivesse'],displayAnswer:'tivesse',explanation:'“Tivesse” is the imperfect subjunctive of ter used for this hypothetical condition.',hint:{intermediate:'This is the imperfect subjunctive of ter, not the present form tenho.'}}
+      },
+      {
+        title:'Future events after “se” and “quando”',topic:'Future subjunctive in conditional sentences',
+        explanation:'In Brazilian Portuguese, a future event after conditional “se” (if) or temporal “quando” (when) often takes the future subjunctive. The main clause then explains what will happen. Compare “Se eu tiver tempo, vou cozinhar” and “Quando você chegar, me avise.”',
+        items:[
+          {pt:'Se eu tiver tempo, vou cozinhar.',en:'If I have time, I will cook.',note:'“Tiver” is the future subjunctive of ter.'},
+          {pt:'Quando você chegar, me avise.',en:'When you arrive, let me know.',note:'“Chegar” is the future subjunctive form here; it looks like the infinitive for eu/ele/ela/você in this verb.'},
+          {pt:'Se ela puder, vai ajudar.',en:'If she can, she will help.',note:'“Puder” is the future subjunctive of poder.'}
+        ],
+        practice:{type:'choice',prompt:'Choose the natural completion: “Quando você ___, me avise.”',options:['chega ontem','chegar','chegou amanhã'],answer:'chegar',explanation:'For a future event introduced by “quando,” use the future subjunctive: “Quando você chegar, me avise.”',hint:{intermediate:'The arrival has not happened yet; look for the future-oriented verb form.'}},
+        review:{type:'text',prompt:'Complete: “Se eu ___ tempo, vou cozinhar.”',accepted:['tiver'],displayAnswer:'tiver',explanation:'“Tiver” is the future subjunctive of ter used for a possible future condition.',hint:{intermediate:'It is the future subjunctive of ter: se eu…'} }
+      },
+      {
+        title:'States, conditions & becoming',topic:'Ser, estar, ficar, and tornar-se',
+        explanation:'These verbs overlap in English translations, but they frame meaning differently. “Ser” often gives identity or a characteristic; “estar” describes a state; “ficar” can mark a change or resulting state; “tornar-se” means to become and can sound more formal.',
+        items:[
+          {pt:'Ela é médica.',en:'She is a doctor.',note:'Ser gives identity or profession.'},
+          {pt:'Ela está cansada.',en:'She is tired.',note:'Estar describes her current state.'},
+          {pt:'Fiquei feliz com a notícia.',en:'I was / became happy about the news.',note:'Ficar often highlights the result or change of state.'},
+          {pt:'Ele se tornou professor.',en:'He became a teacher.',note:'Tornar-se is “to become”; it is often more formal than ficar.'}
+        ],
+        practice:{type:'choice',prompt:'You want to stress your reaction to news: “I became happy about the news.” Which sentence fits?',options:['Sou feliz com a notícia.','Fiquei feliz com a notícia.','Tenho feliz com a notícia.'],answer:'Fiquei feliz com a notícia.',explanation:'“Fiquei feliz” presents happiness as the resulting state or reaction to the news.',hint:{intermediate:'Choose the verb that can signal a change or resulting state.'}},
+        review:{type:'text',prompt:'Which verb completes this sentence? “Ele se ___ professor.” (He became a teacher.)',accepted:['tornou'],displayAnswer:'tornou',explanation:'“Tornou-se” means “became.” In the sentence shown, the pronoun se appears before the verb.',hint:{intermediate:'The infinitive is tornar-se; use the past form shown in the lesson.'}}
+      },
+      {
+        title:'Talking about what had happened',topic:'Pretérito mais-que-perfeito composto and connectors',
+        explanation:'“Tinha + past participle” often describes an action that had already happened before another past event. Connectors help listeners follow your reasoning: “porém” introduces contrast, “embora” introduces concession, and “visto que” gives a reason.',
+        items:[
+          {pt:'Eu já tinha estudado quando a aula começou.',en:'I had already studied when the class began.',note:'Tinha estudado happened before the class began.'},
+          {pt:'Queria sair; porém, estava chovendo.',en:'I wanted to go out; however, it was raining.',note:'“Porém” marks contrast.'},
+          {pt:'Embora estivesse cansado, continuou.',en:'Although he was tired, he continued.',note:'“Embora” commonly introduces a concessive clause with the subjunctive.'},
+          {pt:'Fiquei em casa, visto que chovia.',en:'I stayed home, since it was raining.',note:'“Visto que” introduces a reason.'}
+        ],
+        practice:{type:'choice',prompt:'The class started at 9. You had studied before 9. Which phrase clearly marks the earlier action?',options:['tinha estudado','estudará','está estudando'],answer:'tinha estudado',explanation:'“Tinha estudado” is the compound pluperfect form: the studying happened before the later past event.',hint:{intermediate:'Look for tinha + a past participle.'}},
+        review:{type:'text',prompt:'Type the connector meaning “although” in this sentence: “___ estivesse cansado, continuou.”',accepted:['embora'],displayAnswer:'embora',explanation:'“Embora” means “although,” and the clause in this example uses the subjunctive estivesse.',hint:{intermediate:'It starts with em- and is used to introduce a concession.'}}
+      },
+      {
+        title:'False friends & everyday problem-solving',topic:'Context, travel, forms, health, and preferences',
+        explanation:'Words that look familiar across languages can mislead you. In Brazilian Portuguese, “brincar” generally means to play, not Spanish “to jump.” “Propina” usually means a bribe in Brazil, while in Portugal it commonly means university tuition fees. Context matters. These phrases also help in practical situations.',
+        items:[
+          {pt:'As crianças gostam de brincar.',en:'The children like to play.',note:'Brazilian Portuguese brincar generally means “to play.”'},
+          {pt:'No Brasil, propina pode significar suborno.',en:'In Brazil, propina can mean a bribe.',note:'In Portugal, propina commonly refers to university tuition fees.'},
+          {pt:'Preciso de ajuda com este formulário.',en:'I need help with this form.',note:'Useful for administrative paperwork.'},
+          {pt:'Tenho uma consulta médica às três.',en:'I have a medical appointment at three.',note:'A consulta médica is a medical appointment.'},
+          {pt:'Prefiro ir de manhã.',en:'I prefer to go in the morning.',note:'Prefiro means “I prefer.”'}
+        ],
+        practice:{type:'choice',prompt:'A Brazilian friend says “As crianças estão brincando.” What are the children doing?',options:['They are playing.','They are jumping.','They are filling out a form.'],answer:'They are playing.',explanation:'In Brazilian Portuguese, brincar generally means “to play.” The “jump” meaning is a common Spanish false-friend trap.',hint:{intermediate:'Think of a game children do for fun.'}},
+        review:{type:'choice',prompt:'In Brazil, what does “propina” usually mean?',options:['A university tuition fee','A bribe','A medical appointment'],answer:'A bribe',explanation:'In Brazil, propina means a bribe; in Portugal it commonly refers to university tuition fees.',hint:{intermediate:'It is connected to an illicit payment, not a school bill.'}}
+      }
+    ],
+    difficult: [
+      {
+        title:'Infinitivo pessoal: who is doing the action?',topic:'The personal infinitive',
+        explanation:'Portuguese can inflect the infinitive to show its subject, which is especially useful when the subject is explicit or differs from the main clause. In “É importante estudarmos,” the ending -mos identifies “us.” This is not interchangeable with every plain infinitive; the choice depends on the construction and intended clarity.',
+        items:[
+          {pt:'É importante estudarmos antes da prova.',en:'It is important for us to study before the exam.',note:'Estudarmos marks “we” as the subject of studying.'},
+          {pt:'Antes de eles saírem, avise-me.',en:'Before they leave, let me know.',note:'Saírem marks “they” as the subject after antes de.'},
+          {pt:'Quero estudar agora.',en:'I want to study now.',note:'The plain infinitive is natural when the subject is understood from the main clause.'}
+        ],
+        practice:{type:'choice',prompt:'In “É importante estudarmos antes da prova,” what does the ending -mos tell you?',options:['The studying is already finished.','The subject of studying is “we.”','The sentence is a command to one person.'],answer:'The subject of studying is “we.”',explanation:'The personal infinitive estudarmos carries a subject marker: nós, “we.”',hint:{difficult:'Look at the person/number ending, not the tense.'}},
+        review:{type:'text',prompt:'Complete: “Antes de eles ___, avise-me.” (Before they leave, let me know.)',accepted:['saírem','sairem'],displayAnswer:'saírem',explanation:'“Saírem” is the personal infinitive of sair with the subject eles. The accent is part of standard spelling.',hint:{difficult:'The subject is eles, so use the personal infinitive ending -em.'}}
+      },
+      {
+        title:'Pronoun placement & register',topic:'Próclise, ênclise, and mesóclise',
+        explanation:'Pronoun placement varies by grammatical trigger, region, and register. Próclise puts the pronoun before the verb (“Não me diga isso”; also common conversational “Eu te aviso”). Ênclise puts it after the verb with a hyphen (“Entregue-me o documento”) and is associated with formal standard writing. Mesóclise inserts it into a future form (“dir-lhe-ei”) and is rare in everyday Brazilian speech.',
+        items:[
+          {pt:'Não me diga isso.',en:'Don’t tell me that.',note:'The negative word não attracts the pronoun before the verb (próclise).'},
+          {pt:'Eu te aviso amanhã.',en:'I’ll let you know tomorrow.',note:'A natural pattern in everyday Brazilian Portuguese.'},
+          {pt:'Entregue-me o documento.',en:'Hand me the document.',note:'A formal-standard enclitic construction.'},
+          {pt:'Dir-lhe-ei a verdade.',en:'I shall tell him/her the truth.',note:'Mesóclise is highly formal and uncommon in everyday Brazilian speech; more natural speech often rephrases this.'}
+        ],
+        practice:{type:'choice',prompt:'Which sentence is a natural choice in everyday Brazilian conversation?',options:['Eu te aviso amanhã.','Avisar-te-ei amanhã.','Dir-lhe-ei amanhã.'],answer:'Eu te aviso amanhã.',explanation:'“Eu te aviso amanhã” is a natural everyday Brazilian pattern. The mesoclitic forms are highly formal and uncommon in conversation.',hint:{difficult:'Choose the sentence that sounds like ordinary spoken Brazilian Portuguese, not a formal document.'}},
+        review:{type:'text',prompt:'Complete the sentence with the pronoun in the form shown: “Não ___ diga isso.” (Don’t tell me that.)',accepted:['me'],displayAnswer:'me',explanation:'In this sentence, não attracts the unstressed pronoun before the verb: “Não me diga isso.”',hint:{difficult:'Use the first-person singular object pronoun.'}}
+      },
+      {
+        title:'Crase & regência in context',topic:'The grave accent and verb government',
+        explanation:'Crase (à) marks the fusion of the preposition a with the feminine article a in contexts that require both: “Vou à universidade.” Regência is the preposition or complement pattern a verb selects. In formal standard Portuguese, assistir meaning “to watch” traditionally takes a: “Assisti ao filme.” Actual Brazilian usage can differ by register, so notice the context.',
+        items:[
+          {pt:'Vou à universidade.',en:'I am going to the university.',note:'À combines the preposition a + feminine article a.'},
+          {pt:'Gosto de música.',en:'I like music.',note:'Gostar takes de: gostar de alguma coisa.'},
+          {pt:'Assisti ao filme.',en:'I watched the film.',note:'This is the formal-standard regência pattern: assistir a + o = ao.'},
+          {pt:'Cheguei à estação.',en:'I arrived at the station.',note:'In this context, chegar a + a estação contracts to à.'}
+        ],
+        practice:{type:'choice',prompt:'Which sentence correctly uses crase in the standard written form shown?',options:['Vou a universidade.','Vou à universidade.','Vou há universidade.'],answer:'Vou à universidade.',explanation:'“Vou à universidade” uses à for the preposition a plus the feminine article a.',hint:{difficult:'The destination is a feminine noun with an article, and the verb construction calls for a.'}},
+        review:{type:'text',prompt:'Complete the formal-standard sentence: “Gosto ___ música.”',accepted:['de'],displayAnswer:'de',explanation:'The verb gostar takes the preposition de: gostar de música.',hint:{difficult:'Remember the fixed pattern gostar ___ alguma coisa.'}}
+      },
+      {
+        title:'Idioms: read beyond the literal words',topic:'Brazilian idiomatic expressions',
+        explanation:'Idioms carry conventional meanings that are not obvious from literal translation. Tone and situation matter: these expressions can sound funny, informal, or emphatic. Use them when the relationship and setting make that register appropriate.',
+        items:[
+          {pt:'Chutar o balde',en:'To throw caution to the wind; to lose patience or give up on the usual limits.',note:'Informal and context-dependent. It can signal frustration or a decision to stop holding back.'},
+          {pt:'Tirar o cavalo da chuva',en:'To stop hoping for something; don’t count on it.',note:'Often said when someone should abandon an expectation.'},
+          {pt:'Pagar mico',en:'To embarrass yourself / make a fool of yourself.',note:'Informal Brazilian expression; avoid it in formal writing.'}
+        ],
+        practice:{type:'choice',prompt:'Your friend expects an unlikely favour. You say “Pode tirar o cavalo da chuva.” What do you mean?',options:['You should stop counting on that.','Let’s go horseback riding.','You should relax in the rain.'],answer:'You should stop counting on that.',explanation:'“Tirar o cavalo da chuva” is an idiom meaning to stop hoping for something or not to count on it.',hint:{difficult:'The phrase rejects an expectation; its meaning is not about an actual horse.'}},
+        review:{type:'choice',prompt:'Someone ignored every warning, lost patience, and decided to throw caution to the wind. Which idiom fits?',options:['Chutar o balde','Tirar o cavalo da chuva','Gosto de música'],answer:'Chutar o balde',explanation:'“Chutar o balde” can describe losing patience, giving up on restraint, or throwing caution to the wind, depending on context.',hint:{difficult:'It literally mentions kicking a household container.'}}
+      },
+      {
+        title:'Slang, irony, region & PT-BR / PT-PT',topic:'Register, context, and regional nuance',
+        explanation:'Informal words vary by age, region, and social group. “Grana” is an informal Brazilian word for money; “legal” often means cool or nice. Intonation can make praise ironic (“Nossa, que pontual…” said to someone who is late). Regional expressions such as “oxente” (associated with parts of the Northeast) or “bah” (associated with the South) are not universal. European Portuguese often uses “autocarro” where Brazilian Portuguese uses “ônibus”; in Portugal “propina” commonly means university tuition, while in Brazil it usually means a bribe.',
+        items:[
+          {pt:'Legal! / Que legal!',en:'Cool! / How nice!',note:'In Brazil, legal often means “cool” or “nice,” not just “legal” in the law-related English sense.'},
+          {pt:'Estou sem grana.',en:'I’m out of money.',note:'Grana is informal. Use a more neutral word such as dinheiro in formal contexts.'},
+          {pt:'Nossa, que pontual…',en:'Wow, how punctual…',note:'Said with ironic intonation to someone who is late, it can mean the opposite of the literal words.'},
+          {pt:'PT-BR: ônibus · PT-PT: autocarro',en:'Brazilian Portuguese: bus · European Portuguese: bus',note:'A vocabulary difference between varieties; PT-BR remains the main target here.'}
+        ],
+        practice:{type:'choice',prompt:'You arrive 25 minutes late. A friend looks at the clock and says dryly, “Nossa, que pontual…” What is the likely intention?',options:['Sincere praise for arriving early.','Irony: the friend is pointing out that you are late.','A formal request to board a bus.'],answer:'Irony: the friend is pointing out that you are late.',explanation:'The literal words praise punctuality, but the context and dry intonation make the remark ironic.',hint:{difficult:'Compare the literal compliment with the fact that the person arrived late.'}},
+        review:{type:'choice',prompt:'Which word is the usual Brazilian Portuguese term for “bus” in the comparison taught here?',options:['Autocarro','Ônibus','Propina'],answer:'Ônibus',explanation:'PT-BR commonly uses “ônibus”; PT-PT commonly uses “autocarro.” These are labelled variety differences.',hint:{difficult:'Choose the Brazilian Portuguese form, with a circumflex on ô.'}}
+      }
+    ]
+  };
+
+  const $ = (selector, root=document) => root.querySelector(selector);
+  const $$ = (selector, root=document) => Array.from(root.querySelectorAll(selector));
+  const screens = ['titleScreen','characterScreen','difficultyScreen','gameScreen','endScreen'];
+  const state = {
+    character:null, difficulty:null, checkpoint:0, phase:'lesson', selectedOption:0,
+    lives:3, score:0, timeLeft:600, ticket:false, ticketUsed:false, timerId:null,
+    hintUsed:false, hintText:'', solved:Array(10).fill(false), failed:false, won:false,
+    audioItems:[], audioSupported:('speechSynthesis' in window) && ('SpeechSynthesisUtterance' in window),
+    voices:[], slowAudio:false, sceneNudge:0, answerFeedback:null, routeNotice:'',
+  };
+
+  function characterSVG(kind, extraClass='') {
+    const isGirl = kind === 'girl';
+    const cls = `sprite character-${kind} state-idle ${extraClass}`.trim();
+    if (!isGirl) return `<svg class="avatar-svg ${cls}" viewBox="0 0 96 120" role="img" aria-label="Mateus, pixel-art student" xmlns="http://www.w3.org/2000/svg">
+      <ellipse class="sprite-shadow" cx="48" cy="113" rx="27" ry="5"/>
+      <g class="sprite-body">
+        <g class="leg leg-left"><rect class="pants" x="31" y="78" width="14" height="23"/><rect class="shoe" x="27" y="98" width="20" height="8"/><rect fill="#f4e7ca" x="32" y="79" width="12" height="4"/></g>
+        <g class="leg leg-right"><rect class="pants" x="51" y="78" width="14" height="23"/><rect class="shoe" x="49" y="98" width="20" height="8"/><rect fill="#f4e7ca" x="52" y="79" width="12" height="4"/></g>
+        <g class="body-core">
+          <path class="uniform-main" d="M29 52 L42 47 L54 47 L68 53 L72 81 L26 81 Z"/><path class="uniform-dark" d="M39 49 L48 57 L57 49 L61 81 L35 81 Z"/><path class="uniform-light" d="M41 48 L48 56 L55 48 L52 63 L44 63 Z"/>
+          <rect class="bag" x="21" y="55" width="9" height="29"/><rect fill="#c99232" x="21" y="60" width="9" height="4"/><rect fill="#ffd66b" x="23" y="67" width="5" height="7"/>
+          <g class="arm arm-left"><path class="skin" d="M28 55 L20 60 L22 75 L29 75 L31 63 Z"/><rect class="skin-shadow" x="22" y="70" width="7" height="6"/></g>
+          <g class="arm arm-right"><path class="skin" d="M67 55 L75 60 L73 75 L66 75 L64 63 Z"/><rect class="skin-shadow" x="66" y="70" width="7" height="6"/></g>
+          <rect class="skin" x="42" y="41" width="12" height="11"/><rect class="skin-shadow" x="42" y="47" width="12" height="4"/>
+          <g class="sprite-head">
+            <path class="boy-hair" d="M29 21 L34 12 L42 10 L46 5 L53 9 L60 8 L66 15 L69 24 L66 42 L60 49 L35 48 L29 38 Z"/>
+            <path class="skin" d="M33 22 L61 22 L62 35 L57 44 L48 48 L39 44 L33 35 Z"/>
+            <path class="skin-shadow" d="M55 23 L61 25 L61 35 L57 43 L51 46 L55 36 Z"/>
+            <rect class="boy-hair" x="31" y="20" width="7" height="9"/><path class="boy-hair" d="M31 21 L32 14 L39 11 L43 7 L48 12 L54 8 L59 12 L65 14 L66 23 L58 19 L52 22 L47 18 L41 23 L36 20 Z"/>
+            <rect class="brow" x="37" y="27" width="7" height="2"/><rect class="brow" x="52" y="27" width="7" height="2"/>
+            <g class="eyes"><rect class="eye" x="38" y="30" width="4" height="5"/><rect class="eye" x="53" y="30" width="4" height="5"/><rect fill="#fff" x="39" y="30" width="1" height="2"/><rect fill="#fff" x="54" y="30" width="1" height="2"/></g>
+            <rect class="nose" x="47" y="33" width="3" height="5"/><rect class="skin-shadow" x="46" y="37" width="4" height="2"/>
+            <rect class="blush" x="34" y="36" width="5" height="3"/><rect class="blush" x="57" y="36" width="5" height="3"/><rect class="mouth" x="44" y="41" width="8" height="2"/><rect fill="#fff4da" x="46" y="41" width="4" height="1"/>
+          </g>
+        </g>
+      </g>
+    </svg>`;
+    return `<svg class="avatar-svg ${cls}" viewBox="0 0 96 120" role="img" aria-label="Beatriz, pixel-art student" xmlns="http://www.w3.org/2000/svg">
+      <ellipse class="sprite-shadow" cx="48" cy="113" rx="27" ry="5"/>
+      <g class="sprite-body">
+        <g class="leg leg-left"><rect fill="#e8b08a" x="34" y="82" width="10" height="20"/><rect class="skin-shadow" x="34" y="97" width="10" height="5"/><rect class="shoe" x="29" y="99" width="18" height="7"/><rect fill="#f9e3d3" x="34" y="82" width="10" height="4"/></g>
+        <g class="leg leg-right"><rect fill="#e8b08a" x="52" y="82" width="10" height="20"/><rect class="skin-shadow" x="52" y="97" width="10" height="5"/><rect class="shoe" x="50" y="99" width="18" height="7"/><rect fill="#f9e3d3" x="52" y="82" width="10" height="4"/></g>
+        <g class="body-core">
+          <path class="girl-uniform" d="M31 51 L41 47 L55 47 L66 52 L70 70 L26 70 Z"/><path class="girl-dark" d="M38 49 L48 55 L58 49 L61 70 L35 70 Z"/><path class="uniform-light" d="M41 48 L48 56 L55 48 L52 61 L44 61 Z"/>
+          <path class="girl-skirt" d="M28 68 L68 68 L73 84 L23 84 Z"/><path fill="#608bb0" d="M39 70 L37 83 M48 70 L48 83 M57 70 L60 83" stroke="#253c5e" stroke-width="2"/>
+          <rect class="bag" x="20" y="54" width="8" height="29"/><rect fill="#c99232" x="20" y="60" width="8" height="4"/><rect fill="#ffd66b" x="22" y="68" width="4" height="6"/>
+          <g class="arm arm-left"><path class="skin" d="M29 54 L21 59 L23 75 L30 75 L32 63 Z"/><rect class="skin-shadow" x="23" y="70" width="7" height="6"/></g>
+          <g class="arm arm-right"><path class="skin" d="M66 54 L74 59 L72 75 L65 75 L63 63 Z"/><rect class="skin-shadow" x="65" y="70" width="7" height="6"/></g>
+          <rect class="skin" x="42" y="41" width="12" height="11"/><rect class="skin-shadow" x="42" y="47" width="12" height="4"/>
+          <g class="sprite-head">
+            <path class="girl-hair" d="M27 23 L30 14 L38 9 L47 8 L57 9 L65 16 L69 29 L68 54 L60 60 L60 37 L57 25 L39 24 L35 37 L35 59 L27 53 Z"/>
+            <path class="skin" d="M34 22 L61 22 L62 35 L57 44 L48 48 L39 44 L34 35 Z"/><path class="skin-shadow" d="M55 23 L61 25 L61 35 L57 43 L51 46 L55 36 Z"/>
+            <path class="girl-hair" d="M30 24 L31 15 L38 10 L47 9 L57 11 L64 17 L65 24 L57 20 L51 23 L46 19 L40 23 L35 20 Z"/>
+            <path class="girl-hair" d="M31 22 L37 18 L39 28 L35 33 L32 30 Z M56 20 L64 21 L64 31 L60 36 L57 30 Z"/>
+            <rect class="brow" x="37" y="27" width="7" height="2"/><rect class="brow" x="52" y="27" width="7" height="2"/>
+            <g class="eyes"><rect class="eye" x="38" y="30" width="4" height="5"/><rect class="eye" x="53" y="30" width="4" height="5"/><rect fill="#fff" x="39" y="30" width="1" height="2"/><rect fill="#fff" x="54" y="30" width="1" height="2"/></g>
+            <rect class="nose" x="47" y="33" width="3" height="5"/><rect class="skin-shadow" x="46" y="37" width="4" height="2"/>
+            <rect class="blush" x="34" y="36" width="5" height="3"/><rect class="blush" x="57" y="36" width="5" height="3"/><path class="mouth" d="M44 41 L48 43 L52 41 L52 43 L48 45 L44 43 Z"/>
+            <rect class="hair-tie" x="61" y="17" width="7" height="5"/><rect fill="#eeae4c" x="63" y="17" width="3" height="5"/>
+          </g>
+        </g>
+      </g>
+    </svg>`;
+  }
+
+  function showScreen(id) {
+    stopAudio();
+    screens.forEach(screenId => $('#'+screenId).classList.toggle('active', screenId === id));
+  }
+  function setAvatarState(name) {
+    const avatar = $('#gameAvatar').querySelector('.avatar-svg');
+    if (!avatar) return;
+    avatar.classList.remove('state-idle','state-walk','state-learning','state-correct','state-wrong','state-win');
+    avatar.classList.add('state-'+name);
+  }
+  function setCharacter(kind) {
+    state.character = kind;
+    $$('.character-choice').forEach(button => {
+      const selected = button.dataset.character === kind;
+      button.classList.toggle('selected',selected); button.setAttribute('aria-pressed',String(selected));
+      $('.select-hint',button).textContent = selected ? '✓ Selected' : `Click to select ${button.dataset.character==='boy'?'Mateus':'Beatriz'}`;
+    });
+    $('#toDifficulty').disabled = !kind;
+  }
+  function setDifficulty(level) {
+    state.difficulty = level;
+    $$('.difficulty-choice').forEach(button => {
+      const selected=button.dataset.difficulty===level;
+      button.classList.toggle('selected',selected); button.setAttribute('aria-pressed',String(selected));
+    });
+    $('#startJourney').disabled = !level;
+  }
+  function normalizeAnswer(value) {
+    return String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/[.!?,;:"“”‘’]/g,'').replace(/\s+/g,' ');
+  }
+  function currentLesson() { return curriculum[state.difficulty][Math.floor(state.checkpoint/2)]; }
+  function currentQuestion() {
+    const lesson=currentLesson();
+    return state.checkpoint%2===0 ? lesson.practice : lesson.review;
+  }
+  function currentHint(question=currentQuestion()) {
+    if (!question || !question.hint) return 'Reread the example and look for the key word or grammatical clue.';
+    return question.hint[state.difficulty] || question.hint.easy || question.hint.intermediate || question.hint.difficult || 'Look for the key word in the lesson.';
+  }
+  function addAudioItem(item) {
+    if (!state.audioItems.some(existing => existing.pt===item.pt && existing.en===item.en)) state.audioItems.push({pt:item.pt,en:item.en});
+  }
+  function lessonItemsHTML(lesson) {
+    return lesson.items.map((item,index)=>{
+      addAudioItem(item);
+      return `<div class="lesson-item"><div><div class="pt" lang="pt-BR">${escapeHTML(item.pt)}</div><div class="en">${escapeHTML(item.en)}</div>${item.note?`<div class="note">${escapeHTML(item.note)}</div>`:''}</div><button class="audio-button" type="button" data-speak="${index}" aria-label="Play Brazilian Portuguese pronunciation for ${escapeHTML(item.pt)}" title="Hear PT-BR">🔊 <span class="sr-only">Listen</span></button></div>`;
+    }).join('');
+  }
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  }
+  function renderHUD() {
+    const minutes=Math.floor(Math.max(0,state.timeLeft)/60), seconds=Math.max(0,state.timeLeft)%60;
+    $('#timerDisplay').textContent=`${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+    $('#timerDisplay').style.color=state.timeLeft<=60?'#ffb4a7':'#fff9e9';
+    $('#scoreDisplay').textContent=`${state.score}/10`;
+    $('#livesDisplay').textContent=Array.from({length:3},(_,i)=>i<state.lives?'♥':'♡').join(' ');
+    $('#livesDisplay').setAttribute('aria-label',`${state.lives} of 3 lives remaining`);
+    $('#ticketHud').textContent=state.ticketUsed?'Used at turnstile':state.ticket?'1 ticket held':'Not yet earned';
+    const liveHintButton=$('#hintButton');
+    if(liveHintButton && state.phase==='question') {
+      liveHintButton.disabled=state.hintUsed || state.timeLeft<20;
+      liveHintButton.textContent=state.hintUsed?'Hint used':state.timeLeft<20?'Need 20s':'Hint −20s';
+    }
+    $('#progressText').textContent=`Checkpoint ${state.checkpoint+1} of 10`;
+    $('#progressLine').innerHTML=state.solved.map((done,i)=>`<span class="progress-segment ${done?'done':''} ${i===state.checkpoint?'current':''}" title="Checkpoint ${i+1}${done?' completed':''}"></span>`).join('');
+    const left=8 + state.checkpoint*8.75 + state.sceneNudge;
+    $('#avatarPosition').style.setProperty('--avatar-left',`${Math.max(3,Math.min(83,left))}%`);
+    $('#sceneSign').innerHTML=`${escapeHTML(locations[state.checkpoint].toUpperCase())}<small>LINE 10 · SCHOOL BOUND</small>`;
+    $('#inventoryMessage').textContent=state.ticketUsed?'Ticket used — the turnstile is open. Keep going to the train.':state.ticket?'Ticket secured. Keep it for the turnstile at checkpoint 8.':'No ticket yet. Complete the ticket-machine lesson at checkpoint 3.';
+    $('#inventoryTicket').textContent=state.ticketUsed?'✓ Used':state.ticket?'🎟 1 ticket':'🎟 Empty';
+    $('#sceneDoor').classList.toggle('open',state.ticketUsed);
+    $('#turnstileGate')?.classList.toggle('open',state.ticketUsed);
+  }
+  function renderCheckpoint() {
+    stopAudio();
+    state.hintUsed=false; state.hintText=''; state.selectedOption=0; state.answerFeedback=null; state.routeNotice=''; state.sceneNudge=0;
+    const lesson=currentLesson();
+    state.phase = state.checkpoint%2===0 ? 'lesson' : 'question';
+    $('#gameAvatar').innerHTML=characterSVG(state.character);
+    renderHUD();
+    $('#lessonPanel').innerHTML=`<div class="location-heading"><div><div class="eyebrow">${state.checkpoint%2===0?'New lesson':'Active recall'}</div><h2>${escapeHTML(locations[state.checkpoint])}</h2></div><span class="checkpoint-badge">CHECKPOINT ${state.checkpoint+1}/10</span></div>`;
+    if (state.phase==='lesson') {
+      setAvatarState('learning');
+      $('#lessonPanel').innerHTML += `<h3 class="lesson-heading">${escapeHTML(lesson.title)}</h3><p class="lesson-explanation">${escapeHTML(lesson.explanation)}</p><div class="lesson-items">${lessonItemsHTML(lesson)}</div><div class="audio-controls"><label class="slow-toggle"><input id="slowAudioToggle" type="checkbox" ${state.slowAudio?'checked':''}/> Slower audio</label><button class="pixel-button secondary" id="replayLessonAudio">▶ Replay first example</button></div><div id="audioStatus" class="audio-status" role="status">${audioStatusText()}</div><div style="margin-top:18px"><button id="lessonContinue" class="pixel-button green">I’m ready — practise →</button></div>`;
+      $('#taskPanel').innerHTML=`<div class="eyebrow">Checkpoint task</div><h3>Learn, listen, then practise</h3><p class="question-prompt">Read the examples, play the pronunciation buttons, and notice how the forms are used. Your timer keeps running during lessons and audio.</p><div class="context-block"><strong>Active recall tip</strong><br>Try saying one example out loud before you press “I’m ready.” A wrong answer costs one life, but you can try again.</div><div class="hint-action"><div><strong>Need a clue?</strong><div class="small-note">One hint per checkpoint · costs 20 seconds.</div></div><button id="hintButton" class="pixel-button secondary" disabled>Available during practice</button></div><div id="hintBox"></div>`;
+      wireLessonControls(lesson);
+      wireHintButton();
+    } else {
+      // This branch is only a defensive fallback; review checkpoints render their task below.
+      renderTask();
+    }
+    renderHUD();
+  }
+  function audioStatusText() {
+    if (!state.audioSupported) return 'Pronunciation audio is not available in this browser. The written lesson remains usable; try a modern browser with Web Speech API support.';
+    const voice=getPTBRVoice();
+    if (voice) return `Brazilian Portuguese voice ready: ${voice.name} (${voice.lang}). Press any 🔊 button to listen.`;
+    return 'No Brazilian Portuguese (pt-BR) speech voice is currently available on this device. The written lesson still works. Enable or install a Brazilian Portuguese voice in your device/browser speech settings, then reload; this game will not substitute an English or European Portuguese voice.';
+  }
+  function refreshAudioStatus() {
+    const node=$('#audioStatus'); if (!node) return;
+    node.textContent=audioStatusText();
+    node.classList.toggle('good',!!getPTBRVoice());
+  }
+  function wireLessonControls(lesson) {
+    const toggle=$('#slowAudioToggle');
+    if (toggle) toggle.addEventListener('change',()=>{state.slowAudio=toggle.checked;});
+    $$('.lesson-item [data-speak]').forEach(button=>button.addEventListener('click',()=>{
+      const item=lesson.items[Number(button.dataset.speak)]; if(item) speakPortuguese(item.pt,state.slowAudio);
+    }));
+    $('#replayLessonAudio')?.addEventListener('click',()=>speakPortuguese(lesson.items[0].pt,state.slowAudio));
+    $('#lessonContinue')?.addEventListener('click',()=>{stopAudio();state.phase='question';renderTask();setAvatarState('learning');});
+  }
+  function renderTask() {
+    state.phase='question';
+    const lesson=currentLesson(), question=currentQuestion();
+    if (state.checkpoint===7 && !state.ticket) {
+      // Normally unreachable: checkpoint 8 follows checkpoint 3, but keep the gate honest.
+      state.routeNotice='The turnstile remains locked until you earn the ticket at checkpoint 3.';
+    }
+    $('#taskPanel').innerHTML=`<div class="eyebrow">${state.checkpoint%2===0?'Lesson practice':'Review · active recall'}</div><h3>${escapeHTML(lesson.topic)}</h3>${question.context?`<div class="context-block">${escapeHTML(question.context)}</div>`:''}<div class="question-prompt">${escapeHTML(question.prompt)}</div>${question.type==='choice'?renderOptions(question):`<label for="typedAnswer" class="small-note">Your answer</label><input id="typedAnswer" class="text-answer" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type your answer…" aria-label="Type your Portuguese answer"/>`}<div id="hintBox">${state.hintText?`<div class="hint-box"><strong>Hint:</strong> ${escapeHTML(state.hintText)}</div>`:''}</div><div id="taskFeedback"></div><div class="submit-area"><button id="submitAnswer" class="pixel-button green">Submit answer</button></div><div class="hint-action"><div><strong>Need a clue?</strong><div class="small-note">One hint per checkpoint · costs exactly 20 seconds.</div></div><button id="hintButton" class="pixel-button secondary" ${state.hintUsed||state.timeLeft<20?'disabled':''}>${state.hintUsed?'Hint used':state.timeLeft<20?'Need 20s':'Hint −20s'}</button></div>${state.routeNotice?`<p class="small-note" style="color:#a43c31">${escapeHTML(state.routeNotice)}</p>`:''}`;
+    const isReviewCheckpoint = state.checkpoint%2===1;
+    $('#lessonPanel').innerHTML=`<div class="location-heading"><div><div class="eyebrow">${isReviewCheckpoint?'Recall checkpoint':'Lesson checkpoint'}</div><h2>${escapeHTML(locations[state.checkpoint])}</h2></div><span class="checkpoint-badge">CHECKPOINT ${state.checkpoint+1}/10</span></div><h3 class="lesson-heading">${escapeHTML(lesson.title)}</h3>${isReviewCheckpoint?'<p class="lesson-explanation">Recall the language from the lesson without looking it up. The answer and explanation appear after you submit.</p><div class="context-block"><strong>Memory first</strong><br>Pause for a moment and retrieve the word or structure from memory before choosing or typing.</div>':`<p class="lesson-explanation">${escapeHTML(lesson.explanation)}</p><div class="context-block"><strong>Key example</strong><br><span lang="pt-BR">${escapeHTML(lesson.items[0].pt)}</span><br><span class="muted">${escapeHTML(lesson.items[0].en)}</span></div>`}<p class="small-note">${state.checkpoint===2?'Ticket checkpoint: a correct answer earns one ticket.':state.checkpoint===7?'Turnstile checkpoint: correct recall and your ticket are both required.':'A correct answer earns one point. Every wrong submitted answer costs one shared life.'}</p>`;
+    if(question.type==='choice') wireOptions();
+    $('#submitAnswer')?.addEventListener('click',submitAnswer);
+    $('#typedAnswer')?.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();submitAnswer();}});
+    wireHintButton();
+    if(question.type==='text') $('#typedAnswer')?.focus({preventScroll:true});
+    else updateOptionSelection();
+  }
+  function renderOptions(question) {
+    return `<div class="answer-options" role="group" aria-label="Answer choices">${question.options.map((option,index)=>`<button type="button" class="answer-option ${index===state.selectedOption?'selected':''}" data-option="${index}" aria-pressed="${index===state.selectedOption?'true':'false'}"><span class="option-key">${String.fromCharCode(65+index)}</span><span>${escapeHTML(option)}</span></button>`).join('')}</div>`;
+  }
+  function wireOptions() {
+    $$('.answer-option').forEach(button=>button.addEventListener('click',()=>{state.selectedOption=Number(button.dataset.option);updateOptionSelection();}));
+  }
+  function updateOptionSelection() {
+    $$('.answer-option').forEach((button,index)=>{const selected=index===state.selectedOption;button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected));});
+  }
+  function wireHintButton() {
+    $('#hintButton')?.addEventListener('click',useHint);
+  }
+  function useHint() {
+    if(state.hintUsed || state.phase!=='question') return;
+    if(state.timeLeft<20) { showToast('You need at least 20 seconds to use a hint.'); return; }
+    state.timeLeft-=20; state.hintUsed=true; state.hintText=currentHint();
+    renderHUD();
+    if(state.timeLeft<=0) { endGame(false,'time'); return; }
+    const hintBox=$('#hintBox'); if(hintBox) hintBox.innerHTML=`<div class="hint-box"><strong>Hint:</strong> ${escapeHTML(state.hintText)}<div style="font-size:.76rem;margin-top:4px">20 seconds deducted · remaining time updated</div></div>`;
+    const button=$('#hintButton'); if(button){button.disabled=true;button.textContent='Hint used';}
+  }
+  function showToast(message) {
+    let toast=$('#routeToast');
+    if(!toast){toast=document.createElement('div');toast.id='routeToast';toast.setAttribute('role','status');toast.style.cssText='position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:50;max-width:calc(100% - 24px);background:#18233e;color:#fffaf0;border:3px solid #ffd66b;padding:11px 16px;border-radius:4px;box-shadow:4px 4px 0 #0d1424;text-align:center;font-weight:800;';document.body.appendChild(toast);}
+    toast.textContent=message; toast.hidden=false;
+    window.clearTimeout(toast._hideId); toast._hideId=window.setTimeout(()=>{toast.hidden=true;},2400);
+  }
+  function submitAnswer() {
+    if(state.phase!=='question') return;
+    const question=currentQuestion();
+    let given=''; let isCorrect=false;
+    if(question.type==='choice') {
+      if(!Number.isInteger(state.selectedOption) || state.selectedOption<0 || state.selectedOption>=question.options.length) { showToast('Choose an answer before submitting.'); return; }
+      given=question.options[state.selectedOption];
+      isCorrect=normalizeAnswer(given)===normalizeAnswer(question.answer);
+    } else {
+      given=$('#typedAnswer')?.value.trim()||'';
+      if(!given) { showToast('Type an answer before submitting. An empty answer does not cost a life.'); $('#typedAnswer')?.focus(); return; }
+      const accepted=question.accepted||[question.answer];
+      isCorrect=accepted.some(answer=>normalizeAnswer(given)===normalizeAnswer(answer));
+    }
+    if(!isCorrect) {
+      state.lives=Math.max(0,state.lives-1); setAvatarState('wrong'); renderHUD();
+      $('#taskFeedback').innerHTML=`<div class="feedback-box incorrect"><strong>Not quite — keep trying.</strong>${state.lives>0?'One life used. Reread the explanation and try again.':'That was your last life.'}${state.difficulty==='easy'?' You can do this!':''}</div>`;
+      if(state.lives<=0) { window.setTimeout(()=>endGame(false,'lives'),250); return; }
+      if($('#submitAnswer')) { $('#submitAnswer').textContent='Try again'; }
+      return;
+    }
+    completeCheckpoint(question);
+  }
+  function completeCheckpoint(question) {
+    if(state.solved[state.checkpoint]) { state.phase='resolved'; return; }
+    if(state.checkpoint===7 && !state.ticket) { showToast('Ticket missing: the turnstile stays locked. Return to the ticket machine.'); return; }
+    state.solved[state.checkpoint]=true; state.score=Math.min(10,state.score+1);
+    if(state.checkpoint===2) { state.ticket=true; state.ticketUsed=false; }
+    if(state.checkpoint===7) { state.ticket=false; state.ticketUsed=true; }
+    state.phase='resolved'; setAvatarState('correct'); renderHUD();
+    const answerText=question.type==='choice'?question.answer:(question.displayAnswer||question.accepted[0]);
+    const nextLabel=state.checkpoint===9?'Enter the subway car →':state.checkpoint===7?'Pass through the turnstile →':'Move to next checkpoint →';
+    $('#taskPanel').innerHTML=`<div class="eyebrow">Checkpoint cleared</div><h3>Correct! +1 point</h3><div class="feedback-box correct"><strong lang="pt-BR">${escapeHTML(answerText)}</strong>${escapeHTML(question.explanation)}</div>${state.checkpoint===2?'<div class="context-block"><strong>🎟 Ticket obtained!</strong><br>You earned exactly one subway ticket. Keep it for the turnstile at checkpoint 8.</div>':''}${state.checkpoint===7?'<div class="context-block"><strong>Turnstile open!</strong><br>Your correct recall and ticket unlocked the gate. The ticket has been used.</div>':''}<p class="small-note">Score: ${state.score}/10. ${state.checkpoint===9?'Complete journey: all ten checkpoints, all ten points, and the ticket used.':'Your next checkpoint stays locked until you continue.'}</p><div class="submit-area"><button id="continueCheckpoint" class="pixel-button green">${nextLabel}</button></div>`;
+    if(state.checkpoint===9) $('#sceneDoor').classList.add('open');
+    $('#lessonPanel').innerHTML=`<div class="location-heading"><div><div class="eyebrow">Progress unlocked</div><h2>${escapeHTML(locations[state.checkpoint])}</h2></div><span class="checkpoint-badge">CHECKPOINT ${state.checkpoint+1}/10</span></div><h3 class="lesson-heading">${escapeHTML(currentLesson().title)}</h3><p class="lesson-explanation">${escapeHTML(question.explanation)}</p><div class="context-block"><strong>Language to remember</strong><br><span lang="pt-BR">${escapeHTML(answerText)}</span></div><p class="small-note">${state.checkpoint===2?'The ticket is now in your inventory.':state.checkpoint===7?'The ticket was consumed to open the turnstile.':'You earned this checkpoint point. Previously earned points are never removed for mistakes.'}</p>`;
+    $('#continueCheckpoint').addEventListener('click',advanceCheckpoint);
+  }
+  function advanceCheckpoint() {
+    if(state.phase!=='resolved') return;
+    stopAudio();
+    if(state.checkpoint===9) {
+      if(state.score===10 && state.solved.every(Boolean) && state.ticketUsed && !state.ticket) endGame(true,'win');
+      else { showToast('The train requires all ten points and a used ticket.'); return; }
+      return;
+    }
+    state.checkpoint++;
+    // A brief walking state gives the character a deliberate, consistent transition.
+    $('#gameAvatar').innerHTML=characterSVG(state.character,'state-walk');
+    renderHUD(); setAvatarState('walk');
+    window.setTimeout(()=>{ if($('#gameScreen').classList.contains('active') && state.phase!=='resolved') renderCheckpoint(); },240);
+    // Avoid a transition callback race if the next checkpoint starts after the brief walk.
+    state.phase='moving';
+  }
+  function startGame() {
+    stopTimer();stopAudio();
+    state.checkpoint=0;state.phase='lesson';state.selectedOption=0;state.lives=3;state.score=0;state.timeLeft=600;state.ticket=false;state.ticketUsed=false;state.hintUsed=false;state.hintText='';state.solved=Array(10).fill(false);state.failed=false;state.won=false;state.audioItems=[];state.sceneNudge=0;state.answerFeedback=null;state.routeNotice='';
+    state.slowAudio=state.difficulty==='easy';
+    $('#gameAvatar').innerHTML=characterSVG(state.character);
+    showScreen('gameScreen');
+    renderCheckpoint();
+    state.timerId=window.setInterval(()=>{
+      if(!$('#gameScreen').classList.contains('active') || state.failed || state.won) return;
+      state.timeLeft=Math.max(0,state.timeLeft-1);renderHUD();
+      if(state.timeLeft<=0) endGame(false,'time');
+    },1000);
+  }
+  function stopTimer() { if(state.timerId!==null) { clearInterval(state.timerId);state.timerId=null; } }
+  function stopAudio() { if(state.audioSupported) { try{window.speechSynthesis.cancel();}catch(_e){} } }
+  function getPTBRVoice() {
+    if(!state.audioSupported) return null;
+    if(!state.voices.length) state.voices=window.speechSynthesis.getVoices()||[];
+    return state.voices.find(voice=>String(voice.lang||'').replace('_','-').toLowerCase()==='pt-br')||null;
+  }
+  function updateVoices() { if(state.audioSupported) state.voices=window.speechSynthesis.getVoices()||[];refreshAudioStatus(); }
+  function speakPortuguese(text, slow=false) {
+    if(!state.audioSupported) { showToast('Speech synthesis is not supported here. The written example is still available.');refreshAudioStatus();return; }
+    const voice=getPTBRVoice();
+    if(!voice) { refreshAudioStatus();showToast('No PT-BR voice available. Enable a Brazilian Portuguese voice in device/browser settings, then try again.');return; }
+    stopAudio();
+    const utterance=new SpeechSynthesisUtterance(text);
+    utterance.lang='pt-BR';utterance.voice=voice;utterance.rate=slow?0.78:0.94;utterance.pitch=1.0;
+    utterance.onstart=()=>refreshAudioStatus();
+    utterance.onerror=event=>{ if(event.error!=='canceled' && event.error!=='interrupted') showToast('Pronunciation playback failed. Please check your device speech settings.'); };
+    try { window.speechSynthesis.speak(utterance); } catch(_e) { showToast('Pronunciation playback failed. Please check browser speech settings.'); }
+  }
+  if(state.audioSupported) {
+    state.voices=window.speechSynthesis.getVoices()||[];
+    window.speechSynthesis.addEventListener?.('voiceschanged',updateVoices);
+    window.speechSynthesis.onvoiceschanged=updateVoices;
+  }
+  function endGame(won,reason) {
+    if(state.failed||state.won) return;
+    state.won=Boolean(won);state.failed=!won;stopTimer();stopAudio();
+    if(won) setAvatarState('win');
+    renderEndScreen(won,reason);showScreen('endScreen');
+  }
+  function renderEndScreen(won,reason) {
+    const currentLevel=levelNames[state.difficulty]||'Not selected';
+    const headline=won?'You Win!':reason==='time'?"Time’s Up!":'No Lives Remaining';
+    const description=won?'You earned every point, used your ticket, passed the turnstile, and made it to the train. School is next!':reason==='time'?'The countdown reached 00:00 before the journey was complete. Review the lessons below and give it another go.':'All three shared lives were used. Your score is safe, and the lesson examples are ready for another attempt.';
+    const lessons=curriculum[state.difficulty]||[];
+    const summaries=lessons.slice(0,won?5:Math.ceil((state.checkpoint+1)/2)).map((lesson,index)=>{
+      const example=lesson.items[0];
+      return `<div class="summary-card"><h3>${index+1}. ${escapeHTML(lesson.topic)}</h3><p>${escapeHTML(lesson.title)}<br><strong lang="pt-BR">${escapeHTML(example.pt)}</strong> — ${escapeHTML(example.en)}</p><div class="replay-list"><button class="audio-button" data-end-speak="${index}" title="Replay Portuguese example">🔊 Replay example</button></div></div>`;
+    }).join('');
+    const introduced=lessons.slice(0,Math.ceil((state.checkpoint+1)/2)).map(lesson=>`<li><strong>${escapeHTML(lesson.topic)}</strong> — <span lang="pt-BR">${escapeHTML(lesson.items[0].pt)}</span></li>`).join('');
+    $('#endPanel').innerHTML=`<div class="eyebrow">${won?'Journey completed':'Journey ended'}</div><h1 id="endTitle" class="end-title ${won?'win':''}">${escapeHTML(headline)}</h1><div class="end-character" id="endAvatar"></div><p style="font-size:1.08rem;line-height:1.7;max-width:760px">${escapeHTML(description)}</p><div class="end-stats"><div class="end-stat"><span>Final score</span><strong>${state.score}/10</strong></div><div class="end-stat"><span>Difficulty</span><strong style="font-size:1rem">${escapeHTML(state.difficulty?state.difficulty[0].toUpperCase()+state.difficulty.slice(1):'—')}</strong></div><div class="end-stat"><span>Checkpoint reached</span><strong>${state.solved.filter(Boolean).length}/10</strong></div><div class="end-stat"><span>Ticket</span><strong style="font-size:1rem">${state.ticketUsed?'Used at turnstile':state.ticket?'Earned, not used':'Not used'}</strong></div></div>${won?'<div class="context-block"><strong>All aboard!</strong><br>You cleared all 10 checkpoints with a score of 10/10, earned one ticket at checkpoint 3, and used it at checkpoint 8.</div>':`<h2 style="margin-top:22px">Lesson topics introduced</h2><ul style="line-height:1.8">${introduced||'<li>No lessons introduced yet.</li>'}</ul>`}<h2 style="margin:26px 0 7px">${won?'Your five lesson topics':'Review what you met on this run'}</h2><p class="muted">Replay the Brazilian Portuguese examples while a PT-BR voice is available. Audio replay is optional and never costs a life or time penalty.</p><div class="audio-status" id="endAudioStatus">${escapeHTML(audioStatusText())}</div><div class="end-summary">${summaries}</div><div class="btn-row"><button id="playAgain" class="pixel-button green">↻ Play Again</button><button id="returnTitle" class="pixel-button secondary">Return to Title Screen</button></div>`;
+    $('#endAvatar').innerHTML=characterSVG(state.character,won?'state-win':'state-idle');
+    $$('[data-end-speak]').forEach(button=>button.addEventListener('click',()=>{
+      const lesson=lessons[Number(button.dataset.endSpeak)]; if(lesson) speakPortuguese(lesson.items[0].pt,state.slowAudio);
+    }));
+    $('#playAgain').addEventListener('click',()=>startGame());
+    $('#returnTitle').addEventListener('click',()=>{stopTimer();stopAudio();state.character=null;state.difficulty=null;setCharacter(null);setDifficulty(null);showScreen('titleScreen');});
+  }
+  function goForward() {
+    if(state.phase==='lesson') { $('#lessonContinue')?.click();return; }
+    if(state.phase==='resolved') { advanceCheckpoint();return; }
+    if(state.phase==='question') { showToast('That route is locked until you answer this checkpoint correctly.');return; }
+  }
+  function goBackward() {
+    if(state.phase==='question'||state.phase==='lesson') {
+      state.sceneNudge=Math.max(-5,state.sceneNudge-2);renderHUD();
+      showToast('You can look around this station, but the checkpoint remains active.');
+    } else if(state.phase==='resolved') {
+      showToast('You have unlocked the route ahead. Continue to the next checkpoint to progress.');
+    }
+  }
+  document.addEventListener('keydown',event=>{
+    if(!$('#gameScreen').classList.contains('active')) return;
+    const target=event.target;
+    const typing=target && (target.tagName==='INPUT'||target.tagName==='TEXTAREA'||target.isContentEditable);
+    if(event.key==='ArrowLeft' && !typing) {event.preventDefault();goBackward();return;}
+    if(event.key==='ArrowRight' && !typing) {event.preventDefault();goForward();return;}
+    if(state.phase==='question' && currentQuestion().type==='choice' && ['ArrowUp','ArrowDown'].includes(event.key)) {
+      event.preventDefault();const count=currentQuestion().options.length;
+      state.selectedOption=(state.selectedOption+(event.key==='ArrowDown'?1:-1)+count)%count;updateOptionSelection();return;
+    }
+    if(event.key==='Enter' && !typing && state.phase==='lesson') {event.preventDefault();goForward();}
+    else if(event.key==='Enter' && !typing && state.phase==='resolved') {event.preventDefault();advanceCheckpoint();}
+    else if(event.key==='Enter' && !typing && state.phase==='question') {event.preventDefault();submitAnswer();}
+  });
+
+  $('#playButton').addEventListener('click',()=>{showScreen('characterScreen');});
+  $('#backToTitle').addEventListener('click',()=>showScreen('titleScreen'));
+  $('#toDifficulty').addEventListener('click',()=>{if(state.character)showScreen('difficultyScreen');});
+  $('#backToCharacters').addEventListener('click',()=>showScreen('characterScreen'));
+  $$('.character-choice').forEach(button=>button.addEventListener('click',()=>setCharacter(button.dataset.character)));
+  $$('.difficulty-choice').forEach(button=>button.addEventListener('click',()=>setDifficulty(button.dataset.difficulty)));
+  $('#startJourney').addEventListener('click',()=>{if(state.character&&state.difficulty)startGame();});
+
+  // Render the two distinct original student sprites on the selection screen.
+  $('#boyPreview').innerHTML=characterSVG('boy');
+  $('#girlPreview').innerHTML=characterSVG('girl');
+  setCharacter(null);setDifficulty(null);
+  // A pending voice list may be populated asynchronously after this script has run.
+  window.addEventListener('pagehide',()=>{stopTimer();stopAudio();});
+})();
+</script>
+</body>
+</html>
