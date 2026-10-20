@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Card Race</title>
+<style>
+:root{--bg:#2a1245;--bd:#3b1a63;--cd:#fff3a0;--c1:#ff7f50;--c2:#3eb489}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#fff;font-family:system-ui,Segoe UI,sans-serif;text-align:center;padding:8px}
+h1{margin:2px 0 6px;font-size:1.4rem}
+#st{display:flex;gap:6px;justify-content:center;max-width:460px;margin:0 auto 4px}
+.chip{flex:1;padding:5px;border-radius:10px;border:3px solid transparent;background:var(--bd);font-size:.8rem;font-weight:700}
+.chip.act{border-color:var(--cd)}
+#msg{min-height:2.4em;max-width:460px;margin:2px auto;font-size:.88rem;color:#ffe9a8}
+#ins{font-size:.8rem;color:#d9c7f5;min-height:1.2em}
+svg{width:100%;max-width:420px;background:var(--bd);border-radius:16px;touch-action:manipulation;display:block;margin:4px auto}
+#bw{position:relative;max-width:420px;margin:4px auto}
+#bw svg{margin:0}
+#cc{position:absolute;left:50%;top:51.6%;width:52px;height:68px;margin:-34px 0 0 -26px;border-radius:9px;background:var(--cd);color:#2a1245;font-weight:800;font-size:1.7rem;display:none;align-items:center;justify-content:center;pointer-events:none;border:3px solid var(--c1);box-shadow:0 4px 10px #0008}
+.hand{display:flex;gap:6px;justify-content:center;max-width:420px;margin:2px auto;min-height:84px;align-items:center}
+.hl{font-weight:700;font-size:.8rem;max-width:420px;margin:2px auto 0}
+.card{flex:1;max-width:84px;height:78px;border-radius:10px;background:var(--cd);color:#2a1245;border:3px solid var(--cd);font-weight:800;font-size:1.9rem;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
+.card small{font-size:.62rem;font-weight:700}
+.card.sel{border-color:var(--c1);box-shadow:0 0 12px #ff7f50}
+.card.dis{opacity:.4}
+.card.back{background:repeating-linear-gradient(45deg,#6b3fa0,#6b3fa0 6px,#4d2a7a 6px,#4d2a7a 12px);border-color:#8a5cc0;cursor:default}
+#leg{font-size:.72rem;color:#d9c7f5;margin-top:4px}
+button{font-size:1rem;padding:10px 16px;border-radius:10px;border:0;background:var(--cd);color:#2a1245;font-weight:700;margin:4px;cursor:pointer;min-height:44px}
+.ov{position:fixed;inset:0;background:#2a1245;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;z-index:5}
+.ov.hide{display:none}
+.ov p{max-width:420px;line-height:1.45;font-size:.9rem}
+#toast{position:fixed;top:10px;left:50%;transform:translateX(-50%);background:var(--cd);color:#2a1245;padding:10px 16px;border-radius:10px;font-weight:700;z-index:6;display:none}
+.stone{cursor:pointer;transition:transform .2s linear}
+.stone.can .sh{stroke:#fff;stroke-width:4;animation:p .8s infinite alternate}
+.stone.sel .sh{stroke:#ffeb3b;stroke-width:4}
+@keyframes p{to{stroke-width:1}}
+@media(prefers-reduced-motion:reduce){.stone{transition:none}.stone.can .sh{animation:none}}
+</style></head><body>
+<h1>Card Race</h1>
+<div id="st"><div class="chip" id="c0"></div><div class="chip" id="c1"></div></div>
+<div id="msg"></div><div id="ins"></div>
+<div class="hl" id="l1"></div><div class="hand" id="h1"></div>
+<div id="bw"><svg id="b" viewBox="0 0 400 640"></svg><div id="cc"></div></div>
+<div class="hl" id="l0"></div><div class="hand" id="h0"></div>
+<div id="dp" style="font-size:.75rem;color:#d9c7f5"></div><div id="leg">▲ Boost +3 &nbsp; ✖ Trap -3 &nbsp; ☠ Back home &nbsp; ★ Safe (no capture)</div>
+<div><button id="snd">Sound: On</button><button id="vb">Vibration: On</button></div><div><button id="restart">Restart</button><button id="menu">Exit</button></div>
+
+<div class="ov" id="ovMenu"><h1>Card Race</h1>
+<p>Race all 4 stones around the track, then up or down your own lane (F1 to F4) to the GOAL. Each card moves a stone that many boxes. Card 1 opens a stone from Home, or moves 1. Card 4 goes back 4. Card 6 moves your stone 6, or a rival stone 6. Card 9 moves two stones 9 each. Land on a rival stone to capture it. You need the exact number to reach the GOAL. Watch the special boxes!<br>You cannot land on your own stone, or on an occupied Safe Star. Open square rules: a stone sitting on its own OPEN square blocks rivals, who cannot land on it or pass it. A rival stone sitting on your OPEN square is captured when you open a stone with Card 1.<br>Player 1 = round coral stones (bottom). Player 2 = square mint stones (top).</p>
+<button onclick="startGame('cpu')">Play with Computer</button>
+<button onclick="startGame('friend')">Play with a Friend</button></div>
+<div class="ov hide" id="ovPass"><h1 id="passT"></h1><button id="ready">Ready</button></div>
+<div class="ov hide" id="ovEnd"><h1 id="endT"></h1><p id="endP"></p><button onclick="startGame(mode)">Restart</button></div>
+<div id="toast"></div>
+
+<script>
+const COL=['#ff7f50','#3eb489'],NS='http://www.w3.org/2000/svg',R=48,GOAL=52,S=[24,0],sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const $=id=>document.getElementById(id);
+const CAP={1:'Open / +1',4:'Back 4',6:'+6 / rival',9:'Double'};
+const TY={};[3,12,20,29,36,44].forEach(i=>TY[i]='b');[6,18,27,31,41,46].forEach(i=>TY[i]='t');[10,22,37,45].forEach(i=>TY[i]='k');[0,9,15,24,33,39].forEach(i=>TY[i]='s');
+const TC={b:'#2e9e5b',t:'#c0392b',k:'#555',s:'#c9a227'},TS={b:'▲',t:'✖',k:'☠',s:'★'};
+let st,deck,disc,hands,turn,sel,nine,over,mode,locked,busy=false;
+const nm=p=>mode=='cpu'?(p?'Computer':'Player 1'):'Player '+(p+1);
+const human=()=>mode=='friend'||turn==0;
+const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const say=t=>$('msg').textContent=t;
+
+let AC=null,soundOn=true,vibOn=true;
+function beep(f,d,t,v,at){if(!soundOn)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state=='suspended')AC.resume();
+ const o=AC.createOscillator(),g=AC.createGain(),s=AC.currentTime+(at||0);o.type=t||'sine';o.frequency.value=f;
+ g.gain.setValueAtTime(v||.15,s);g.gain.exponentialRampToValueAtTime(.001,s+d);o.connect(g);g.connect(AC.destination);o.start(s);o.stop(s+d)}catch(e){}}
+const vib=p=>{if(vibOn&&navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
+const SFX={tick(){beep(480+Math.random()*80,.07,'triangle');vib(15)},pick(){beep(700,.05,'sine',.1)},
+ capture(){beep(150,.25,'sawtooth',.2);beep(100,.3,'sawtooth',.2,.1);vib([80,40,80])},
+ boost(){beep(500,.1);beep(750,.14,'sine',.15,.1);vib(40)},trap(){beep(300,.12,'square',.1);beep(200,.2,'square',.1,.12);vib(60)},
+ skull(){beep(180,.15,'sawtooth');beep(110,.3,'sawtooth',.15,.15);vib(150)},
+ goal(){beep(660,.12);beep(880,.18,'sine',.15,.12);vib(80)},
+ win(){[523,659,784,1047].forEach((f,k)=>beep(f,.25,'triangle',.18,k*.15));vib([100,50,100,50,250])}};
+/* ---------- board ---------- */
+const pts=(()=>{const P=[],seg=(x1,y1,x2,y2,n)=>{for(let i=0;i<n;i++)P.push([x1+(x2-x1)*i/n,y1+(y2-y1)*i/n])};
+ const bul=(g,y1,y2,n)=>{for(let i=0;i<n;i++){const y=y1+(y2-y1)*i/n;P.push([200+g*(40+120*Math.sin(Math.PI*(y-150)/360)),y])}};
+ seg(240,40,240,150,110);bul(1,150,510,360);seg(240,510,240,620,110);seg(240,620,160,620,80);seg(160,620,160,510,110);bul(-1,510,150,360);seg(160,150,160,40,110);seg(160,40,240,40,80);
+ P.push(P[0]);const L=[0];for(let i=1;i<P.length;i++)L.push(L[i-1]+Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]));
+ const T=L[L.length-1],o=[];let j=0;for(let k=0;k<R;k++){const t=T*k/R;while(L[j+1]<t)j++;o.push(P[j])}return o})();
+const laneXY=(pl,k)=>[200,pl?62+24*(k-1):598-24*(k-1)];
+function posOf(pl,p){return p<R?pts[(S[pl]+p)%R]:laneXY(pl,p-R+1)}
+const keyOf=(pl,p)=>p<R?'r'+(S[pl]+p)%R:'l'+pl+'_'+p;
+function build(){const s=$('b');let h='<ellipse cx="200" cy="330" rx="70" ry="125" fill="#2d1250" stroke="#6b3fa0"/><text x="200" y="335" font-size="13" font-weight="700" fill="#8a5cc0" text-anchor="middle">CARD RACE</text>';
+ for(let i=0;i<R;i++){const[x,y]=pts[i],t=TY[i];const f=i==S[0]?COL[0]:i==S[1]?COL[1]:t?TC[t]:'#5a2f8e';
+  h+=`<rect x="${x-11}" y="${y-11}" width="22" height="22" rx="5" fill="${f}" fill-opacity="${i==S[0]||i==S[1]?.6:1}" stroke="#8a5cc0"/><text x="${x}" y="${y+4}" font-size="11" fill="#fff" text-anchor="middle">${i==S[0]||i==S[1]?'':TS[t]||''}</text>`}
+ for(let pl=0;pl<2;pl++){
+  for(let k=1;k<=5;k++){const[x,y]=laneXY(pl,k);
+   h+=`<rect x="${x-14}" y="${y-12}" width="28" height="24" fill="${k==5?COL[pl]:'#2d1250'}" fill-opacity="${k==5?.6:1}" stroke="${COL[pl]}" stroke-width="2"/><text x="${x}" y="${y+4}" font-size="${k==5?8:11}" font-weight="700" fill="#fff" text-anchor="middle">${k==5?'GOAL':'F'+k}</text>`}
+  const[sx,sy]=pts[S[pl]];
+  h+=`<text x="${sx}" y="${pl?sy-17:sy+27}" font-size="9" fill="${COL[pl]}" text-anchor="middle" font-weight="700">${pl?'OPEN P2':'OPEN P1'}</text>`;
+  const hx=pl?270:10,hy=pl?8:540;
+  h+=`<rect x="${hx}" y="${hy}" width="120" height="92" rx="10" fill="none" stroke="${COL[pl]}" stroke-dasharray="4"/><text x="${hx+60}" y="${hy+84}" font-size="9" fill="${COL[pl]}" text-anchor="middle">P${pl+1} HOME</text>`}
+ s.innerHTML=h;
+ for(let pl=0;pl<2;pl++)for(let i=0;i<4;i++){const g=document.createElementNS(NS,'g');
+  g.setAttribute('class','stone');g.id='s'+pl+i;
+  g.innerHTML=(pl?'<rect class="sh" x="-9" y="-9" width="18" height="18" rx="4" stroke-dasharray="3 1"':'<circle class="sh" r="10"')+` fill="${COL[pl]}" stroke="#fff" stroke-width="1.5"/><text y="4" font-size="11" font-weight="800" fill="#2a1245" text-anchor="middle" pointer-events="none">${i+1}</text>`;
+  g.onclick=()=>pick(pl,i);s.appendChild(g)}}
+
+/* ---------- rules ---------- */
+function deal(pl){hands[pl]=[];while(hands[pl].length<4){
+ if(!deck.length){if(!disc.length)break;deck=shuf(disc);disc=[]}
+ hands[pl].push(deck.pop())}}
+const occ=a=>st.some((arr,pl)=>arr.some(q=>q>=0&&q<R&&(S[pl]+q)%R==a));
+function blocked(m,p,np){if(p<0)return false;const o=1-m;
+ return st[o].some(x=>{if(x!=0)return false;const q=(S[o]-S[m]+R)%R;
+  return np>p?(q>p&&q<=np):(q>=np&&q<p)})}
+function canMove(pl,i,c){const p=st[pl][i];if(p==GOAL||(p<0&&c!=1))return false;
+ const np=p<0?0:p+(c==4?-4:c);if(np<0||np>GOAL||blocked(pl,p,np))return false;
+ if(np<GOAL&&st[pl].some((q,j)=>j!=i&&q==np))return false;
+ if(np<R){const a=(S[pl]+np)%R;if(TY[a]=='s'&&!(p<0&&c==1)&&occ(a))return false}
+ return true}
+function canPush(o,i){const p=st[o][i];return p>=0&&p+6<R&&!occ((S[o]+p+6)%R)&&!blocked(o,p,p+6)}
+function legal(pl,c){const r=[];
+ if(c==6)st[1-pl].forEach((_,i)=>canPush(1-pl,i)&&r.push([1-pl,i]));
+ st[pl].forEach((_,i)=>canMove(pl,i,c)&&r.push([pl,i]));return r}
+const sec=()=>st[turn].map((_,j)=>j).filter(j=>j!=nine&&canMove(turn,j,9));
+const hasMove=pl=>hands[pl].some(c=>legal(pl,c).length);
+function fx(pl,p,c){let np=p<0?0:p+(c==4?-4:c),n='';
+ if(np<R){const t=TY[(S[pl]+np)%R];
+  if(t=='b'){np=Math.min(np+3,GOAL);n=' Boost +3!'}
+  else if(t=='t'){np=Math.max(np-3,0);n=' Trap -3!'}
+  else if(t=='k'){np=-1;n=' Skull! Back home.'}}
+ return[np,n]}
+async function walk(pl,i,to){let p=st[pl][i];
+ if(p<0){st[pl][i]=to;render();await sleep(250);return}
+ const d=to>p?1:-1;while(p!=to){p+=d;st[pl][i]=p;SFX.tick();render();await sleep(220)}}
+async function doMove(c,pl,i){const p=st[pl][i];
+ if(c==6&&pl!=turn){await walk(pl,i,p+6);return `${nm(pl)}'s stone ${i+1} was pushed 6 boxes.`}
+ const raw=p<0?0:p+(c==4?-4:c);let[fp,n]=fx(pl,p,c);
+ if(fp>=0&&fp!=raw&&((fp<GOAL&&st[pl].some((q,j)=>j!=i&&q==fp))||blocked(pl,raw,fp))){fp=raw;n=' Extra move blocked.'}
+ await walk(pl,i,raw);let m=`${nm(pl)} moved stone ${i+1}.${n}`;
+ if(fp!=raw){await sleep(250);SFX[n.includes('Boost')?'boost':n.includes('Trap')?'trap':'skull']();if(fp<0){st[pl][i]=-1;render();await sleep(250)}else await walk(pl,i,fp)}
+ const np=fp;
+ if(np==GOAL){m+=' Stone reached the GOAL!';SFX.goal()}
+ if(np>=0&&np<R){const a=(S[pl]+np)%R;
+  if(TY[a]!='s'||(p<0&&c==1)){const o=1-pl;
+   st[o].forEach((q,j)=>{if(q>=0&&q<R&&(S[o]+q)%R==a){st[o][j]=-1;m+=` Captured ${nm(o)}'s stone ${j+1}!`;SFX.capture()}})}}
+ return m}
+
+/* ---------- turns ---------- */
+function pick(pl,i){if(over||locked||busy||sel==null||!human())return;
+ const c=hands[turn][sel];const o=nine!=null?sec().map(j=>[turn,j]):legal(turn,c);
+ if(!o.some(a=>a[0]==pl&&a[1]==i))return say('That stone cannot use this card. Glowing stones can.');
+ act(pl,i)}
+function throwCard(el,v){const cc=$('cc');cc.style.transform='none';cc.style.display='none';
+ if(!el)return;
+ cc.style.display='flex';cc.textContent=v;cc.style.visibility='hidden';
+ const a=el.getBoundingClientRect(),b=cc.getBoundingClientRect(),rot=(Math.random()*30-15)|0;
+ const f=el.cloneNode(true);f.className='card';
+ Object.assign(f.style,{position:'fixed',left:a.left+'px',top:a.top+'px',width:a.width+'px',height:a.height+'px',margin:0,zIndex:7,pointerEvents:'none',maxWidth:'none'});
+ document.body.appendChild(f);
+ const done=()=>{f.remove();cc.style.transform='rotate('+rot+'deg)';cc.style.visibility='visible'};
+ if(f.animate){const an=f.animate([{transform:'none'},{transform:`translate(${b.left-a.left+(b.width-a.width)/2}px,${b.top-a.top+(b.height-a.height)/2}px) scale(${b.width/a.width}) rotate(${rot}deg)`}],{duration:380,easing:'cubic-bezier(.2,.8,.3,1)',fill:'forwards'});an.onfinish=done}else done()}
+let dead=0;
+function draw(){over=true;render();$('endT').textContent='Draw';$('endP').textContent='Nobody can make progress. This game is a draw.';$('ovEnd').classList.remove('hide')}
+function cpuThrow(){if(over||busy)return;const v=hands[1][0];
+ throwCard(document.querySelectorAll('#h1 .card')[0],v);sel=0;busy=true;render();
+ setTimeout(()=>{busy=false;if(++dead>=30)return draw();finish(`Computer: no legal move, threw away card ${v}.`)},900)}
+function chooseCard(k){if(over||locked||busy||!human()||nine!=null)return;
+ if(!hasMove(turn)){const v=hands[turn][k],el=document.querySelectorAll('#h'+turn+' .card')[k];
+  sel=k;SFX.pick();throwCard(el,v);busy=true;render();
+  setTimeout(()=>{busy=false;if(++dead>=30)return draw();finish(`${nm(turn)}: no legal move, threw away card ${v}.`)},700);return}
+ sel=sel===k?null:k;SFX.pick();
+ throwCard(sel==null?null:document.querySelectorAll('#h'+turn+' .card')[k],hands[turn][k]);
+ if(sel!=null&&!legal(turn,hands[turn][k]).length)say('That card has no legal move. Try another card.');
+ render();
+ if(sel!=null){const o=legal(turn,hands[turn][sel]),s0=sel;
+  if(o.length==1)setTimeout(()=>{if(sel===s0&&!busy&&!over&&!locked&&nine==null)act(o[0][0],o[0][1])},550)}}
+async function act(pl,i){busy=true;dead=0;const c=hands[turn][sel];let m=await doMove(c,pl,i);busy=false;
+ if(c==9&&nine==null){nine=i;
+  if(sec().length){say(m+' Now choose a different stone for the second 9-move.');render();if(!human())setTimeout(ai,900);else if(sec().length==1){const j=sec()[0];setTimeout(()=>{if(nine!=null&&!busy&&!over)act(turn,j)},800)}return}
+  m+=' The second 9-move is not possible.'}
+ finish(m)}
+function finish(m){disc.push(hands[turn].splice(sel,1)[0]);sel=null;nine=null;
+ const w=[0,1].find(p=>st[p].every(x=>x==GOAL));
+ if(w!=null)return end(w);
+ if(!hands[turn].length)deal(turn);
+ say(m);turn=1-turn;render();begin()}
+function begin(){if(over)return;
+ if(mode=='friend'){locked=true;render();$('passT').textContent=`Pass the device to ${nm(turn)} — Tap Ready`;
+  $('ovPass').classList.remove('hide');
+  $('ready').onclick=()=>{$('ovPass').classList.add('hide');locked=false;render();check()}}
+ else check()}
+function check(){if(over)return;
+ if(!hasMove(turn)){say(`${nm(turn)}: no card can move. Throw a card away.`);
+  if(mode=='cpu'&&turn==1)setTimeout(cpuThrow,1200);return}
+ if(mode=='cpu'&&turn==1)setTimeout(ai,1000)}
+function skipTurn(){const p=turn;locked=true;
+ const t=$('toast');t.textContent=`${nm(p)}: No legal moves — hand replaced`;t.style.display='block';
+ setTimeout(()=>{t.style.display='none';disc.push(...hands[p]);hands[p]=[];deal(p);
+  locked=false;turn=1-turn;render();begin()},2000)}
+function end(w){over=true;render();SFX.win();
+ $('endT').textContent=mode=='cpu'?(w==0?'Victory!':'Game Over'):'Victory!';
+ $('endP').textContent=(mode=='cpu'?(w==0?'You win!':'The computer wins.'):nm(w)+' wins!')+` ${nm(w)}: Finished 4/4.`+(mode=='friend'?` Game Over for ${nm(1-w)}.`:'');
+ $('ovEnd').classList.remove('hide')}
+
+/* ---------- computer ---------- */
+function score(c,pl,i){const p=st[pl][i];let s=Math.random()*3;
+ if(pl==0)return s-8;
+ const[np,n]=fx(1,p,c);
+ if(np==GOAL)s+=100;if(p<0)s+=30;if(np<0)s-=60;
+ if(n.includes('Boost'))s+=15;if(n.includes('Trap'))s-=15;
+ if(np>=0&&np<R){const a=(S[1]+np)%R;
+  if(TY[a]!='s'||p<0){
+   if(st[0].some(q=>q>=0&&q<R&&(S[0]+q)%R==a))s+=50;
+   if(st[0].some(q=>q>=0&&q<R&&(a-(S[0]+q)%R+R)%R>=1&&(a-(S[0]+q)%R+R)%R<=12))s-=3}}
+ return s+(np-p)}
+function ai(){if(over||locked||busy||turn!=1||mode!='cpu')return;
+ let b=null,bs=-1e9;
+ const ks=nine!=null?[sel]:hands[1].map((_,k)=>k);
+ for(const k of ks){const c=hands[1][k];
+  const o=nine!=null?sec().map(j=>[1,j]):legal(1,c);
+  for(const[pl,i]of o){const s=score(c,pl,i);if(s>bs){bs=s;b=[k,pl,i]}}}
+ if(!b)return cpuThrow();
+ if(nine==null)throwCard(document.querySelectorAll('#h1 .card')[b[0]],hands[1][b[0]]);
+ sel=b[0];render();setTimeout(()=>act(b[1],b[2]),700)}
+
+/* ---------- screen ---------- */
+const INS=c=>c==1?'Open a stone from Home, or move one stone 1 box.':c==4?'Move one of your stones back 4 boxes.':c==6?'Move your stone 6 boxes, OR push a rival stone 6 boxes.':c==9?'Move two different stones 9 boxes each.':`Move one stone forward ${c} boxes.`;
+function render(){
+ $('dp').textContent=`Draw pile: ${(deck||[]).length} | Discard pile: ${(disc||[]).length}`;
+ const grp={};
+ for(let pl=0;pl<2;pl++)for(let i=0;i<4;i++){const p=st[pl][i];if(p>=0)(grp[keyOf(pl,p)]=grp[keyOf(pl,p)]||[]).push([pl,i])}
+ for(let pl=0;pl<2;pl++)for(let i=0;i<4;i++){const p=st[pl][i],g=$('s'+pl+i);let x,y;
+  if(p<0){x=(pl?300:40)+(i%2)*44;y=(pl?40:572)+(i>>1)*(pl?40:38)}
+  else{const l=grp[keyOf(pl,p)],k=l.findIndex(a=>a[0]==pl&&a[1]==i),n=l.length;
+   [x,y]=posOf(pl,p);if(n>1)x+=(k-(n-1)/2)*Math.min(14,26/(n-1))}
+  g.style.transform=`translate(${x}px,${y}px)`;g.classList.remove('can','sel')}
+ const c=sel!=null&&human()&&!locked&&!busy&&!over?hands[turn][sel]:null;
+ if(c!=null)(nine!=null?sec().map(j=>[turn,j]):legal(turn,c)).forEach(([p,i])=>$('s'+p+i).classList.add('can'));
+ if(nine!=null)$('s'+turn+nine).classList.add('sel');
+ [0,1].forEach(p=>{const e=$('c'+p);
+  e.innerHTML=`<span style="color:${COL[p]}">${p?'■':'●'}</span> ${nm(p)}<br>Finished: ${st[p].filter(x=>x==GOAL).length}/4`;
+  e.classList.toggle('act',p==turn&&!over)});
+ const up=human()&&!locked&&!over&&!busy;
+ $('ins').textContent=c!=null?`Card ${c}: ${INS(c)}`:(up?(hasMove(turn)?`${nm(turn)}: tap a card, then tap a glowing stone.`:`${nm(turn)}: no card can move. Tap any card to throw it away.`):(!over&&!locked?'Computer is playing...':''));
+ [0,1].forEach(p=>{const a=p==turn&&up;
+  $('l'+p).innerHTML=a?`<span style="color:${COL[p]}">${nm(p)}'s cards</span>`:'';
+  $('h'+p).innerHTML=hands[p].map((cd,k)=>a
+   ?`<div class="card ${k==sel?'sel':''} ${legal(p,cd).length?'':'dis'}" onclick="chooseCard(${k})">${cd}<small>${CAP[cd]||''}</small></div>`
+   :'<div class="card back"></div>').join('')})}
+function startGame(m){mode=m;st=[[-1,-1,-1,-1],[-1,-1,-1,-1]];
+ deck=shuf([...Array(48)].map((_,i)=>i%12+1));disc=[];hands=[[],[]];deal(0);deal(1);
+ turn=0;sel=null;nine=null;over=false;locked=false;dead=0;$('cc').style.display='none';
+ ['ovMenu','ovEnd','ovPass'].forEach(id=>$(id).classList.add('hide'));
+ say('Choose a card, then tap a glowing stone.');render();begin()}
+$('restart').onclick=()=>startGame(mode);
+$('menu').onclick=()=>{if(!confirm('Exit this game and go back to the main menu?'))return;over=true;$('ovPass').classList.add('hide');$('ovEnd').classList.add('hide');$('ovMenu').classList.remove('hide')};
+$('snd').onclick=()=>{soundOn=!soundOn;$('snd').textContent='Sound: '+(soundOn?'On':'Off');SFX.pick()};
+$('vb').onclick=()=>{vibOn=!vibOn;$('vb').textContent='Vibration: '+(vibOn?'On':'Off');vib(40)};
+st=[[-1,-1,-1,-1],[-1,-1,-1,-1]];hands=[[],[]];turn=0;mode='cpu';locked=false;over=true;
+build();render();
+</script></body></html>
