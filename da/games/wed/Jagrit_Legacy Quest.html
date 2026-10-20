@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Legacy Quest — The Enchanted Forest Adventure</title><style>
+:root{color-scheme:dark;font-family:system-ui,Segoe UI,sans-serif}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#245444,#101f21 72%);color:#f3efd9;display:flex;justify-content:center;padding:22px 12px}.shell{width:min(760px,100%)}header{text-align:center}h1{font-size:clamp(2rem,5vw,3.2rem);letter-spacing:.09em;color:#f7d985;text-shadow:0 3px 0 #6e4b2b;margin:0}header p{margin:5px 0 18px;color:#b8dbc0;letter-spacing:.12em;font-size:.82rem;text-transform:uppercase}.hud{display:flex;justify-content:space-between;gap:8px;margin-bottom:12px}.stat{flex:1;background:#102e2bcf;border:1px solid #6c9d7a;border-radius:12px;padding:10px;text-align:center}.stat small{display:block;color:#a8cbb8;font-size:.7rem;text-transform:uppercase;letter-spacing:.13em}.stat strong{display:block;margin-top:3px;font-size:1.15rem}.board{position:relative;line-height:0;border:5px solid #967448;border-radius:12px;overflow:hidden;box-shadow:0 18px 42px #0008,0 0 0 2px #2d4c36;background:#315e38}canvas{display:block;width:100%;height:auto;image-rendering:pixelated}.overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#071d1bd9;line-height:1.5;padding:20px;text-align:center}.overlay.show{display:flex}.panel{max-width:440px;background:#173a34;border:2px solid #d7b873;border-radius:16px;padding:22px;box-shadow:0 12px 40px #0009}.panel h2{color:#ffdf91;margin:0 0 8px}.panel p{line-height:1.5}.message{min-height:42px;text-align:center;padding:12px 5px;color:#ffe19a;font-weight:600}.footer{background:#122d2a;border:1px solid #4b7864;border-radius:12px;padding:14px 18px;display:flex;gap:14px;justify-content:space-between;align-items:center;flex-wrap:wrap}.footer p{margin:3px 0;font-size:.9rem;color:#c4dac7}button{background:linear-gradient(#f3d487,#dba953);color:#2d291c;border:2px solid #ffe4a5;border-radius:9px;padding:11px 20px;font-size:1rem;font-weight:800;cursor:pointer}button:hover{filter:brightness(1.1)}button:focus-visible{outline:3px solid white;outline-offset:3px}.legend{text-align:center;color:#b1cbb7;font-size:.78rem;margin:12px 0}.legend span{white-space:nowrap;margin:0 6px}@media(max-width:520px){.stat{padding:8px 2px}.stat strong{font-size:.97rem}.footer{justify-content:center;text-align:center}.footer p{font-size:.8rem}}
+</style></head><body><main class="shell"><header><h1>LEGACY QUEST</h1><p>The Enchanted Forest Adventure</p></header><section class="hud" aria-label="Game status"><div class="stat"><small>Lives</small><strong id="lives">❤️❤️❤️</strong></div><div class="stat"><small>Keys</small><strong id="keys">0 / 3</strong></div><div class="stat"><small>Score</small><strong id="score">0 / 500</strong></div></section><div class="board"><canvas id="game" width="640" height="480" aria-label="Forest maze game"></canvas><div class="overlay" id="overlay"><div class="panel"><h2 id="result"></h2><p id="summary"></p><button id="again">Play Again</button></div></div></div><div class="message" id="message" role="status" aria-live="polite">Choose a route and explore the enchanted forest!</div><div class="footer"><div><p><b>Move:</b> WASD or Arrow Keys</p><p>Collect 3 keys, unlock the gates, and find the treasure.</p></div><button id="restart">↻ Restart</button></div><div class="legend"><span>🔴 Red key</span><span>🔵 Blue key</span><span>🟢 Green key</span><span>👾 Avoid guardians</span></div></main><script>
+'use strict';
+const W=20,H=15,T=32,canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const $=id=>document.getElementById(id);
+// Fixed maze. # is an impassable tree; . is traversable path. Special objects are overlaid.
+const RAW=[
+'####################',
+'#.....#......#.....#',
+'#.###.#.####.#.###.#',
+'#...#...#....#...#.#',
+'###.#####.######.#.#',
+'#...#.....#......#.#',
+'#.###.###.#.######.#',
+'#.....#...#........#',
+'#.#####.######.###.#',
+'#...#.......#....#.#',
+'###.#.#####.#.##.#.#',
+'#...#.....#...#....#',
+'#.#######.#####.##.#',
+'#..................#',
+'####################'];
+if(RAW.length!==H||RAW.some(r=>r.length!==W))throw Error('Map dimensions invalid');
+const map=RAW.map(r=>r.split(''));
+// Additional connections provide loops and two genuine starting branches.
+const openings=[[6,1],[13,1],[5,3],[9,4],[10,5],[10,7],[6,9],[12,9],[9,10],[15,12],[17,12],[3,12],[7,6],[14,8],[18,6],[4,13],[12,13],[1,4],[4,5],[16,4],[13,11]];
+for(const [x,y] of openings)map[y][x]='.';
+// Two long, distinct navigable perimeter branches lead to the first keys.
+for(let y=1;y<=13;y++){map[y][1]='.';map[y][18]='.';}
+for(let x=1;x<=18;x++)map[1][x]='.';
+// A tree closes the eastern approach to a two-tile alcove. The only way to
+// reach the Green Key is through the Blue Gate at (14,7).
+map[7][17]='#';
+const START={x:2,y:13};
+const ITEMS=[{id:'red',x:2,y:1},{id:'blue',x:18,y:1},{id:'green',x:16,y:7}];
+const GATES=[{id:'red',x:9,y:7},{id:'blue',x:14,y:7},{id:'green',x:16,y:13}];
+const CHEST={x:18,y:13};
+const ROUTES=[[[7,13],[8,13],[9,13],[10,13],[11,13],[12,13]],[[1,7],[2,7],[3,7],[4,7],[5,7]],[[15,9],[16,9],[16,10],[16,11],[17,11]]];
+// Gate tiles and patrol paths are validated below; no patrol crosses a gate.
+const color={red:'#ff6767',blue:'#69b7ff',green:'#76e89a'};
+let state,last=0,acc=0,held=null,nextMove=0,noticeUntil=0;
+const keyName=k=>k[0].toUpperCase()+k.slice(1);
+const same=(a,b)=>a.x===b.x&&a.y===b.y;
+function walkable(x,y,owned=new Set()){return x>=0&&y>=0&&x<W&&y<H&&map[y][x]==='.'&&!GATES.some(g=>g.x===x&&g.y===y&&!owned.has(g.id));}
+function reachable(owned){const visited=new Set([START.x+','+START.y]),q=[START];for(let i=0;i<q.length;i++){let p=q[i];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){let x=p.x+dx,y=p.y+dy,k=x+','+y;if(walkable(x,y,owned)&&!visited.has(k)){visited.add(k);q.push({x,y});}}}return visited;}
+function validate(){for(const p of [START,...ITEMS,...GATES,CHEST])if(map[p.y]?.[p.x]!=='.')throw Error('Object on wall: '+JSON.stringify(p));for(const r of ROUTES)for(const [x,y] of r)if(!walkable(x,y))throw Error('Patrol blocked '+x+','+y);let owned=new Set();while(owned.size<3){const found=reachable(owned);const available=ITEMS.filter(k=>!owned.has(k.id)&&found.has(k.x+','+k.y));if(!available.length)throw Error('No further key accessible');for(const k of available)owned.add(k.id);}if(owned.size!==3||!reachable(owned).has(CHEST.x+','+CHEST.y))throw Error('Treasure unreachable');const allWithoutBlue=reachable(new Set(['red','green']));if(allWithoutBlue.has('16,7'))throw Error('Green Key bypasses the Blue Gate');if(!reachable(new Set(['blue'])).has('16,7'))throw Error('Blue Gate does not unlock Green Key');}
+function reset(){state={player:{...START},lives:3,score:0,owned:new Set(),enemies:ROUTES.map((route,i)=>({route,index:i===1?route.length-1:0,dir:i===1?-1:1})),invincibleUntil:0,ended:false,won:false,clock:0};last=0;acc=0;held=null;nextMove=0;noticeUntil=0;$('overlay').classList.remove('show');message('Choose a route and explore the enchanted forest!',2500);hud();draw();}
+function hud(){$('lives').textContent='❤️'.repeat(state.lives)+'🖤'.repeat(3-state.lives);$('keys').textContent=state.owned.size+' / 3';$('score').textContent=state.score+' / 500';}
+function message(s,ms=1800){$('message').textContent=s;noticeUntil=performance.now()+ms;}
+function end(win){state.ended=true;state.won=win;held=null;$('result').textContent=win?'🏆 Victory!':'💀 Game Over';$('summary').textContent=(win?'Victory! You unlocked the forest treasure and completed Legacy Quest!':'Game Over! The forest guardians defeated you.')+' Final score: '+state.score+' / 500.';$('overlay').classList.add('show');hud();}
+function hit(now){if(state.ended||now<state.invincibleUntil)return;state.lives--;hud();if(state.lives===0){end(false);return;}state.player={...START};state.invincibleUntil=now+2000;message('A forest guardian caught you! 2 seconds of protection.',2200);}
+function checkCollision(now){if(state.enemies.some(e=>{const p=e.route[e.index];return p[0]===state.player.x&&p[1]===state.player.y;}))hit(now);}
+function move(dx,dy,now){if(state.ended)return;const x=state.player.x+dx,y=state.player.y+dy;if(!walkable(x,y,state.owned)){const gate=GATES.find(g=>g.x===x&&g.y===y&&!state.owned.has(g.id));if(gate)message(keyName(gate.id)+' Gate locked — find the '+keyName(gate.id)+' Key!',1400);return;}state.player={x,y};const key=ITEMS.find(k=>k.x===x&&k.y===y&&!state.owned.has(k.id));if(key){state.owned.add(key.id);state.score+=100;hud();message(keyName(key.id)+' Key collected! '+keyName(key.id)+' Gate opened permanently!',2400);}if(same(state.player,CHEST)){if(state.owned.size===3){state.score+=200;end(true);return;}message('Find all 3 magical keys to unlock the treasure!',2000);}checkCollision(now);}
+const DIR={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]};
+const down=new Set();let order=[];
+window.addEventListener('keydown',e=>{if(!DIR[e.code])return;e.preventDefault();if(state.ended)return;if(!down.has(e.code)){down.add(e.code);order.push(e.code);held=e.code;move(...DIR[e.code],performance.now());nextMove=performance.now()+150;}});
+window.addEventListener('keyup',e=>{if(!DIR[e.code])return;e.preventDefault();down.delete(e.code);order=order.filter(c=>c!==e.code);held=order.at(-1)||null;nextMove=performance.now()+150;});
+window.addEventListener('blur',()=>{down.clear();order=[];held=null;});
+function tile(x,y,fill){ctx.fillStyle=fill;ctx.fillRect(x*T,y*T,T,T);}
+function circle(x,y,r,fill){ctx.fillStyle=fill;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
+function draw(){ctx.clearRect(0,0,640,480);for(let y=0;y<H;y++)for(let x=0;x<W;x++){const seed=(x*97+y*53)%13;tile(x,y,map[y][x]==='#'?'#244e32':seed%3===0?'#98734b':'#aa8352');if(map[y][x]==='#'){circle(x*T+16,y*T+14,15,'#163e2d');circle(x*T+12,y*T+10,10,'#347c4b');circle(x*T+21,y*T+9,9,'#2b6941');if(seed%4===0)circle(x*T+11,y*T+6,2,'#76aa62');}else{if(seed===2||seed===9){circle(x*T+8,y*T+9,2,'#e6b76a');circle(x*T+12,y*T+12,2,'#d8c887');}if(seed===5)circle(x*T+25,y*T+25,3,'#63944f');}}
+// Open gates become glowing stepping stones.
+for(const g of GATES){const px=g.x*T,py=g.y*T,c=color[g.id];if(state.owned.has(g.id)){tile(g.x,g.y,'#a38d62');ctx.fillStyle=c;ctx.globalAlpha=.55;ctx.fillRect(px+4,py+13,24,6);ctx.globalAlpha=1;circle(px+16,py+16,3,'#fff2c9');}else{ctx.fillStyle='#202a3d';ctx.fillRect(px+2,py+2,28,28);ctx.fillStyle=c;for(let j=0;j<3;j++)ctx.fillRect(px+6+j*8,py+3,4,26);ctx.fillStyle='#fff5bd';circle(px+16,py+15,4,'#fff5bd');}}
+for(const k of ITEMS){if(state.owned.has(k.id))continue;let cx=k.x*T+16,cy=k.y*T+16;circle(cx,cy,13,color[k.id]+'55');ctx.save();ctx.translate(cx,cy);ctx.rotate(-.55);circle(-4,-5,6,'#ffe7a3');circle(-4,-5,3,color[k.id]);ctx.fillStyle='#ffe7a3';ctx.fillRect(-2,0,5,14);ctx.fillRect(2,9,7,3);ctx.restore();}
+const cx=CHEST.x*T,cy=CHEST.y*T;ctx.fillStyle='#53311e';ctx.fillRect(cx+3,cy+10,26,19);ctx.fillStyle=state.won?'#ffeb8a':'#c78a37';ctx.fillRect(cx+4,cy+(state.won?3:7),24,10);ctx.fillStyle='#ffe47b';ctx.fillRect(cx+14,cy+8,5,19);ctx.fillStyle='#4d311c';ctx.fillRect(cx+14,cy+15,5,5);
+for(let i=0;i<state.enemies.length;i++){const e=state.enemies[i],p=e.route[e.index],cx=p[0]*T+16,cy=p[1]*T+16;circle(cx,cy+2,12,['#9a4eaf','#db7647','#63a9a1'][i]);circle(cx-5,cy-3,4,'#fff4c5');circle(cx+5,cy-3,4,'#fff4c5');circle(cx-4,cy-3,2,'#172c27');circle(cx+6,cy-3,2,'#172c27');ctx.fillStyle='#482b33';ctx.fillRect(cx-5,cy+6,10,3);circle(cx-9,cy-10,4,'#d4ad78');circle(cx+9,cy-10,4,'#d4ad78');}
+const p=state.player,px=p.x*T,py=p.y*T,blink=performance.now()<state.invincibleUntil&&Math.floor(performance.now()/130)%2===0;if(!blink){circle(px+16,py+24,10,'#3e342e');ctx.fillStyle='#3567c7';ctx.fillRect(px+9,py+13,14,13);ctx.fillStyle='#edc49a';ctx.fillRect(px+10,py+7,12,10);ctx.fillStyle='#4c3029';ctx.fillRect(px+8,py+4,16,6);ctx.fillStyle='#e5c26a';ctx.fillRect(px+6,py+3,20,4);ctx.fillStyle='#23374d';ctx.fillRect(px+9,py+25,5,5);ctx.fillRect(px+18,py+25,5,5);circle(px+19,py+12,1,'#30271e');}if(performance.now()<state.invincibleUntil){ctx.strokeStyle='#d5f9ff';ctx.lineWidth=2;ctx.strokeRect(px+3,py+2,26,29);}}
+function frame(now){if(!last)last=now;const delta=Math.min(now-last,100);last=now;if(!state.ended){state.clock+=delta;acc+=delta;while(acc>=800){acc-=800;for(const e of state.enemies){let n=e.index+e.dir;if(n<0||n>=e.route.length){e.dir*=-1;n=e.index+e.dir;}e.index=n;}checkCollision(now);if(state.ended)break;}if(held&&down.has(held)&&now>=nextMove){move(...DIR[held],now);nextMove=now+150;}if(now>noticeUntil&&$('message').textContent!=='Explore the forest. Watch the guardians!')$('message').textContent='Explore the forest. Watch the guardians!';}draw();requestAnimationFrame(frame);}
+$('restart').addEventListener('click',()=>{down.clear();order=[];reset();});$('again').addEventListener('click',()=>{down.clear();order=[];reset();});
+validate();reset();requestAnimationFrame(frame);
+// Deterministic self-tests: accessibility, gate dependency, collision, scoring and reset.
+window.LegacyQuestTest=()=>{const result={dimensions:map.length===15&&map.every(r=>r.length===20),keys:ITEMS.length===3,gates:GATES.length===3,enemies:ROUTES.length===3,reachable:ITEMS.every(k=>reachable(new Set(['red','blue','green'])).has(k.x+','+k.y)),treasure:reachable(new Set(['red','blue','green'])).has('18,13'),restart:typeof reset==='function',maximumScore:ITEMS.length*100+200===500,greenRequiresBlue:!reachable(new Set(['red','green'])).has('16,7')&&reachable(new Set(['blue'])).has('16,7')};return result;};
+</script></body></html>
