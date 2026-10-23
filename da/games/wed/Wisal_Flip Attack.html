@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flip Attack</title>
+<style>
+:root{--bg:#10151f;--panel:#1b2433;--red:#e5484d;--blue:#3b82f6;--cell:#2a3650;--txt:#eef2f8;--gold:#fbbf24}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--txt);font-family:system-ui,Arial,sans-serif}
+body{display:flex;justify-content:center;align-items:center;min-height:100vh}
+.screen{display:none;width:100%;max-width:560px;padding:12px;text-align:center}
+.screen.on{display:block}
+h1{font-size:2.6rem;margin:.2em 0;letter-spacing:2px}
+h1 span{color:var(--red)}h1 b{color:var(--blue)}
+button.btn{display:block;width:80%;max-width:300px;margin:10px auto;padding:14px;font-size:1.1rem;font-weight:700;border-radius:12px;background:var(--panel);color:var(--txt);cursor:pointer;border:2px solid #3a4a6a;min-height:48px}
+button.btn:hover{background:#2f3d5a}
+button.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+button.btn.pri{background:var(--gold);color:#111;border-color:var(--gold)}
+.how{text-align:left;background:var(--panel);border-radius:12px;padding:14px 14px 14px 8px;font-size:.95rem;line-height:1.4;max-height:65vh;overflow:auto}
+.how li{margin-bottom:6px}
+.hud{display:flex;gap:8px;margin-bottom:8px}
+.pl{flex:1;background:var(--panel);border-radius:12px;padding:6px;border:3px solid transparent;font-size:.85rem}
+.pl.act{border-color:var(--gold)}
+.pl .sc{font-size:1.6rem;font-weight:800}
+.pl.r .nm{color:var(--red)}.pl.b .nm{color:var(--blue)}
+.pl small{display:block;opacity:.85;min-height:1.1em}
+.info{font-weight:700;margin:4px 0}
+#msg{min-height:2.8em;font-size:.9rem;color:var(--gold);margin:4px 0}
+#board{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;width:min(94vw,56vh,520px);margin:0 auto;aspect-ratio:1;background:#0a0e16;padding:5px;border-radius:12px}
+.c{position:relative;border:0;border-radius:8px;background:var(--cell);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:clamp(14px,4.5vw,26px);color:var(--txt);padding:0}
+.c:hover:not(:disabled){background:#3a4a6e}
+.c:active:not(:disabled){transform:scale(.92);background:#4a5c88}
+.c:focus-visible{outline:3px solid var(--gold);z-index:1}
+.c:disabled{cursor:default}
+.c .sp{position:absolute;opacity:.9;font-size:.8em;font-weight:800}
+.c.used .sp{opacity:.3;filter:grayscale(1)}
+.c.used::after{content:"✔";position:absolute;right:3px;top:1px;font-size:.45em;color:var(--gold)}
+.pc{width:78%;height:78%;border-radius:50%;box-shadow:inset 0 -4px 6px rgba(0,0,0,.35);transition:background .35s,transform .35s;display:flex;align-items:center;justify-content:center;font-size:.7em}
+.pc.r{background:var(--red)}.pc.b{background:var(--blue)}
+.pc.sh{box-shadow:0 0 0 3px var(--gold),inset 0 -4px 6px rgba(0,0,0,.35)}
+.pc.flip{animation:fl .4s}
+@keyframes fl{50%{transform:scaleX(0)}}
+.c.tgt{outline:3px dashed var(--gold);animation:pl .8s infinite}
+@keyframes pl{50%{background:#6b5a1e}}
+@media (prefers-reduced-motion:reduce){.pc.flip,.c.tgt{animation:none}}
+.row{display:flex;gap:8px;justify-content:center;margin-top:10px}
+.row .btn{margin:0;width:auto;flex:1;padding:10px;font-size:.95rem}
+.ov{position:fixed;inset:0;background:rgba(5,8,14,.88);display:none;align-items:center;justify-content:center;z-index:5}
+.ov.on{display:flex}
+.box{background:var(--panel);padding:22px;border-radius:16px;width:90%;max-width:380px;text-align:center}
+.box h2{margin:.2em 0}
+</style>
+</head>
+<body>
+
+<div id="menu" class="screen on">
+  <h1><span>FLIP</span> <b>ATTACK</b></h1>
+  <p>Red vs Blue on a 6×6 battlefield. 25 turns.</p>
+  <button class="btn pri" data-start="2">👥 Play 2 Players</button>
+  <button class="btn pri" data-start="1">🤖 Play vs Computer</button>
+  <button class="btn" id="howBtn">❓ How to Play</button>
+</div>
+
+<div id="how" class="screen">
+  <h2>How to Play</h2>
+  <div class="how"><ul>
+    <li><b>Goal:</b> Finish 25 total turns with a higher score than your opponent. Red moves first, then players alternate.</li>
+    <li><b>Place:</b> Click, tap, or use Tab + Enter/Space on an empty cell. Placing a piece gives +1.</li>
+    <li><b>Capture:</b> Your new piece and another piece of yours can trap a straight line of opponent pieces. All trapped pieces turn to your colour.</li>
+    <li><b>8 directions:</b> Up, down, left, right and the 4 diagonals. Several directions can capture in the same turn.</li>
+    <li><b>Scoring:</b> Place +1 · Capture +2 per piece · Bonus +3 · Bomb +4 · Shield +1.</li>
+    <li><b>⭐ Bonus Cell:</b> +3 points.</li>
+    <li><b>💣 Bomb Cell:</b> Choose one neighbouring opponent piece and flip it (+4). No target means no points.</li>
+    <li><b>🛡️ Shield Cell:</b> +1 point. Your piece can't be flipped on the opponent's next turn.</li>
+    <li><b>×2 Double Score Cell:</b> Your next successful capture gives double capture points (placement and special points are not doubled).</li>
+    <li>Special cells are in fixed places and work only once.</li>
+    <li><b>Winner:</b> Highest score after Turn 25. Tie: more pieces wins. Still tied: draw.</li>
+  </ul></div>
+  <button class="btn pri" id="backBtn">Back</button>
+</div>
+
+<div id="game" class="screen">
+  <div class="hud">
+    <div class="pl r" id="pR"><div class="nm">🔴 RED</div><div class="sc" id="sR">0</div><small id="nR">Pieces: 0</small><small id="dR"></small></div>
+    <div class="pl b" id="pB"><div class="nm" id="nmB">🔵 BLUE</div><div class="sc" id="sB">0</div><small id="nB">Pieces: 0</small><small id="dB"></small></div>
+  </div>
+  <div class="info" id="turnInfo"></div>
+  <div id="board" role="grid" aria-label="Game board"></div>
+  <div id="msg" aria-live="polite"></div>
+  <div class="row">
+    <button class="btn" id="pauseBtn">⏸ Pause</button>
+    <button class="btn" id="restartBtn">🔄 Restart</button>
+  </div>
+</div>
+
+<div id="pauseOv" class="ov"><div class="box"><h2>⏸ Paused</h2>
+  <button class="btn pri" id="resumeBtn">Resume</button>
+  <button class="btn" id="pRestart">Restart</button>
+  <button class="btn" id="pMenu">Main Menu</button></div></div>
+
+<div id="endOv" class="ov"><div class="box"><h2 id="endTitle"></h2>
+  <p id="endScores" style="font-size:1.1rem;line-height:1.6"></p>
+  <button class="btn pri" id="againBtn">Play Again</button>
+  <button class="btn" id="eMenu">Main Menu</button></div></div>
+
+<script>
+const N=6,MAX=25;
+const SPECIAL={7:'bonus',10:'bomb',25:'shield',28:'double'};
+const ICON={bonus:'⭐',bomb:'💣',shield:'🛡️',double:'×2'};
+const DIRS=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+let mode=2,board,used,score,dbl,turn,cur,over,paused,bombPending,aiTimer,busy,bombCell=-1;
+const $=id=>document.getElementById(id);
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$(id).classList.add('on')}
+document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>{mode=+b.dataset.start;start()});
+$('howBtn').onclick=()=>show('how');$('backBtn').onclick=()=>show('menu');
+$('pauseBtn').onclick=pause;$('resumeBtn').onclick=resume;
+$('restartBtn').onclick=start;$('pRestart').onclick=start;$('againBtn').onclick=start;
+$('pMenu').onclick=toMenu;$('eMenu').onclick=toMenu;
+function toMenu(){clearTimeout(aiTimer);$('pauseOv').classList.remove('on');$('endOv').classList.remove('on');show('menu')}
+
+function start(){
+  clearTimeout(aiTimer);
+  board=Array(N*N).fill(null);used={};score=[0,0,0];dbl=[0,false,false];
+  turn=1;cur=1;over=false;paused=false;bombPending=false;busy=false;bombCell=-1;
+  $('nmB').textContent=mode==1?'🔵 BLUE (CPU)':'🔵 BLUE';
+  $('pauseOv').classList.remove('on');$('endOv').classList.remove('on');
+  buildBoard();show('game');setMsg('Red starts. Place a piece on any empty cell.');render();aiCheck();
+}
+function buildBoard(){
+  const b=$('board');b.innerHTML='';
+  for(let i=0;i<N*N;i++){
+    const c=document.createElement('button');c.className='c';c.dataset.i=i;
+    c.setAttribute('role','gridcell');
+    c.onclick=()=>clickCell(i);b.appendChild(c);
+  }
+}
+function setMsg(t){$('msg').textContent=t}
+const nm=p=>p==1?'Red':'Blue';
+const isAI=()=>mode==1&&cur==2;
+function counts(){let r=0,b=0;board.forEach(p=>{if(p){p.o==1?r++:b++}});return[0,r,b]}
+
+function render(flipped=[]){
+  const cells=$('board').children;
+  for(let i=0;i<N*N;i++){
+    const c=cells[i],p=board[i],sp=SPECIAL[i];
+    let h='';
+    if(sp)h+=`<span class="sp">${ICON[sp]}</span>`;
+    if(p){const shd=p.sh>=turn&&!over;h+=`<div class="pc ${p.o==1?'r':'b'}${shd?' sh':''}${flipped.includes(i)?' flip':''}">${shd?'🛡️':''}</div>`}
+    c.innerHTML=h;
+    c.className='c'+(used[i]?' used':'');
+    c.disabled=!!p||over||paused||bombPending;
+    c.setAttribute('aria-label',`Row ${Math.floor(i/N)+1} column ${i%N+1}`+(sp?` ${sp} cell${used[i]?' (used)':''}`:'')+(p?`, ${nm(p.o)} piece`:', empty'));
+  }
+  if(bombPending&&!paused&&!isAI()){bombTargets().forEach(i=>{cells[i].classList.add('tgt');cells[i].disabled=false})}
+  const c=counts();
+  $('sR').textContent=score[1];$('sB').textContent=score[2];
+  $('nR').textContent='Pieces: '+c[1];$('nB').textContent='Pieces: '+c[2];
+  $('dR').textContent=dbl[1]?'×2 Double Score active':'';$('dB').textContent=dbl[2]?'×2 Double Score active':'';
+  $('pR').classList.toggle('act',cur==1&&!over);$('pB').classList.toggle('act',cur==2&&!over);
+  $('turnInfo').textContent=over?'Game over':`Turn ${Math.min(turn,MAX)} of ${MAX} — ${nm(cur)}'s move`;
+}
+
+function findFlips(i,p,t=turn){
+  const x=i%N,y=Math.floor(i/N),out=[];
+  for(const[dy,dx]of DIRS){
+    let cx=x+dx,cy=y+dy,run=[],ok=false,blocked=false;
+    while(cx>=0&&cx<N&&cy>=0&&cy<N){
+      const q=board[cy*N+cx];
+      if(!q)break;
+      if(q.o==p){ok=run.length>0;break}
+      if(q.sh>=t)blocked=true;
+      run.push(cy*N+cx);cx+=dx;cy+=dy;
+    }
+    if(ok&&!blocked)out.push(...run);
+  }
+  return out;
+}
+function neighbors(i){
+  const x=i%N,y=Math.floor(i/N),r=[];
+  for(const[dy,dx]of DIRS){const nx=x+dx,ny=y+dy;if(nx>=0&&nx<N&&ny>=0&&ny<N)r.push(ny*N+nx)}
+  return r;
+}
+function bombTargets(){
+  return neighbors(bombCell).filter(j=>board[j]&&board[j].o!=cur&&board[j].sh<turn);
+}
+
+function clickCell(i){
+  if(over||paused||isAI()||busy)return;
+  if(bombPending){if(bombTargets().includes(i))resolveBomb(i);return}
+  if(board[i])return;
+  place(i);
+}
+
+// Order: place (+1) -> line captures (with Double Score) -> special cell effect
+function place(i){
+  const p=cur;let pts=1;const parts=[];
+  board[i]={o:p,sh:-1};
+  const flips=findFlips(i,p);
+  flips.forEach(j=>board[j].o=p);
+  if(flips.length){
+    let cap=flips.length*2;
+    if(dbl[p]){cap*=2;dbl[p]=false;parts.push('Double Score used!')}
+    pts+=cap;
+    parts.unshift(`${nm(p)} captured ${flips.length} piece${flips.length>1?'s':''}! (+${cap})`);
+  }else parts.push('No capture.');
+  const sp=SPECIAL[i];let needBomb=false;
+  if(sp&&!used[i]){
+    used[i]=true;
+    if(sp=='bonus'){pts+=3;parts.push('Bonus Cell: +3')}
+    if(sp=='shield'){pts+=1;board[i].sh=turn+1;parts.push('Shield activated! (+1)')}
+    if(sp=='double'){dbl[p]=true;parts.push('Double Score ready!')}
+    if(sp=='bomb'){bombCell=i;needBomb=true}
+  }
+  score[p]+=pts;
+  let msg=parts.join(' ');
+  if(needBomb){
+    const t=bombTargets();
+    if(t.length){
+      bombPending=true;
+      if(isAI()){
+        setMsg(msg+' Bomb Cell!');render(flips);busy=true;
+        aiTimer=setTimeout(()=>{busy=false;resolveBomb(t[Math.floor(Math.random()*t.length)])},700);return;
+      }
+      setMsg(msg+' Bomb Cell: choose a highlighted enemy piece to flip.');render(flips);return;
+    }
+    msg+=' Bomb Cell: no target.';
+  }
+  setMsg(msg);render(flips);endTurn();
+}
+function resolveBomb(j){
+  board[j].o=cur;score[cur]+=4;bombPending=false;
+  setMsg(`Bomb successful: +4 (${nm(cur)})`);
+  render([j]);endTurn();
+}
+function endTurn(){
+  if(turn>=MAX){finish();return}
+  turn++;cur=turn%2==1?1:2;
+  render();aiCheck();
+}
+
+// Computer: most captures first, then a useful unused special cell, then random
+function aiCheck(){
+  if(over||paused||!isAI())return;
+  busy=true;
+  aiTimer=setTimeout(()=>{
+    busy=false;if(paused||over)return;
+    let pick=[],bf=-1,bu=-1;
+    board.forEach((p,i)=>{
+      if(p)return;
+      const f=findFlips(i,2).length,sp=SPECIAL[i];
+      const u=(sp&&!used[i]&&(sp!='bomb'||neighbors(i).some(j=>board[j]&&board[j].o==1&&board[j].sh<turn)))?1:0;
+      if(f>bf||(f==bf&&u>bu)){bf=f;bu=u;pick=[i]}
+      else if(f==bf&&u==bu)pick.push(i);
+    });
+    place(pick[Math.floor(Math.random()*pick.length)]);
+  },800);
+}
+
+function pause(){
+  if(over)return;
+  paused=true;clearTimeout(aiTimer);busy=false;
+  $('pauseOv').classList.add('on');render();
+}
+function resume(){
+  paused=false;$('pauseOv').classList.remove('on');render();
+  if(bombPending&&isAI()){const t=bombTargets();busy=true;aiTimer=setTimeout(()=>{busy=false;resolveBomb(t[Math.floor(Math.random()*t.length)])},500)}
+  else aiCheck();
+}
+function finish(){
+  over=true;render();
+  const c=counts();let t;
+  if(score[1]>score[2])t='🏆 Red wins!';
+  else if(score[2]>score[1])t='🏆 Blue wins!';
+  else if(c[1]>c[2])t='🏆 Red wins on piece count!';
+  else if(c[2]>c[1])t='🏆 Blue wins on piece count!';
+  else t="🤝 It's a draw!";
+  $('endTitle').textContent=t;
+  $('endScores').innerHTML=`🔴 Red: <b>${score[1]}</b> pts · ${c[1]} pieces<br>🔵 Blue${mode==1?' (CPU)':''}: <b>${score[2]}</b> pts · ${c[2]} pieces`;
+  setTimeout(()=>$('endOv').classList.add('on'),600);
+}
+document.addEventListener('keydown',e=>{
+  if(e.key=='Escape'&&$('game').classList.contains('on')&&!over){paused?resume():pause()}
+});
+</script>
+</body>
+</html>
