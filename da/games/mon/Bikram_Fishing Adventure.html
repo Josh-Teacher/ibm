@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bikram Prasad Bhusal | Portfolio</title>
+<meta name="description" content="Bikram Prasad Bhusal: pharmacy diploma graduate, bachelor's student at Dong-A University, cricket lover, game maker, and passionate helper.">
+<style>
+  :root {
+    --bg: #f3faf8; --surface: #ffffff; --text: #0c2828; --muted: #567170;
+    --accent: #0fa58a; --accent-2: #f5a524; --accent-3: #e4572e;
+    --border: #d9ebe6; --radius: 22px; --shadow: 0 18px 40px -22px rgba(15,165,138,.55);
+  }
+  :root[data-theme="dark"] {
+    --bg: #07181a; --surface: #0e2b2c; --text: #eaf7f4; --muted: #8fb0ab;
+    --accent: #2fd4b4; --accent-2: #ffc14d; --accent-3: #ff7a59;
+    --border: #17403f; --shadow: 0 18px 40px -22px rgba(47,212,180,.5);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.65; overflow-x: hidden;
+    transition: background .3s, color .3s;
+  }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+  .grad { background: linear-gradient(90deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  #bar { position: fixed; top: 0; left: 0; height: 4px; width: 0; z-index: 50; background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3)); }
+
+  /* NAV */
+  nav { position: sticky; top: 0; z-index: 30; backdrop-filter: blur(14px); background: color-mix(in srgb, var(--bg) 80%, transparent); border-bottom: 1px solid var(--border); }
+  nav .wrap { display: flex; justify-content: space-between; align-items: center; height: 62px; gap: 10px; }
+  .logo { font-weight: 800; letter-spacing: -.5px; font-size: 1.1rem; }
+  .logo b { color: var(--accent); }
+  nav ul { display: flex; gap: 20px; list-style: none; font-size: .9rem; color: var(--muted); }
+  nav ul a:hover { color: var(--accent); }
+  #theme { border: 1px solid var(--border); background: var(--surface); width: 38px; height: 38px; border-radius: 50%; cursor: pointer; font-size: 1.05rem; }
+  @media (max-width: 700px) { nav ul { display: none; } }
+
+  /* HERO */
+  .hero { position: relative; padding: 70px 0 70px; overflow: hidden; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(70px); z-index: -1; animation: drift 12s ease-in-out infinite alternate; }
+  .blob.a { width: 360px; height: 360px; background: var(--accent); top: -80px; right: -80px; opacity: .35; }
+  .blob.b { width: 280px; height: 280px; background: var(--accent-2); bottom: -40px; left: -90px; opacity: .28; animation-delay: -4s; }
+  .blob.c { width: 200px; height: 200px; background: var(--accent-3); top: 40%; left: 45%; opacity: .14; animation-delay: -8s; }
+  @keyframes drift { to { transform: translate(40px, 30px) scale(1.12); } }
+  .hero-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; align-items: center; }
+  @media (max-width: 780px) { .hero-grid { grid-template-columns: 1fr; text-align: center; } .hero-photo { order: -1; } .btns, .pills { justify-content: center; } }
+  .hello { display: inline-block; padding: 7px 16px; border-radius: 999px; font-size: .85rem; font-weight: 600; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); margin-bottom: 18px; }
+  .wave { display: inline-block; animation: wave 2s infinite; transform-origin: 70% 70%; }
+  @keyframes wave { 0%, 60%, 100% { transform: rotate(0); } 10%, 30% { transform: rotate(16deg); } 20%, 40% { transform: rotate(-10deg); } 50% { transform: rotate(8deg); } }
+  h1 { font-size: clamp(2.3rem, 7.5vw, 4.1rem); line-height: 1.05; letter-spacing: -2px; margin-bottom: 14px; }
+  .typed-line { font-size: clamp(1.1rem, 3.5vw, 1.5rem); font-weight: 700; margin-bottom: 16px; min-height: 2em; }
+  .typed-line .cursor { display: inline-block; width: 3px; height: 1.1em; background: var(--accent); margin-left: 3px; vertical-align: -3px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .lead { color: var(--muted); font-size: 1.06rem; max-width: 520px; margin-bottom: 26px; }
+  @media (max-width: 780px) { .lead { margin-left: auto; margin-right: auto; } }
+  .btns { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; }
+  .btn { padding: 13px 26px; border-radius: 999px; font-weight: 600; font-size: .95rem; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); font-family: inherit; transition: transform .15s, box-shadow .15s; cursor: pointer; display: inline-block; text-align: center; }
+  .btn:hover { transform: translateY(-3px); }
+  .btn.primary { background: linear-gradient(90deg, var(--accent), #0b8ba5); border-color: transparent; color: #fff; box-shadow: var(--shadow); }
+  .pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pills span { font-size: .8rem; padding: 5px 13px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
+
+  .hero-photo { display: grid; place-items: center; }
+  .photo-frame { position: relative; width: min(300px, 72vw); aspect-ratio: 1; border-radius: 50%; padding: 8px; background: conic-gradient(from 0deg, var(--accent), var(--accent-2), var(--accent-3), var(--accent)); animation: spin 10s linear infinite; box-shadow: var(--shadow); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .photo-wrap { position: relative; width: min(300px, 72vw); aspect-ratio: 1; }
+  .photo-frame .inner { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; background: var(--surface); display: grid; place-items: center; animation: spin 10s linear infinite reverse; }
+  .initials { font-size: 4.2rem; font-weight: 800; color: var(--accent); }
+  .badge { position: absolute; background: var(--surface); border: 1px solid var(--border); padding: 8px 14px; border-radius: 999px; font-size: .82rem; font-weight: 600; box-shadow: 0 12px 26px -12px rgba(0,0,0,.35); animation: float 4s ease-in-out infinite; z-index: 2; }
+  .badge.one { top: 4%; left: -8%; }
+  .badge.two { bottom: 6%; right: -10%; animation-delay: 1.5s; }
+  .badge.three { top: 48%; right: -14%; animation-delay: 2.6s; }
+  @keyframes float { 50% { transform: translateY(-9px); } }
+
+  /* MARQUEE */
+  .marquee { overflow: hidden; border-block: 1px solid var(--border); background: var(--surface); padding: 14px 0; }
+  .track { display: flex; gap: 38px; width: max-content; animation: scroll 26s linear infinite; font-weight: 700; color: var(--muted); }
+  .track span { white-space: nowrap; }
+  .track span:nth-child(3n) { color: var(--accent); }
+  .track span:nth-child(3n+1) { color: var(--accent-2); }
+  @keyframes scroll { to { transform: translateX(-50%); } }
+
+  /* SECTIONS */
+  section { padding: 62px 0; }
+  .eyebrow { color: var(--accent); font-weight: 700; font-size: .78rem; letter-spacing: 2.5px; text-transform: uppercase; }
+  h2 { font-size: clamp(1.7rem, 5vw, 2.2rem); letter-spacing: -1px; margin: 6px 0 8px; }
+  .sub { color: var(--muted); margin-bottom: 30px; max-width: 580px; }
+
+  /* ===== PROJECTS ===== */
+  .featured { display: grid; grid-template-columns: 1.15fr 1fr; background: var(--surface); border: 1px solid var(--border); border-radius: 28px; overflow: hidden; transition: transform .25s, box-shadow .25s, border-color .25s; }
+  .featured:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: var(--shadow); }
+  @media (max-width: 760px) { .featured { grid-template-columns: 1fr; } }
+  .game-preview { position: relative; min-height: 280px; background: linear-gradient(180deg, #4fc3e4, #1a9ecb 55%, #087eaa); overflow: hidden; cursor: pointer; border: 0; display: block; width: 100%; padding: 0; }
+  .game-preview svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .play-badge { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 78px; height: 78px; border-radius: 50%; background: rgba(255,255,255,.95); display: grid; place-items: center; box-shadow: 0 14px 30px -8px rgba(0,0,0,.45); transition: transform .2s; z-index: 2; }
+  .play-badge::after { content: ""; margin-left: 6px; border-left: 22px solid #087eaa; border-top: 14px solid transparent; border-bottom: 14px solid transparent; }
+  .game-preview:hover .play-badge { transform: translate(-50%, -50%) scale(1.12); }
+  .game-tag { position: absolute; top: 14px; left: 14px; z-index: 2; background: rgba(0,0,0,.4); color: #fff; font-size: .74rem; font-weight: 700; letter-spacing: 1px; padding: 5px 12px; border-radius: 999px; backdrop-filter: blur(4px); }
+  .fish-a { animation: swim 9s linear infinite; }
+  .fish-b { animation: swim 13s linear infinite -5s; }
+  .fish-c { animation: swim 11s linear infinite -8s; }
+  @keyframes swim { from { transform: translateX(-120px); } to { transform: translateX(560px); } }
+  .featured-body { padding: 30px; display: flex; flex-direction: column; justify-content: center; }
+  .featured-body h3 { font-size: 1.5rem; letter-spacing: -.5px; margin-bottom: 8px; }
+  .featured-body p { color: var(--muted); font-size: .95rem; margin-bottom: 16px; }
+  .specs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 20px; }
+  .spec { background: color-mix(in srgb, var(--accent) 9%, var(--surface)); border: 1px solid var(--border); border-radius: 14px; padding: 8px 12px; font-size: .84rem; }
+  .spec b { display: block; font-size: .95rem; }
+  .spec span { color: var(--muted); }
+  .project-links { display: flex; gap: 10px; flex-wrap: wrap; }
+  .project-links .btn { padding: 11px 20px; font-size: .9rem; }
+
+  .doc-card { margin-top: 20px; display: grid; grid-template-columns: auto 1fr auto; gap: 22px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 24px 28px; transition: transform .25s, box-shadow .25s, border-color .25s; }
+  .doc-card:hover { transform: translateY(-5px); border-color: var(--accent-2); box-shadow: 0 18px 40px -22px rgba(245,165,36,.6); }
+  @media (max-width: 680px) { .doc-card { grid-template-columns: 1fr; text-align: center; justify-items: center; } }
+  .doc-ico { width: 62px; height: 78px; border-radius: 10px; background: linear-gradient(160deg, #4285f4, #2b62c9); position: relative; box-shadow: 0 12px 22px -10px rgba(66,133,244,.7); }
+  .doc-ico::before { content: ""; position: absolute; top: 0; right: 0; width: 18px; height: 18px; background: rgba(255,255,255,.35); border-bottom-left-radius: 8px; }
+  .doc-ico::after { content: ""; position: absolute; left: 12px; right: 12px; top: 30px; height: 4px; border-radius: 2px; background: #fff; box-shadow: 0 10px 0 #fff, 0 20px 0 #fff, 0 30px 0 rgba(255,255,255,.7); }
+  .doc-card h3 { font-size: 1.2rem; margin-bottom: 4px; }
+  .doc-card p { color: var(--muted); font-size: .93rem; margin-bottom: 10px; }
+  .doc-tags { display: flex; gap: 7px; flex-wrap: wrap; }
+  @media (max-width: 680px) { .doc-tags { justify-content: center; } }
+  .doc-tags span { font-size: .75rem; padding: 3px 11px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); }
+
+  /* modal */
+  #modal { position: fixed; inset: 0; z-index: 100; background: rgba(4,20,24,.82); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; padding: 14px; }
+  #modal.open { display: flex; }
+  .modal-box { width: min(1120px, 100%); height: min(92vh, 960px); background: var(--surface); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+  .modal-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); font-weight: 700; }
+  .modal-bar div { display: flex; gap: 8px; }
+  .modal-bar a, .modal-bar button { font: inherit; font-size: .85rem; font-weight: 600; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; }
+  .modal-bar button:hover, .modal-bar a:hover { border-color: var(--accent); color: var(--accent); }
+  #gameFrame { flex: 1; width: 100%; border: 0; background: #dff6ff; }
+
+  /* flip cards */
+  .flips { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px; }
+  .flip { perspective: 900px; height: 190px; cursor: pointer; }
+  .flip-in { position: relative; width: 100%; height: 100%; transition: transform .7s; transform-style: preserve-3d; }
+  .flip:hover .flip-in, .flip.on .flip-in { transform: rotateY(180deg); }
+  .face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: var(--radius); padding: 22px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 6px; }
+  .front { background: var(--surface); border: 1px solid var(--border); }
+  .front .ico { font-size: 2.4rem; }
+  .front h3 { font-size: 1.02rem; }
+  .front small { color: var(--muted); }
+  .back { transform: rotateY(180deg); color: #fff; font-size: .92rem; }
+  .flip:nth-child(1) .back { background: linear-gradient(135deg, #0fa58a, #0b6e8a); }
+  .flip:nth-child(2) .back { background: linear-gradient(135deg, #5b6cff, #0b8ba5); }
+  .flip:nth-child(3) .back { background: linear-gradient(135deg, #f5a524, #e4572e); }
+  .flip:nth-child(4) .back { background: linear-gradient(135deg, #e4572e, #b5179e); }
+
+  /* about */
+  .about-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+  @media (max-width: 760px) { .about-grid { grid-template-columns: 1fr; } }
+  .box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; }
+  .box p { color: var(--muted); margin-bottom: 12px; }
+  .box p:last-child { margin: 0; }
+  .box strong { color: var(--text); }
+  .facts { display: grid; gap: 12px; align-content: start; }
+  .fact { display: flex; justify-content: space-between; gap: 12px; padding: 14px 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--border); font-size: .92rem; }
+  .fact span:first-child { color: var(--muted); }
+  .fact span:last-child { font-weight: 700; text-align: right; }
+
+  /* timeline */
+  .timeline { border-left: 2px dashed var(--border); padding-left: 28px; display: grid; gap: 26px; margin-left: 8px; }
+  .tl { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; transition: transform .2s, border-color .2s; }
+  .tl:hover { transform: translateX(6px); border-color: var(--accent); }
+  .tl::before { content: attr(data-ico); position: absolute; left: -48px; top: 18px; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); font-size: 1.05rem; }
+  .tl.now::before { border-color: var(--accent-2); }
+  .tl small { color: var(--accent); font-weight: 700; }
+  .tl h3 { font-size: 1.1rem; margin: 2px 0; }
+  .tl p { color: var(--muted); font-size: .93rem; }
+
+  /* CRICKET */
+  .cricket { background: linear-gradient(160deg, #0b6e4f, #0fa58a 55%, #1a8f5f); color: #fff; border-radius: 30px; padding: 46px 30px; position: relative; overflow: hidden; }
+  .cricket::after { content: ""; position: absolute; inset: auto -10% -60% -10%; height: 70%; border-radius: 50%; border: 2px solid rgba(255,255,255,.18); }
+  .cricket .eyebrow { color: #ffe08a; }
+  .cricket h2 { color: #fff; }
+  .cricket .sub { color: rgba(255,255,255,.85); }
+  .ball { position: absolute; right: 34px; top: 30px; width: 54px; height: 54px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #ff6b5a, #b3171d 70%); box-shadow: 0 10px 20px rgba(0,0,0,.35); animation: bounce 1.6s cubic-bezier(.3,.6,.4,1) infinite; }
+  .ball::before { content: ""; position: absolute; left: 50%; top: 4px; bottom: 4px; width: 2px; margin-left: -1px; background: rgba(255,255,255,.75); border-radius: 2px; box-shadow: -5px 0 0 -1px rgba(255,255,255,.45), 5px 0 0 -1px rgba(255,255,255,.45); }
+  @keyframes bounce { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(95px) rotate(300deg); } }
+  .lessons { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; position: relative; z-index: 1; }
+  .lesson { background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.22); border-radius: 18px; padding: 18px; backdrop-filter: blur(6px); }
+  .lesson b { display: block; font-size: 1.05rem; margin-bottom: 2px; }
+  .lesson span { font-size: .88rem; opacity: .9; }
+
+  /* HELP */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; position: relative; overflow: hidden; transition: transform .2s, box-shadow .2s, border-color .2s; }
+  .card::before { content: ""; position: absolute; left: 0; top: 0; height: 4px; width: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+  .card:hover { transform: translateY(-6px); border-color: var(--accent); box-shadow: var(--shadow); }
+  .card .big { font-size: 2rem; margin-bottom: 8px; }
+  .card h3 { font-size: 1.08rem; margin-bottom: 4px; }
+  .card p { color: var(--muted); font-size: .93rem; }
+
+  /* chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip { padding: 10px 18px; border-radius: 999px; font-size: .9rem; font-weight: 500; background: var(--surface); border: 1px solid var(--border); transition: all .15s; }
+  .chip:hover { background: var(--accent); color: #fff; border-color: var(--accent); transform: translateY(-3px) rotate(-1.5deg); }
+
+  /* quote */
+  .quote { text-align: center; padding: 56px 24px; border-radius: 30px; position: relative; background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 18%, var(--surface)), color-mix(in srgb, var(--accent-2) 16%, var(--surface))); border: 1px solid var(--border); }
+  .quote::before { content: "“"; position: absolute; top: -10px; left: 24px; font-size: 7rem; line-height: 1; color: var(--accent); opacity: .25; font-family: Georgia, serif; }
+  .quote q { font-size: clamp(1.4rem, 4.5vw, 2.2rem); font-weight: 800; letter-spacing: -.5px; line-height: 1.25; quotes: none; }
+  .quote small { display: block; margin-top: 12px; color: var(--muted); }
+
+  /* FOOTER */
+  footer { margin-top: 30px; padding: 56px 0 44px; border-top: 1px solid var(--border); text-align: center; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--accent) 7%, transparent)); }
+  footer p { color: var(--muted); margin-bottom: 22px; }
+  .socials { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-bottom: 30px; }
+  .socials a { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--border); transition: all .2s; }
+  .socials a:hover { transform: translateY(-5px) scale(1.06); background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: var(--shadow); }
+  .socials svg { width: 22px; height: 22px; fill: currentColor; }
+  .copy { font-size: .85rem; margin: 0 !important; }
+
+  #top-btn { position: fixed; right: 18px; bottom: 18px; width: 46px; height: 46px; border-radius: 50%; border: none; background: var(--accent); color: #fff; font-size: 1.2rem; cursor: pointer; box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: opacity .3s, transform .2s; z-index: 40; }
+  #top-btn.show { opacity: 1; pointer-events: auto; }
+  #top-btn:hover { transform: translateY(-3px); }
+
+  .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s, transform .7s; }
+  .reveal.show { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .reveal { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+<div id="bar"></div>
+
+<nav>
+  <div class="wrap">
+    <a href="#top" class="logo">bikram<b>.</b></a>
+    <ul>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#journey">Journey</a></li>
+      <li><a href="#cricket">Cricket</a></li>
+      <li><a href="#help">Helping</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button id="theme" aria-label="Toggle dark mode">🌙</button>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+  <div class="wrap hero-grid">
+    <div>
+      <span class="hello"><span class="wave">👋</span> Hello, I'm a student in Korea</span>
+      <h1>I'm <span class="grad">Bikram Prasad Bhusal</span></h1>
+      <div class="typed-line"><span id="typed"></span><span class="cursor"></span></div>
+      <p class="lead">Pharmacy graduate turned bachelor's student at Dong-A University. I learn by doing, I build small games, I love cricket, and helping people is what drives me.</p>
+      <div class="btns">
+        <a class="btn primary" href="#projects">🎣 Play my game →</a>
+        <a class="btn" href="#contact">Say hello</a>
+      </div>
+      <div class="pills"><span>💊 Pharmacy</span><span>🎮 Game Maker</span><span>🏏 Cricket</span><span>🤝 Helper</span><span>🇰🇷 Busan</span></div>
+    </div>
+    <div class="hero-photo">
+      <div class="photo-wrap">
+        <div class="photo-frame">
+          <div class="inner">
+            <span class="initials" id="ini">BB</span>
+          </div>
+        </div>
+        <span class="badge one">🏏 Cricket fan</span>
+        <span class="badge two">🤝 Here to help</span>
+        <span class="badge three">🎣 Game maker</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="marquee" aria-hidden="true">
+  <div class="track" id="track"></div>
+</div>
+
+<!-- ============ PROJECTS ============ -->
+<section id="projects">
+  <div class="wrap reveal">
+    <span class="eyebrow">My work</span>
+    <h2>Featured <span class="grad">Projects</span></h2>
+    <p class="sub">A browser game I designed and built, plus the full design document behind it.</p>
+
+    <!-- Game -->
+    <article class="featured">
+      <button class="game-preview" id="openGame" aria-label="Play Fishing Adventure">
+        <span class="game-tag">🎮 PLAYABLE GAME</span>
+        <svg viewBox="0 0 480 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs>
+            <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#4fc3e4"/><stop offset=".55" stop-color="#1a9ecb"/><stop offset="1" stop-color="#087eaa"/>
+            </linearGradient>
+          </defs>
+          <rect width="480" height="300" fill="url(#water)"/>
+          <rect width="480" height="46" fill="#8bd18b"/>
+          <g stroke="#c7f5ff" stroke-opacity=".5" stroke-width="2" fill="none">
+            <ellipse cx="90" cy="110" rx="26" ry="4"/><ellipse cx="300" cy="90" rx="30" ry="4"/>
+            <ellipse cx="200" cy="230" rx="24" ry="4"/><ellipse cx="400" cy="200" rx="28" ry="4"/>
+          </g>
+          <g class="fish-a"><ellipse cx="0" cy="150" rx="18" ry="10" fill="#ffe08a"/><path d="M-14 150 l-14 -9 v18z" fill="#ffe08a"/><circle cx="9" cy="147" r="3" fill="#fff"/></g>
+          <g class="fish-b"><ellipse cx="0" cy="220" rx="22" ry="12" fill="#ff8c69"/><path d="M-17 220 l-16 -10 v20z" fill="#ff8c69"/><circle cx="11" cy="217" r="3.5" fill="#fff"/></g>
+          <g class="fish-c"><ellipse cx="0" cy="95" rx="26" ry="14" fill="#c4a1ff"/><path d="M-20 95 l-18 -12 v24z" fill="#c4a1ff"/><circle cx="13" cy="92" r="4" fill="#fff"/></g>
+          <ellipse cx="78" cy="262" rx="40" ry="26" fill="#6e8790"/><ellipse cx="68" cy="254" rx="18" ry="7" fill="#a8bac0"/>
+          <ellipse cx="410" cy="80" rx="26" ry="38" fill="#177d58"/>
+          <line x1="40" y1="46" x2="250" y2="170" stroke="#e9c48c" stroke-width="2"/>
+          <circle cx="250" cy="170" r="6" fill="#ffd166"/><circle cx="250" cy="170" r="12" fill="none" stroke="#fff" stroke-width="2"/>
+        </svg>
+        <span class="play-badge"></span>
+      </button>
+      <div class="featured-body">
+        <h3>🎣 Fishing Adventure</h3>
+        <p>A browser fishing challenge. Aim your cast at open water, wait for the bite, then hit the catch zone at the perfect moment. Dodge rocks and plants, survive rain and wind, and upgrade your rod.</p>
+        <div class="specs">
+          <div class="spec"><b>100 pts</b><span>goal in 60 seconds</span></div>
+          <div class="spec"><b>3 fish types</b><span>5 · 10 · 25 points</span></div>
+          <div class="spec"><b>Dynamic weather</b><span>sun, rain, wind</span></div>
+          <div class="spec"><b>Rod upgrade</b><span>+25% range</span></div>
+        </div>
+        <div class="project-links">
+          <button class="btn primary" id="openGame2">▶ Play here</button>
+          <a class="btn" href="fishing-adventure.html" target="_blank" rel="noopener">Open full page ↗</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- Google Doc -->
+    <article class="doc-card">
+      <div class="doc-ico" aria-hidden="true"></div>
+      <div>
+        <h3>📄 Project Documentation</h3>
+        <p>The complete design document for my game: story, mechanics, rules, and technical specifications.</p>
+        <div class="doc-tags"><span>Game design</span><span>Story</span><span>Mechanics</span><span>Rules</span><span>Tech specs</span></div>
+      </div>
+      <a class="btn primary" href="https://docs.google.com/document/d/1_hgfBvuJwR4468LFIDVVC4luZQrdEAPih6OjtI_Tsvo/edit?usp=drivesdk" target="_blank" rel="noopener">Read document ↗</a>
+    </article>
+  </div>
+</section>
+
+<!-- Game modal -->
+<div id="modal" role="dialog" aria-modal="true" aria-label="Fishing Adventure game">
+  <div class="modal-box">
+    <div class="modal-bar">
+      <span>🎣 Fishing Adventure</span>
+      <div>
+        <a href="fishing-adventure.html" target="_blank" rel="noopener">Full page ↗</a>
+        <button id="closeGame">✕ Close</button>
+      </div>
+    </div>
+    <iframe id="gameFrame" title="Fishing Adventure game" allow="fullscreen"></iframe>
+  </div>
+</div>
+
+<section>
+  <div class="wrap reveal">
+    <span class="eyebrow">Quick facts</span>
+    <h2>Tap a card to flip it</h2>
+    <p class="sub">Four things that describe me best.</p>
+    <div class="flips">
+      <div class="flip"><div class="flip-in"><div class="face front"><div class="ico">🎓</div><h3>Diploma in Pharmacy</h3><small>Completed</small></div><div class="face back">My foundation in medicines, health and caring for people.</div></div></div>
+      <div class="flip"><div class="flip-in"><div class="face front"><div class="ico">🏫</div><h3>Dong-A University</h3><small>Bachelor's degree</small></div><div class="face back">Studying in Busan, South Korea and building my future abroad.</div></div></div>
+      <div class="flip"><div class="flip-in"><div class="face front"><div class="ico">🏏</div><h3>Cricket</h3><small>My favorite sport</small></div><div class="face back">Energy, teamwork and friendship, all in one game.</div></div></div>
+      <div class="flip"><div class="flip-in"><div class="face front"><div class="ico">💚</div><h3>Helping Others</h3><small>My passion</small></div><div class="face back">A small act of help can change someone's whole day.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="wrap reveal">
+    <span class="eyebrow">About me</span>
+    <h2>A little about <span class="grad">Bikram</span></h2>
+    <p class="sub">Who I am and what I care about.</p>
+    <div class="about-grid">
+      <div class="box">
+        <p>Hi, I'm <strong>Bikram Prasad Bhusal</strong>. I completed my <strong>diploma in pharmacy</strong> and moved to Korea to continue my education with a <strong>bachelor's degree at Dong-A University</strong>.</p>
+        <p>I'm a hands-on learner who picks things up by trying them, like designing and building my own <strong>fishing game</strong> for the browser. Outside class you'll find me playing <strong>cricket</strong>, and nothing makes me happier than <strong>helping others</strong>, whether it's a friend, a classmate, or someone who simply needs a hand.</p>
+      </div>
+      <div class="facts">
+        <div class="fact"><span>Name</span><span>Bikram Prasad Bhusal</span></div>
+        <div class="fact"><span>University</span><span>Dong-A University</span></div>
+        <div class="fact"><span>Background</span><span>Diploma in Pharmacy</span></div>
+        <div class="fact"><span>Based in</span><span>Busan, Korea</span></div>
+        <div class="fact"><span>Hobbies</span><span>Cricket 🏏 · Games 🎮</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="journey">
+  <div class="wrap reveal">
+    <span class="eyebrow">Journey</span>
+    <h2>My <span class="grad">education</span> path</h2>
+    <p class="sub">The steps that brought me here.</p>
+    <div class="timeline">
+      <div class="tl now" data-ico="🇰🇷">
+        <small>Present</small>
+        <h3>Bachelor's Degree, Dong-A University</h3>
+        <p>Studying in Busan, South Korea, learning a new culture and chasing bigger goals. Built my first browser game, Fishing Adventure.</p>
+      </div>
+      <div class="tl" data-ico="💊">
+        <small>Completed</small>
+        <h3>Diploma in Pharmacy</h3>
+        <p>Built a strong base in medicines, health and caring for people.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cricket">
+  <div class="wrap reveal">
+    <div class="cricket">
+      <div class="ball"></div>
+      <span class="eyebrow">Off the books</span>
+      <h2>Life on the cricket field 🏏</h2>
+      <p class="sub">Cricket is where I recharge. It also teaches me things no classroom can.</p>
+      <div class="lessons">
+        <div class="lesson"><b>🤝 Teamwork</b><span>Every player matters.</span></div>
+        <div class="lesson"><b>🧘 Patience</b><span>Good things take time.</span></div>
+        <div class="lesson"><b>🎯 Focus</b><span>Eyes on the ball, always.</span></div>
+        <div class="lesson"><b>🏅 Fair play</b><span>Respect the game and people.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="help">
+  <div class="wrap reveal">
+    <span class="eyebrow">My passion</span>
+    <h2>How I love to <span class="grad">help</span></h2>
+    <p class="sub">Helping others is the thing that motivates me most.</p>
+    <div class="cards">
+      <div class="card"><div class="big">🧑‍🤝‍🧑</div><h3>Friends &amp; classmates</h3><p>Sharing what I know and lending a hand whenever someone is stuck.</p></div>
+      <div class="card"><div class="big">🌏</div><h3>New students in Korea</h3><p>Moving abroad is hard. I like making newcomers feel welcome.</p></div>
+      <div class="card"><div class="big">💊</div><h3>Health awareness</h3><p>With a pharmacy background, I enjoy sharing simple, helpful health knowledge.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="wrap reveal">
+    <span class="eyebrow">Strengths</span>
+    <h2>What I <span class="grad">bring</span></h2>
+    <p class="sub">Skills I'm building and proud of.</p>
+    <div class="chips">
+      <span class="chip">💊 Pharmacy Knowledge</span>
+      <span class="chip">🎮 Game Design</span>
+      <span class="chip">💻 HTML, CSS &amp; JavaScript</span>
+      <span class="chip">🤝 Helping People</span>
+      <span class="chip">🗣️ Communication</span>
+      <span class="chip">👥 Teamwork</span>
+      <span class="chip">🏏 Team Sports</span>
+      <span class="chip">⚡ Learning by Doing</span>
+      <span class="chip">🌏 Adapting to New Places</span>
+      <span class="chip">😊 Positive Attitude</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap reveal">
+    <div class="quote">
+      <q>Helping others is my passion.</q>
+      <small>Bikram Prasad Bhusal</small>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap">
+    <span class="eyebrow">Contact</span>
+    <h2>Let's <span class="grad">connect</span></h2>
+    <p>Open to friends, teamwork and new opportunities.</p>
+    <div class="btns" style="justify-content:center">
+      <a class="btn primary" href="mailto:you@example.com?subject=Hello%20Bikram">✉️ Send me an email</a>
+    </div>
+    <div class="socials">
+      <a href="https://github.com/bik33402" target="_blank" rel="noopener" aria-label="GitHub"><svg viewBox="0 0 24 24"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg></a>
+      <a href="https://linkedin.com/in/yourusername" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg></a>
+      <a href="https://facebook.com/yourusername" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.69.24 2.69.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.25h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z"/></svg></a>
+      <a href="https://instagram.com/yourusername" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85C2.38 3.92 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.69.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.2 4.36 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.2-4.35-2.62-6.78-6.98-6.98C15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 1 0 0 12.32 6.16 6.16 0 0 0 0-12.32zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.85a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88z"/></svg></a>
+      <a href="mailto:you@example.com" aria-label="Email"><svg viewBox="0 0 24 24"><path d="M2 5.5A2.5 2.5 0 0 1 4.5 3h15A2.5 2.5 0 0 1 22 5.5v13a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 2 18.5v-13zm2.3.3L12 11.7l7.7-5.9a.5.5 0 0 0-.2-.05h-15a.5.5 0 0 0-.2.05zM20 8l-7.4 5.7a1 1 0 0 1-1.2 0L4 8v10.5c0 .28.22.5.5.5h15a.5.5 0 0 0 .5-.5V8z"/></svg></a>
+    </div>
+    <p class="copy">© <span id="yr">2026</span> Bikram Prasad Bhusal · Dong-A University, Busan</p>
+  </div>
+</footer>
+
+<button id="top-btn" aria-label="Back to top">↑</button>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  var root = document.documentElement, tbtn = document.getElementById('theme');
+  function setTheme(t) { root.setAttribute('data-theme', t); tbtn.textContent = t === 'dark' ? '☀️' : '🌙'; try { localStorage.setItem('theme', t); } catch (e) {} }
+  var saved = null; try { saved = localStorage.getItem('theme'); } catch (e) {}
+  setTheme(saved || (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  tbtn.onclick = function () { setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); };
+
+  var words = ['Pharmacy Graduate 💊', 'Dong-A University Student 🎓', 'Game Maker 🎣', 'Cricket Lover 🏏', 'Passionate Helper 🤝'];
+  var tEl = document.getElementById('typed'), wi = 0, ci = 0, del = false;
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function type() {
+    var w = words[wi];
+    if (reduce) { tEl.textContent = w; wi = (wi + 1) % words.length; return setTimeout(type, 2200); }
+    tEl.textContent = w.slice(0, ci);
+    if (!del && ci === w.length) { del = true; return setTimeout(type, 1500); }
+    if (del && ci === 0) { del = false; wi = (wi + 1) % words.length; }
+    ci += del ? -1 : 1;
+    setTimeout(type, del ? 35 : 80);
+  }
+  type();
+
+  var items = ['💊 Pharmacy', '🎣 Fishing Adventure', '🏏 Cricket', '🤝 Helping Others', '🇰🇷 Dong-A University', '🎓 Bachelor\'s Student', '⚡ Learning by Doing', '🌏 Busan'];
+  var track = document.getElementById('track');
+  track.innerHTML = items.concat(items).concat(items).concat(items).map(function (s) { return '<span>' + s + '</span>'; }).join('');
+
+  document.querySelectorAll('.flip').forEach(function (f) { f.addEventListener('click', function () { f.classList.toggle('on'); }); });
+
+  /* game modal */
+  var modal = document.getElementById('modal'), frame = document.getElementById('gameFrame');
+  function openGame() { frame.src = 'fishing-adventure.html'; modal.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeGame() { modal.classList.remove('open'); frame.src = 'about:blank'; document.body.style.overflow = ''; }
+  document.getElementById('openGame').onclick = openGame;
+  document.getElementById('openGame2').onclick = openGame;
+  document.getElementById('closeGame').onclick = closeGame;
+  modal.addEventListener('click', function (e) { if (e.target === modal) closeGame(); });
+  window.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modal.classList.contains('open')) closeGame(); });
+
+  var els = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (en) { en.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('show'); io.unobserve(e.target); } }); }, { threshold: 0.1 });
+    els.forEach(function (el) { io.observe(el); });
+  } else { els.forEach(function (el) { el.classList.add('show'); }); }
+
+  var bar = document.getElementById('bar'), topBtn = document.getElementById('top-btn');
+  window.addEventListener('scroll', function () {
+    var h = document.documentElement, max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+    topBtn.classList.toggle('show', h.scrollTop > 500);
+  }, { passive: true });
+  topBtn.onclick = function () { window.scrollTo({ top: 0, behavior: 'smooth' }); };
+</script>
+</body>
+ </html>
