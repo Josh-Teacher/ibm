@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escape the Angry Teacher</title>
+
+<style>
+:root {
+  --ink: #20243a;
+  --cream: #fff8e8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  color: var(--ink);
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  background: radial-gradient(circle at top, #394b79, #171d35 72%);
+}
+
+.wrap {
+  width: min(100%, 1000px);
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: white;
+  flex-wrap: wrap;
+}
+
+h1 {
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  margin: 0;
+  text-shadow: 0 3px 0 #11182c;
+}
+
+.tag {
+  color: #d8e5ff;
+  font-size: .88rem;
+}
+
+.hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: #fff8e8;
+  border: 3px solid #222944;
+  border-radius: 14px 14px 0 0;
+  padding: 10px 14px;
+  font-weight: 800;
+  box-shadow: 0 5px 0 #10162a;
+}
+
+.hud span {
+  white-space: nowrap;
+}
+
+#score { color: #237c57; }
+#mobileCount { color: #6752bf; }
+#lives { letter-spacing: 3px; font-size: 1.25rem; }
+
+.stage {
+  position: relative;
+  border: 4px solid #222944;
+  border-top: 0;
+  border-radius: 0 0 14px 14px;
+  overflow: hidden;
+  box-shadow: 0 12px 0 #10162a;
+  background: #d6e7cb;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(17,24,45,.76);
+  z-index: 5;
+}
+
+.panel {
+  width: min(100%, 480px);
+  text-align: center;
+  background: var(--cream);
+  border: 4px solid #252b48;
+  border-radius: 22px;
+  padding: 24px;
+  box-shadow: 0 9px 0 #10162a;
+}
+
+.logo {
+  font-size: clamp(2rem, 6vw, 3.25rem);
+  line-height: 1;
+  font-weight: 1000;
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  margin: 0 auto 16px;
+  max-width: 390px;
+  line-height: 1.5;
+  color: #444a60;
+}
+
+.gold { color: #d59a00; }
+.oops { color: #ed4353; }
+
+button {
+  border: 3px solid #242944;
+  border-radius: 12px;
+  background: #70d8a1;
+  color: #17253a;
+  font-size: 1rem;
+  font-weight: 900;
+  padding: 12px 22px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #26304b;
+  margin: 5px;
+}
+
+button.secondary {
+  background: #dbe5ff;
+}
+
+.instructions {
+  font-size: .92rem;
+  line-height: 1.65;
+  text-align: left;
+  background: white;
+  border: 2px dashed #ccd2df;
+  padding: 10px 13px;
+  border-radius: 12px;
+  margin: 14px 0;
+}
+
+.instructions b {
+  color: #3b4780;
+}
+
+.bottom {
+  color: #d8e5ff;
+  text-align: center;
+  font-size: .85rem;
+  line-height: 1.5;
+  margin-top: 14px;
+}
+
+@media(max-width:520px) {
+  body { padding: 8px; }
+  .hud { padding: 8px; font-size: .88rem; }
+  .panel { padding: 18px 14px; }
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>🏃 Escape the Angry Teacher</h1>
+      <div class="tag">Grab 5 mobiles. Keep your cool. Find the exit!</div>
+    </div>
+    <div class="tag">2D School Escape</div>
+  </header>
+
+  <div class="hud" aria-live="polite">
+    <span id="score">⭐ Score: 0</span>
+    <span id="mobileCount">📱 Mobiles: 0/5</span>
+    <span>Lives: <span id="lives">❤️❤️❤️</span></span>
+    <span id="teacherState">👀 Teacher: Patrolling</span>
+  </div>
+
+  <div class="stage">
+    <canvas id="game" width="960" height="600"></canvas>
+
+    <div class="overlay" id="overlay">
+      <div class="panel" id="panel">
+        <div class="logo">ESCAPE<br>THE ANGRY TEACHER</div>
+
+        <p class="subtitle">
+          Collect five mobiles, avoid the teacher, and escape from school!
+        </p>
+
+        <div class="instructions">
+          <b>Move:</b> Arrow keys or W A S D<br>
+          <b>Pause:</b> Esc<br>
+          <b>Goal:</b> Collect all 5 mobiles (+10 points each).<br>
+          <b>Watch out:</b> The teacher will chase you when they see you!
+        </div>
+
+        <button id="playBtn">▶ Play</button>
+        <button class="secondary" id="soundBtn">🔊 Sound: On</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    Use the desks to hide from the teacher. Collect all five mobiles and reach the exit!
+  </div>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+
+  const W = canvas.width;
+  const H = canvas.height;
+
+  const scoreEl = document.getElementById("score");
+  const mobileEl = document.getElementById("mobileCount");
+  const livesEl = document.getElementById("lives");
+  const stateEl = document.getElementById("teacherState");
+  const overlay = document.getElementById("overlay");
+  const panel = document.getElementById("panel");
+  const playBtn = document.getElementById("playBtn");
+  const soundBtn = document.getElementById("soundBtn");
+
+  const keys = new Set();
+
+  const PLAYER_RADIUS = 15;
+  const TEACHER_RADIUS = 17;
+
+  let student;
+  let teacher;
+  let mobiles = [];
+  let desks = [];
+  let exit;
+
+  let score = 0;
+  let lives = 3;
+  let collected = 0;
+
+  let mode = "menu";
+  let state = "Patrolling";
+  let audioOn = true;
+  let audioCtx = null;
+
+  let patrolTarget = null;
+  let searchTarget = null;
+  let chaseSeen = false;
+  let searchTimer = 0;
+  let catchCooldown = 0;
+  let lastTime = 0;
+  let particles = [];
+  let bannerTimer = 0;
+
+  const rand = (a, b) => a + Math.random() * (b - a);
+
+  const dist = (a, b) =>
+    Math.hypot(a.x - b.x, a.y - b.y);
+
+  const clamp = (v, a, b) =>
+    Math.max(a, Math.min(b, v));
+
+  function roundRect(c, x, y, w, h, r) {
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r);
+    c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r);
+    c.arcTo(x, y, x + w, y, r);
+    c.closePath();
+  }
+
+  function rectCircle(x, y, r, d) {
+    const cx = clamp(x, d.x, d.x + d.w);
+    const cy = clamp(y, d.y, d.y + d.h);
+
+    return (x - cx) ** 2 + (y - cy) ** 2 < r * r;
+  }
+
+  function sound(type = "coin") {
+    if (!audioOn) return;
+
+    try {
+      audioCtx = audioCtx ||
+        new (window.AudioContext || window.webkitAudioContext)();
+
+      if (audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+
+      const notes =
+        type === "win" ? [523, 659, 784, 1047] :
+        type === "lose" ? [392, 330, 262] :
+        type === "catch" ? [180, 130] :
+        type === "unlock" ? [440, 660, 880] :
+        [660, 880];
+
+      const now = audioCtx.currentTime;
+
+      notes.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type =
+          type === "lose" || type === "catch"
+            ? "triangle"
+            : "sine";
+
+        osc.frequency.setValueAtTime(freq, now + i * .105);
+        gain.gain.setValueAtTime(.0001, now + i * .105);
+        gain.gain.exponentialRampToValueAtTime(
+          .12, now + i * .105 + .018
+        );
+        gain.gain.exponentialRampToValueAtTime(
+          .0001, now + i * .105 + .18
+        );
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now + i * .105);
+        osc.stop(now + i * .105 + .2);
+      });
+    } catch (e) {}
+  }
+
+  function collidesDesk(x, y, r) {
+    return desks.some(d => rectCircle(x, y, r, d));
+  }
+
+  function validPoint(x, y, r) {
+    if (
+      x < r + 4 ||
+      y < r + 4 ||
+      x > W - r - 4 ||
+      y > H - r - 4
+    ) return false;
+
+    return !collidesDesk(x, y, r);
+  }
+
+  function randomPoint(r = 15, avoid = [], minDist = 0) {
+    for (let i = 0; i < 2000; i++) {
+      const p = {
+        x: rand(40, W - 40),
+        y: rand(40, H - 40)
+      };
+
+      if (!validPoint(p.x, p.y, r)) continue;
+      if (avoid.some(a => dist(a, p) < minDist)) continue;
+
+      return p;
+    }
+
+    return { x: W - 100, y: H / 2 };
+  }
+
+  function makeDesks() {
+    const candidates = [
+      [170,95,100,52],
+      [350,80,100,52],
+      [570,100,100,52],
+      [760,180,100,52],
+      [120,245,100,52],
+      [320,235,100,52],
+      [530,260,100,52],
+      [730,345,100,52],
+      [180,420,100,52],
+      [400,430,100,52],
+      [600,465,100,52],
+      [790,465,80,52],
+      [450,155,48,82],
+      [650,350,48,82],
+      [270,330,48,82]
+    ];
+
+    return candidates
+      .sort(() => Math.random() - .5)
+      .slice(0, 10)
+      .map(([x, y, w, h]) => ({ x, y, w, h }));
+  }
+
+  function updateHUD() {
+    scoreEl.textContent = `⭐ Score: ${score}`;
+    mobileEl.textContent = `📱 Mobiles: ${collected}/5`;
+    livesEl.textContent =
+      "❤️".repeat(lives) + "🖤".repeat(3 - lives);
+    stateEl.textContent = "👀 Teacher: " + state;
+  }
+
+  function resetGame(startNow = false) {
+    score = 0;
+    lives = 3;
+    collected = 0;
+    state = "Patrolling";
+    chaseSeen = false;
+    searchTimer = 0;
+    catchCooldown = 0;
+    particles = [];
+    bannerTimer = 0;
+
+    desks = makeDesks();
+
+    student = {
+      x: 45,
+      y: H - 55
+    };
+
+    exit = {
+      x: W - 64,
+      y: 55,
+      w: 42,
+      h: 54,
+      unlocked: false
+    };
+
+    teacher = randomPoint(TEACHER_RADIUS, [student, exit], 210);
+
+    mobiles = [];
+
+    for (let i = 0; i < 5; i++) {
+      const p = randomPoint(
+        11,
+        [student, teacher, exit, ...mobiles],
+        90
+      );
+
+      mobiles.push({
+        ...p,
+        taken: false,
+        bob: rand(0, Math.PI * 2)
+      });
+    }
+
+    patrolTarget = randomPoint(
+      TEACHER_RADIUS,
+      [teacher, student, exit, ...mobiles],
+      60
+    );
+
+    searchTarget = null;
+    updateHUD();
+
+    mode = startNow ? "playing" : "menu";
+    overlay.style.display = startNow ? "none" : "flex";
+
+    draw();
+  }
+
+  function showOverlay(kind) {
+    overlay.style.display = "flex";
+
+    if (kind === "pause") {
+      panel.innerHTML = `
+        <div class="logo">⏸ PAUSED</div>
+        <p class="subtitle">Take a break!</p>
+        <button id="resumeBtn">▶ Resume</button>
+        <button class="secondary" id="quitBtn">↩ Start Screen</button>
+      `;
+
+      document.getElementById("resumeBtn").onclick = () => {
+        mode = "playing";
+        overlay.style.display = "none";
+        lastTime = performance.now();
+      };
+
+      document.getElementById("quitBtn").onclick = () => {
+        resetGame(false);
+      };
+    }
+
+    if (kind === "win") {
+      panel.innerHTML = `
+        <div class="logo gold">🏆 BOOYAH!</div>
+        <p class="subtitle">
+          You escaped the angry teacher!<br>
+          Final score: <b>${score}</b>
+        </p>
+        <button id="againBtn">↻ Play Again</button>
+      `;
+
+      document.getElementById("againBtn").onclick =
+        () => resetGame(true);
+    }
+
+    if (kind === "lose") {
+      panel.innerHTML = `
+        <div class="logo oops">😵 OOPS!<br>GAME OVER</div>
+        <p class="subtitle">
+          The teacher caught you too many times.<br>
+          Final score: <b>${score}</b>
+        </p>
+        <button id="againBtn">↻ Try Again</button>
+      `;
+
+      document.getElementById("againBtn").onclick =
+        () => resetGame(true);
+    }
+  }
+
+  function moveActor(actor, dx, dy, radius) {
+    if (validPoint(actor.x + dx, actor.y, radius)) {
+      actor.x += dx;
+    }
+
+    if (validPoint(actor.x, actor.y + dy, radius)) {
+      actor.y += dy;
+    }
+  }
+
+  function lineOfSight(a, b) {
+    const d = dist(a, b);
+    const steps = Math.ceil(d / 8);
+
+    for (let i = 1; i < steps; i++) {
+      const x = a.x + (b.x - a.x) * i / steps;
+      const y = a.y + (b.y - a.y) * i / steps;
+
+      if (
+        desks.some(o =>
+          x > o.x &&
+          x < o.x + o.w &&
+          y > o.y &&
+          y < o.y + o.h
+        )
+      ) return false;
+    }
+
+    return true;
+  }
+
+  function updateTeacher(dt) {
+    if (catchCooldown > 0) {
+      catchCooldown -= dt;
+    }
+
+    const visible =
+      dist(teacher, student) < 300 &&
+      lineOfSight(teacher, student);
+
+    if (visible) {
+      state = "Chasing";
+      searchTarget = { x: student.x, y: student.y };
+      searchTimer = 3;
+
+      const dx = student.x - teacher.x;
+      const dy = student.y - teacher.y;
+      const d = Math.hypot(dx, dy) || 1;
+
+      moveActor(
+        teacher,
+        dx / d * 116 * dt,
+        dy / d * 116 * dt,
+        TEACHER_RADIUS
+      );
+    } else {
+      if (state === "Chasing") {
+        state = "Searching";
+        searchTimer = 3;
+      }
+
+      if (state === "Searching") {
+        searchTimer -= dt;
+
+        if (searchTarget) {
+          const dx = searchTarget.x - teacher.x;
+          const dy = searchTarget.y - teacher.y;
+          const d = Math.hypot(dx, dy) || 1;
+
+          moveActor(
+            teacher,
+            dx / d * 85 * dt,
+            dy / d * 85 * dt,
+            TEACHER_RADIUS
+          );
+        }
+
+        if (searchTimer <= 0) {
+          state = "Patrolling";
+          searchTarget = null;
+        }
+      } else {
+        if (
+          !patrolTarget ||
+          dist(teacher, patrolTarget) < 25
+        ) {
+          patrolTarget = randomPoint(
+            TEACHER_RADIUS,
+            [teacher, student],
+            70
+          );
+        }
+
+        const dx = patrolTarget.x - teacher.x;
+        const dy = patrolTarget.y - teacher.y;
+        const d = Math.hypot(dx, dy) || 1;
+
+        moveActor(
+          teacher,
+          dx / d * 70 * dt,
+          dy / d * 70 * dt,
+          TEACHER_RADIUS
+        );
+      }
+    }
+
+    updateHUD();
+  }
+
+  function caughtStudent() {
+    if (catchCooldown > 0) return;
+
+    lives--;
+    catchCooldown = 1.3;
+    sound("catch");
+
+    particles.push({
+      x: student.x,
+      y: student.y,
+      text: "CAUGHT!",
+      life: 1
+    });
+
+    if (lives <= 0) {
+      lives = 0;
+      mode = "lose";
+      updateHUD();
+      sound("lose");
+      showOverlay("lose");
+    } else {
+      student.x = 45;
+      student.y = H - 55;
+      bannerTimer = 1.3;
+    }
+
+    updateHUD();
+  }
+
+  function update(dt) {
+    if (mode !== "playing") return;
+
+    const speed = 150;
+    let dx = 0;
+    let dy = 0;
+
+    if (keys.has("ArrowLeft") || keys.has("a") || keys.has("A")) dx--;
+    if (keys.has("ArrowRight") || keys.has("d") || keys.has("D")) dx++;
+    if (keys.has("ArrowUp") || keys.has("w") || keys.has("W")) dy--;
+    if (keys.has("ArrowDown") || keys.has("s") || keys.has("S")) dy++;
+
+    if (dx || dy) {
+      const n = Math.hypot(dx, dy);
+      dx /= n;
+      dy /= n;
+
+      moveActor(
+        student,
+        dx * speed * dt,
+        dy * speed * dt,
+        PLAYER_RADIUS
+      );
+    }
+
+    updateTeacher(dt);
+
+    if (dist(student, teacher) < PLAYER_RADIUS + TEACHER_RADIUS) {
+      caughtStudent();
+    }
+
+    for (const m of mobiles) {
+      if (
+        !m.taken &&
+        Math.hypot(student.x - m.x, student.y - m.y) < PLAYER_RADIUS + 11
+      ) {
+        m.taken = true;
+        collected++;
+        score += 10;
+        sound("coin");
+
+        particles.push({
+          x: m.x,
+          y: m.y,
+          text: "+10",
+          life: .7
+        });
+
+        if (collected === 5) {
+          exit.unlocked = true;
+          sound("unlock");
+          bannerTimer = 2;
+        }
+
+        updateHUD();
+      }
+    }
+
+    if (
+      exit.unlocked &&
+      student.x > exit.x - 8 &&
+      student.x < exit.x + exit.w + 8 &&
+      student.y > exit.y - 8 &&
+      student.y < exit.y + exit.h + 8
+    ) {
+      mode = "win";
+      sound("win");
+      showOverlay("win");
+    }
+
+    if (bannerTimer > 0) bannerTimer -= dt;
+
+    particles = particles.filter(p => {
+      p.life -= dt;
+      return p.life > 0;
+    });
+  }
+
+  function drawDesk(d) {
+    ctx.fillStyle = "#9c6b46";
+    roundRect(ctx, d.x, d.y, d.w, d.h, 7);
+    ctx.fill();
+
+    ctx.fillStyle = "#bd8b60";
+    roundRect(ctx, d.x + 4, d.y + 4, d.w - 8, d.h - 8, 5);
+    ctx.fill();
+
+    ctx.fillStyle = "#e8c69a";
+    ctx.fillRect(d.x + 9, d.y + 8, d.w - 18, 5);
+  }
+
+  function drawMobile(m) {
+    const bob = Math.sin(performance.now() / 260 + m.bob) * 3;
+
+    ctx.save();
+    ctx.translate(m.x, m.y + bob);
+
+    ctx.fillStyle = "#303a52";
+    roundRect(ctx, -8, -13, 16, 27, 4);
+    ctx.fill();
+
+    ctx.fillStyle = "#63e5d1";
+    roundRect(ctx, -5, -9, 10, 17, 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function drawStudent() {
+    const x = student.x;
+    const y = student.y;
+
+    ctx.fillStyle = "rgba(25,35,54,.22)";
+    ctx.beginPath();
+    ctx.ellipse(x, y + 14, 13, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#263c75";
+    roundRect(ctx, x - 10, y - 2, 20, 19, 6);
+    ctx.fill();
+
+    ctx.fillStyle = "#f0bd91";
+    ctx.beginPath();
+    ctx.arc(x, y - 8, 11, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#493329";
+    ctx.beginPath();
+    ctx.arc(x, y - 12, 11, Math.PI, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#20243a";
+    ctx.fillRect(x - 5, y - 9, 2, 3);
+    ctx.fillRect(x + 3, y - 9, 2, 3);
+  }
+
+  // Teacher is drawn in red with a white outline and label.
+  function drawTeacher() {
+    if (!teacher) return;
+
+    const x = teacher.x;
+    const y = teacher.y;
+
+    ctx.save();
+
+    // Shadow
+    ctx.fillStyle = "rgba(25,35,54,.35)";
+    ctx.beginPath();
+    ctx.ellipse(x, y + 16, 18, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Bright white outline
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(x, y - 2, 19, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Red body
+    ctx.fillStyle = "#ff1744";
+    roundRect(ctx, x - 14, y - 4, 28, 25, 6);
+    ctx.fill();
+
+    // Face
+    ctx.fillStyle = "#f0bd91";
+    ctx.beginPath();
+    ctx.arc(x, y - 10, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Hair
+    ctx.fillStyle = "#352018";
+    ctx.beginPath();
+    ctx.arc(x, y - 14, 12, Math.PI, Math.PI * 2);
+    ctx.fill();
+
+    // Eyes
+    ctx.fillStyle = "#111111";
+    ctx.fillRect(x - 5, y - 10, 3, 3);
+    ctx.fillRect(x + 3, y - 10, 3, 3);
+
+    // Label
+    ctx.fillStyle = "#8d1731";
+    roundRect(ctx, x - 30, y - 43, 60, 18, 4);
+    ctx.fill();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 11px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("TEACHER", x, y - 30);
+
+    if (state === "Chasing") {
+      ctx.fillStyle = "#ff0000";
+      ctx.font = "bold 26px Arial";
+      ctx.fillText("!", x + 22, y - 20);
+    }
+
+    ctx.restore();
+  }
+
+  function drawExit() {
+    ctx.fillStyle = exit.unlocked ? "#e6b832" : "#788294";
+    roundRect(ctx, exit.x, exit.y, exit.w, exit.h, 5);
+    ctx.fill();
+
+    ctx.fillStyle = exit.unlocked ? "#fff0a5" : "#c5ccd7";
+    roundRect(
+      ctx,
+      exit.x + 5,
+      exit.y + 5,
+      exit.w - 10,
+      exit.h - 5,
+      3
+    );
+    ctx.fill();
+
+    ctx.fillStyle = "#424c61";
+    ctx.font = "bold 12px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(
+      exit.unlocked ? "OPEN" : "LOCKED",
+      exit.x + exit.w / 2,
+      exit.y - 7
+    );
+    ctx.textAlign = "left";
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // School floor
+    ctx.fillStyle = "#d6e7cb";
+    ctx.fillRect(0, 0, W, H);
+
+    for (let y = 0; y < H; y += 48) {
+      for (let x = 0; x < W; x += 48) {
+        ctx.fillStyle =
+          ((x / 48 + y / 48) % 2 === 0)
+            ? "rgba(255,255,255,.13)"
+            : "rgba(81,129,81,.035)";
+
+        ctx.fillRect(x, y, 48, 48);
+      }
+    }
+
+    drawExit();
+
+    mobiles.forEach(m => {
+      if (!m.taken) drawMobile(m);
+    });
+
+    desks.forEach(drawDesk);
+
+    drawStudent();
+    drawTeacher();
+
+    particles.forEach(p => {
+      ctx.fillStyle = p.text === "+10" ? "#27834e" : "#e83e52";
+      ctx.font = "bold 16px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(p.text, p.x, p.y);
+      ctx.textAlign = "left";
+    });
+
+    if (bannerTimer > 0 && mode === "playing") {
+      const text =
+        collected === 5 ? "EXIT UNLOCKED! GO!" : "Back to the start!";
+
+      ctx.fillStyle = "rgba(28,39,63,.82)";
+      roundRect(ctx, W / 2 - 150, 18, 300, 42, 12);
+      ctx.fill();
+
+      ctx.fillStyle = "#ffe16a";
+      ctx.font = "bold 19px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(text, W / 2, 45);
+      ctx.textAlign = "left";
+    }
+  }
+
+  function loop(t) {
+    const dt = Math.min(.035, (t - lastTime) / 1000 || 0);
+    lastTime = t;
+
+    update(dt);
+    draw();
+
+    requestAnimationFrame(loop);
+  }
+
+  document.addEventListener("keydown", e => {
+    const k = e.key;
+
+    if ([
+      "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "
+    ].includes(k)) {
+      e.preventDefault();
+    }
+
+    if (k === "Escape") {
+      if (mode === "playing") {
+        mode = "pause";
+        showOverlay("pause");
+      } else if (mode === "pause") {
+        mode = "playing";
+        overlay.style.display = "none";
+        lastTime = performance.now();
+      }
+      return;
+    }
+
+    if (mode === "playing") keys.add(k);
+  });
+
+  document.addEventListener("keyup", e => {
+    keys.delete(e.key);
+  });
+
+  window.addEventListener("blur", () => {
+    keys.clear();
+  });
+
+  playBtn.onclick = () => resetGame(true);
+
+  soundBtn.onclick = () => {
+    audioOn = !audioOn;
+    soundBtn.textContent = audioOn ? "🔊 Sound: On" : "🔇 Sound: Off";
+  };
+
+  resetGame(false);
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
