@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Sneaky Chicken</title>
+
+<style>
+:root {
+    --ink: #26352b;
+    --cream: #fff8e8;
+    --green: #6b9b55;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: var(--ink);
+    background: linear-gradient(#dcefcf, #f9f1d9);
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+}
+
+.wrap {
+    width: min(100%, 1000px);
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+h1 {
+    margin: 0;
+}
+
+.subtitle {
+    color: #53634d;
+}
+
+.hud {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+}
+
+.pill {
+    background: #fffdf5;
+    border: 2px solid #d6dfc4;
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-weight: bold;
+}
+
+.noisebox {
+    flex: 1;
+    min-width: 170px;
+    background: #fffdf5;
+    border: 2px solid #d6dfc4;
+    border-radius: 12px;
+    padding: 8px;
+}
+
+.noisehead {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+}
+
+.bar {
+    height: 12px;
+    background: #e8e5d8;
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+#noiseFill {
+    height: 100%;
+    width: 0%;
+    background: #e5a13b;
+}
+
+.gamebox {
+    position: relative;
+    border: 5px solid #6c8a50;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #9fca76;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 900 / 560;
+    touch-action: none;
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: #203021b8;
+    padding: 20px;
+}
+
+.panel {
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    background: var(--cream);
+    border: 4px solid #d5b96e;
+    border-radius: 20px;
+    padding: 22px;
+}
+
+button {
+    cursor: pointer;
+    border: 0;
+    border-radius: 12px;
+    background: #d98935;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    padding: 12px 20px;
+}
+
+button:hover {
+    filter: brightness(1.1);
+}
+
+.bottom {
+    margin-top: 12px;
+    color: #45533e;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<header>
+    <div>
+        <h1>🐔 The Sneaky Chicken</h1>
+        <p class="subtitle">Collect 6 eggs. Avoid the farmer!</p>
+    </div>
+
+    <button onclick="restart()">Restart</button>
+</header>
+
+<div class="hud">
+
+    <div class="pill">
+        🥚 Eggs: <span id="eggs">0</span>/6
+    </div>
+
+    <div class="pill">
+        ❤️ Lives: <span id="lives">3</span>
+    </div>
+
+    <div class="pill">
+        ⭐ Score: <span id="score">0</span>
+    </div>
+
+    <div class="pill">
+        ⏱ <span id="time">00:00</span>
+    </div>
+
+    <div class="noisebox">
+        <div class="noisehead">
+            <span>🔊 Noise</span>
+            <span id="noiseText">0%</span>
+        </div>
+
+        <div class="bar">
+            <div id="noiseFill"></div>
+        </div>
+    </div>
+
+    <div class="pill">
+        Farmer: <span id="status">Sleeping</span>
+    </div>
+
+</div>
+
+<div class="gamebox">
+
+    <canvas id="game" width="900" height="560"></canvas>
+
+    <div class="overlay" id="overlay">
+
+        <div class="panel">
+
+            <h2 id="panelTitle">The Sneaky Chicken</h2>
+
+            <p id="panelText">
+                Collect all 6 eggs.
+                Walk quietly and avoid the farmer.
+                Running creates more noise.
+                Press E near hay to hide.
+            </p>
+
+            <p>
+                Arrow Keys: Move<br>
+                Shift: Run<br>
+                E: Hide
+            </p>
+
+            <button id="playBtn">Play</button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="bottom">
+    Tip: Stop moving to reduce noise.
+    Hide near hay bales to avoid the farmer.
+</div>
+
+</div>
+
+<script>
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const W = 900;
+const H = 560;
+
+const ui = {
+    eggs: document.getElementById("eggs"),
+    lives: document.getElementById("lives"),
+    score: document.getElementById("score"),
+    time: document.getElementById("time"),
+    noise: document.getElementById("noiseText"),
+    fill: document.getElementById("noiseFill"),
+    status: document.getElementById("status"),
+    overlay: document.getElementById("overlay"),
+    title: document.getElementById("panelTitle"),
+    text: document.getElementById("panelText"),
+    play: document.getElementById("playBtn")
+};
+
+// Keyboard controls
+const keys = new Set();
+
+// Original farm obstacles
+const obstacles = [
+
+    {x:0,y:0,w:900,h:18},
+    {x:0,y:542,w:900,h:18},
+    {x:0,y:0,w:18,h:560},
+    {x:882,y:0,w:18,h:560},
+
+    {x:170,y:80,w:190,h:100,kind:"barn"},
+    {x:560,y:70,w:150,h:75,kind:"coop"},
+
+    {x:390,y:255,w:110,h:60,kind:"crate"},
+    {x:135,y:330,w:105,h:55,kind:"crate"},
+
+    {x:640,y:350,w:130,h:45,kind:"fence"},
+    {x:300,y:440,w:210,h:18,kind:"fence"},
+
+    {x:75,y:210,w:18,h:100,kind:"fence"},
+    {x:800,y:170,w:18,h:120,kind:"fence"}
+
+];
+
+// Hay bales
+const hay = [
+    {x:420,y:105},
+    {x:510,y:210},
+    {x:260,y:245},
+    {x:720,y:455}
+];
+
+// Original egg locations
+const eggSpots = [
+    {x:100,y:100},
+    {x:455,y:180},
+    {x:790,y:105},
+    {x:100,y:440},
+    {x:570,y:470},
+    {x:790,y:410}
+];
+
+// Farmer patrol path
+const patrolPoints = [
+    {x:105,y:48},
+    {x:430,y:48},
+    {x:430,y:210},
+    {x:105,y:210}
+];
+
+let chicken;
+let farmer;
+let eggs;
+
+let lives;
+let score;
+let noise;
+
+let started;
+let ended;
+let won;
+
+let elapsed;
+let lastTime;
+
+let hidden;
+let hideTime;
+
+let awakeTime;
+let patrolIndex;
+
+let catchCooldown;
+
+const clamp = (v,a,b) =>
+    Math.max(a,Math.min(b,v));
+
+// Reset game
+function restart() {
+
+    chicken = {
+        x:55,
+        y:500,
+        r:15
+    };
+
+    farmer = {
+        x:105,
+        y:48,
+        r:18
+    };
+
+    eggs = eggSpots.map(p => ({
+        ...p,
+        got:false
+    }));
+
+    lives = 3;
+    score = 0;
+    noise = 0;
+
+    started = false;
+    ended = false;
+    won = false;
+
+    elapsed = 0;
+    lastTime = 0;
+
+    hidden = false;
+    hideTime = 0;
+
+    awakeTime = 0;
+    patrolIndex = 0;
+
+    catchCooldown = 0;
+
+    keys.clear();
+
+    updateUI();
+
+    showOverlay(
+        "The Sneaky Chicken",
+        "Collect all 6 eggs. Use arrow keys to move. Running makes more noise. At 100% noise, the farmer wakes and chases you. Press E near hay to hide.",
+        "Play"
+    );
+
+    draw();
+}
+
+// Overlay
+function showOverlay(title,text,button) {
+
+    ui.title.textContent = title;
+    ui.text.textContent = text;
+    ui.play.textContent = button;
+
+    ui.overlay.style.display = "grid";
+}
+
+function hideOverlay() {
+    ui.overlay.style.display = "none";
+}
+
+// Collision detection
+function circleRect(cx,cy,r,o) {
+
+    const nx = clamp(cx,o.x,o.x+o.w);
+    const ny = clamp(cy,o.y,o.y+o.h);
+
+    return (cx-nx)**2 + (cy-ny)**2 < r*r;
+}
+
+function blocked(x,y,r) {
+
+    return obstacles.some(o =>
+        circleRect(x,y,r,o)
+    );
+}
+
+// Move with collision
+function moveEntity(entity,dx,dy,r) {
+
+    let nx = entity.x + dx;
+
+    if (!blocked(nx,entity.y,r)) {
+        entity.x = nx;
+    }
+
+    let ny = entity.y + dy;
+
+    if (!blocked(entity.x,ny,r)) {
+        entity.y = ny;
+    }
+
+    entity.x = clamp(entity.x,30,W-30);
+    entity.y = clamp(entity.y,30,H-30);
+}
+
+// Find nearby hay
+function nearestHay() {
+
+    let best = null;
+    let distance = Infinity;
+
+    for (const h of hay) {
+
+        const d = Math.hypot(
+            chicken.x-h.x,
+            chicken.y-h.y
+        );
+
+        if (d < distance) {
+            distance = d;
+            best = h;
+        }
+    }
+
+    return distance < 48 ? best : null;
+}
+
+// Hide
+function toggleHide() {
+
+    if (!started || ended) return;
+
+    if (hidden) {
+
+        hidden = false;
+        hideTime = 0;
+
+        return;
+    }
+
+    if (nearestHay()) {
+
+        hidden = true;
+        hideTime = 5;
+    }
+}
+
+// Farmer catches chicken
+function catchChicken() {
+
+    if (catchCooldown > 0) return;
+
+    lives--;
+
+    score = Math.max(0,score-5);
+
+    chicken.x = 55;
+    chicken.y = 500;
+
+    noise = 0;
+
+    hidden = false;
+    hideTime = 0;
+
+    awakeTime = 5;
+
+    farmer.x = 105;
+    farmer.y = 48;
+
+    patrolIndex = 0;
+
+    catchCooldown = 1.5;
+
+    updateUI();
+
+    if (lives <= 0) {
+
+        ended = true;
+        started = false;
+
+        showOverlay(
+            "Game Over",
+            "The farmer caught you! Eggs collected: " +
+            eggs.filter(e=>e.got).length +
+            "/6. Score: " + score,
+            "Retry"
+        );
+    }
+}
+
+// Chicken movement
+function moveChicken(dt) {
+
+    let dx = 0;
+    let dy = 0;
+
+    if (keys.has("arrowleft")) dx--;
+    if (keys.has("arrowright")) dx++;
+
+    if (keys.has("arrowup")) dy--;
+    if (keys.has("arrowdown")) dy++;
+
+    if (hidden) return;
+
+    const moving = dx !== 0 || dy !== 0;
+
+    if (moving) {
+
+        const length = Math.hypot(dx,dy);
+
+        dx /= length;
+        dy /= length;
+
+        const running = keys.has("shift");
+
+        const speed = running ? 190 : 120;
+
+        moveEntity(
+            chicken,
+            dx*speed*dt,
+            dy*speed*dt,
+            chicken.r
+        );
+
+        noise += (running ? 16 : 8)*dt;
+
+    } else {
+
+        noise -= 12*dt;
+    }
+
+    noise = clamp(noise,0,100);
+
+    collectEggs();
+}
+
+// Collect eggs
+function collectEggs() {
+
+    for (const egg of eggs) {
+
+        if (egg.got) continue;
+
+        const distance = Math.hypot(
+            chicken.x-egg.x,
+            chicken.y-egg.y
+        );
+
+        if (distance < 28) {
+
+            egg.got = true;
+
+            score += 10;
+
+            noise = clamp(noise+20,0,100);
+        }
+    }
+}
+
+// Farmer patrol
+function patrolFarmer(dt) {
+
+    const target = patrolPoints[patrolIndex];
+
+    const dx = target.x-farmer.x;
+    const dy = target.y-farmer.y;
+
+    const distance = Math.hypot(dx,dy);
+
+    if (distance < 5) {
+
+        patrolIndex++;
+
+        if (patrolIndex >= patrolPoints.length) {
+            patrolIndex = 0;
+        }
+
+        return;
+    }
+
+    moveEntity(
+        farmer,
+        dx/distance*65*dt,
+        dy/distance*65*dt,
+        farmer.r
+    );
+}
+
+// Farmer chase
+function chaseChicken(dt) {
+
+    const dx = chicken.x-farmer.x;
+    const dy = chicken.y-farmer.y;
+
+    const distance = Math.hypot(dx,dy);
+
+    if (distance > 1) {
+
+        moveEntity(
+            farmer,
+            dx/distance*145*dt,
+            dy/distance*145*dt,
+            farmer.r
+        );
+    }
+
+    if (distance < chicken.r+farmer.r+3) {
+
+        catchChicken();
+    }
+}
+
+// Update farmer
+function updateFarmer(dt) {
+
+    if (ended) return;
+
+    if (catchCooldown > 0) {
+
+        catchCooldown -= dt;
+
+        return;
+    }
+
+    const distance = Math.hypot(
+        chicken.x-farmer.x,
+        chicken.y-farmer.y
+    );
+
+    // Farmer wakes when chicken is nearby
+    if (distance < 100) {
+        awakeTime = 999;
+    }
+
+    // Farmer wakes from loud noise
+    if (noise >= 100) {
+        awakeTime = 999;
+    }
+
+    if (awakeTime > 0) {
+
+        if (awakeTime !== 999) {
+            awakeTime -= dt;
+        }
+
+        if (!hidden) {
+            chaseChicken(dt);
+        }
+
+    } else {
+
+        patrolFarmer(dt);
+    }
+}
+
+// Main update
+function update(dt) {
+
+    if (!started || ended) return;
+
+    elapsed += dt;
+
+    if (hidden) {
+
+        hideTime -= dt;
+
+        if (hideTime <= 0) {
+
+            hidden = false;
+            hideTime = 0;
+        }
+    }
+
+    moveChicken(dt);
+
+    updateFarmer(dt);
+
+    // Farmer returns to starting position
+    if (awakeTime > 0 && awakeTime !== 999) {
+
+        if (awakeTime <= 0) {
+
+            awakeTime = 0;
+
+            farmer.x = 105;
+            farmer.y = 48;
+
+            noise = 0;
+        }
+    }
+
+    // Win
+    if (eggs.every(e=>e.got) && !ended) {
+
+        won = true;
+        ended = true;
+        started = false;
+
+        score += 40;
+
+        showOverlay(
+            "Farm Victory! 🏆",
+            "You collected all 6 eggs! Final score: " +
+            score + ". Time: " + formatTime(elapsed),
+            "Play Again"
+        );
+    }
+
+    updateUI();
+}
+
+// Time
+function formatTime(t) {
+
+    const s = Math.floor(t);
+
+    return String(Math.floor(s/60)).padStart(2,"0")
+        + ":" +
+        String(s%60).padStart(2,"0");
+}
+
+// UI
+function updateUI() {
+
+    ui.eggs.textContent =
+        eggs ? eggs.filter(e=>e.got).length : 0;
+
+    ui.lives.textContent = lives ?? 3;
+
+    ui.score.textContent = score ?? 0;
+
+    ui.time.textContent = formatTime(elapsed ?? 0);
+
+    ui.noise.textContent =
+        Math.round(noise ?? 0) + "%";
+
+    ui.fill.style.width = (noise ?? 0) + "%";
+
+    ui.status.textContent =
+        awakeTime > 0 ? "Chasing" : "Patrolling";
+}
+
+// Draw farm
+function draw() {
+
+    ctx.clearRect(0,0,W,H);
+
+    // Grass
+    ctx.fillStyle = "#a8cf7d";
+    ctx.fillRect(0,0,W,H);
+
+    // Grass patches
+    for (let i=0;i<18;i++) {
+
+        ctx.fillStyle =
+            i%2 ? "#9bc471" : "#b2d584";
+
+        ctx.beginPath();
+
+        ctx.ellipse(
+            (i*137+40)%W,
+            (i*83+35)%H,
+            55,30,i*.3,0,Math.PI*2
+        );
+
+        ctx.fill();
+    }
+
+    // Farm paths
+    ctx.fillStyle = "#d9c18a";
+
+    ctx.fillRect(18,485,864,42);
+    ctx.fillRect(80,18,42,520);
+    ctx.fillRect(120,120,650,35);
+    ctx.fillRect(740,120,35,350);
+
+    // Original buildings and obstacles
+    for (const o of obstacles) {
+
+        if (
+            o.x===0 || o.y===0 ||
+            o.x+o.w===W || o.y+o.h===H
+        ) {
+
+            ctx.fillStyle = "#567b43";
+            ctx.fillRect(o.x,o.y,o.w,o.h);
+
+            continue;
+        }
+
+        if (o.kind==="barn") {
+
+            ctx.fillStyle = "#b75e48";
+            ctx.fillRect(o.x,o.y,o.w,o.h);
+
+            ctx.fillStyle = "#7e3f35";
+
+            ctx.beginPath();
+
+            ctx.moveTo(o.x-8,o.y);
+            ctx.lineTo(o.x+o.w/2,o.y-45);
+            ctx.lineTo(o.x+o.w+8,o.y);
+
+            ctx.fill();
+
+            ctx.fillStyle = "#e9d5a2";
+
+            ctx.fillRect(
+                o.x+65,o.y+35,60,65
+            );
+
+            ctx.fillStyle = "#75412f";
+
+            ctx.fillRect(
+                o.x+85,o.y+55,20,45
+            );
+
+        } else if (o.kind==="coop") {
+
+            ctx.fillStyle = "#e8d9a7";
+
+            ctx.fillRect(
+                o.x,o.y,o.w,o.h
+            );
+
+            ctx.fillStyle = "#b38d55";
+
+            ctx.fillRect(
+                o.x+12,o.y+12,o.w-24,o.h-24
+            );
+
+        } else {
+
+            ctx.fillStyle =
+                o.kind==="fence" ? "#8c6842" : "#a16f43";
+
+            ctx.fillRect(
+                o.x,o.y,o.w,o.h
+            );
+        }
+    }
+
+    // Hay bales
+    for (const h of hay) {
+
+        ctx.fillStyle = "#d8a63f";
+
+        ctx.fillRect(
+            h.x-22,h.y-17,44,34
+        );
+
+        ctx.strokeStyle = "#a77925";
+        ctx.lineWidth = 3;
+
+        ctx.strokeRect(
+            h.x-22,h.y-17,44,34
+        );
+
+        ctx.beginPath();
+
+        ctx.moveTo(h.x-18,h.y);
+        ctx.lineTo(h.x+18,h.y);
+
+        ctx.stroke();
+    }
+
+    // Eggs
+    for (const egg of eggs) {
+
+        if (egg.got) continue;
+
+        ctx.fillStyle = "#fff7df";
+
+        ctx.beginPath();
+
+        ctx.ellipse(
+            egg.x,egg.y,10,13,-.2,0,Math.PI*2
+        );
+
+        ctx.fill();
+
+        ctx.strokeStyle = "#d9cba8";
+        ctx.lineWidth = 2;
+
+        ctx.stroke();
+    }
+
+    // Farmer graphics
+    ctx.save();
+
+    ctx.translate(farmer.x,farmer.y);
+
+    ctx.fillStyle =
+        awakeTime>0 ? "#c94d3c" : "#5675a5";
+
+    ctx.beginPath();
+
+    ctx.arc(0,0,18,0,Math.PI*2);
+
+    ctx.fill();
+
+    ctx.fillStyle = "#f0d3b2";
+
+    ctx.beginPath();
+
+    ctx.arc(0,-5,10,0,Math.PI*2);
+
+    ctx.fill();
+
+    ctx.fillStyle = "#26352b";
+
+    ctx.fillRect(-8,-18,16,6);
+
+    ctx.restore();
+
+    // Chicken graphics
+    if (!hidden) {
+
+        ctx.save();
+
+        ctx.translate(chicken.x,chicken.y);
+
+        ctx.fillStyle = "#fff4d2";
+
+        ctx.beginPath();
+
+        ctx.ellipse(
+            0,0,17,14,0,0,Math.PI*2
+        );
+
+        ctx.fill();
+
+        ctx.fillStyle = "#e6a63d";
+
+        ctx.beginPath();
+
+        ctx.arc(10,-9,9,0,Math.PI*2);
+
+        ctx.fill();
+
+        ctx.fillStyle = "#d65c43";
+
+        ctx.beginPath();
+
+        ctx.moveTo(8,-18);
+        ctx.lineTo(12,-24);
+        ctx.lineTo(16,-18);
+
+        ctx.fill();
+
+        ctx.fillStyle = "#e18a35";
+
+        ctx.beginPath();
+
+        ctx.moveTo(18,-8);
+        ctx.lineTo(26,-5);
+        ctx.lineTo(18,-2);
+
+        ctx.fill();
+
+        ctx.restore();
+
+    } else {
+
+        ctx.fillStyle = "#5b3b22";
+
+        ctx.font = "bold 14px Arial";
+
+        ctx.textAlign = "center";
+
+        ctx.fillText(
+            "HIDDEN "+Math.ceil(hideTime)+"s",
+            chicken.x,
+            chicken.y-28
+        );
+    }
+
+    // Farmer alert
+    if (awakeTime>0) {
+
+        ctx.fillStyle = "#8c332c";
+
+        ctx.font = "bold 24px Arial";
+
+        ctx.textAlign = "center";
+
+        ctx.fillText(
+            "!",
+            farmer.x,
+            farmer.y-28
+        );
+    }
+
+    // Map labels
+    ctx.font = "bold 13px Arial";
+
+    ctx.fillStyle = "#526b3d";
+
+    ctx.textAlign = "left";
+
+    ctx.fillText("HAY FIELD",530,520);
+    ctx.fillText("GARDEN",690,315);
+    ctx.fillText("FARMYARD",140,520);
+}
+
+// Main game loop
+function loop(time) {
+
+    if (!lastTime) lastTime = time;
+
+    const dt = Math.min(
+        (time-lastTime)/1000,
+        0.04
+    );
+
+    lastTime = time;
+
+    update(dt);
+
+    draw();
+
+    requestAnimationFrame(loop);
+}
+
+// Start game
+function start() {
+
+    restart();
+
+    started = true;
+
+    hideOverlay();
+
+    lastTime = 0;
+}
+
+// Arrow controls
+document.addEventListener("keydown", function(e) {
+
+    const key = e.key.toLowerCase();
+
+    if (
+        ["arrowup","arrowdown","arrowleft","arrowright"," "]
+        .includes(key)
+    ) {
+        e.preventDefault();
+    }
+
+    keys.add(key);
+
+    if (key==="e") {
+        toggleHide();
+    }
+});
+
+document.addEventListener("keyup", function(e) {
+
+    keys.delete(e.key.toLowerCase());
+});
+
+window.addEventListener("blur", function() {
+
+    keys.clear();
+});
+
+ui.play.addEventListener("click",start);
+
+// Start with game menu
+restart();
+
+requestAnimationFrame(loop);
+
+</script>
+
+</body>
+</html>
