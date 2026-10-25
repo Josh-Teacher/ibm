@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Shooting Bottles: 30-Second Horror Challenge</title>
+<style>
+:root{color-scheme:dark;--gold:#ffd166;--panel:rgba(9,14,25,.9)}
+*{box-sizing:border-box}
+body{margin:0;background:#070b12;color:#f5f7fb;font-family:system-ui,-apple-system,Segoe UI,sans-serif;display:flex;justify-content:center;min-height:100vh}
+#app{width:min(100%,1050px);padding:12px}
+h1{font-size:clamp(1.25rem,4vw,2rem);margin:4px 0 8px;text-align:center;color:#ffe6a7;text-shadow:0 0 18px #d35c39}
+#hud{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:8px 0}
+.stat{background:#151c2b;border:1px solid #344258;border-radius:10px;padding:7px 12px;font-weight:700}
+#stage{position:relative;border:2px solid #39465b;border-radius:14px;overflow:hidden;background:#07101b;box-shadow:0 0 30px #000;touch-action:none}
+canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;touch-action:none;cursor:crosshair}
+#overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,5,12,.78);padding:16px;text-align:center}
+#overlay.hidden{display:none}
+.panel{max-width:520px;background:rgba(13,19,31,.96);border:1px solid #69778d;border-radius:16px;padding:20px;box-shadow:0 0 30px #000}
+.panel h2{margin:0 0 8px;color:#ffe6a7;font-size:clamp(1.3rem,4vw,2rem)}
+.panel p{line-height:1.5;margin:8px 0 14px}
+button{background:#ffd166;color:#17120a;border:0;border-radius:9px;padding:10px 15px;font-weight:800;font-size:1rem;cursor:pointer;margin:4px}
+button.secondary{background:#29364b;color:#fff;border:1px solid #617089}
+.controls{display:flex;justify-content:center;flex-wrap:wrap;gap:5px;margin-top:10px}
+#note{text-align:center;color:#aeb9c9;font-size:.85rem;margin:8px}
+@media(max-width:520px){#app{padding:7px}.stat{padding:6px 8px;font-size:.9rem}.panel{padding:14px}}
+</style>
+</head>
+<body>
+<div id="app">
+<h1>🌕 Shooting Bottles: 30-Second Horror Challenge</h1>
+<div id="hud">
+ <div class="stat">Score: <span id="score">0</span></div>
+ <div class="stat">Time: <span id="time">30</span>s</div>
+ <div class="stat">Level: <span id="level">1 · Beginner</span></div>
+ <div class="stat">Streak: <span id="streak">0</span></div>
+</div>
+<div id="stage">
+ <canvas id="game" width="960" height="540" aria-label="Bottle shooting game"></canvas>
+ <div id="overlay"><div class="panel">
+  <h2 id="overlayTitle">Shooting Bottles</h2>
+  <p id="overlayText">A spooky forest. Four bottles. Thirty seconds. Hit bottles for points, but don't waste shots!</p>
+  <p><b>+10</b> per bottle · <b>+10</b> every 5 consecutive hits · <b>−5</b> per miss · glowing bottle gives <b>+10 extra</b>. Reach 200 points to win.</p>
+  <div><button id="mainBtn">Start Game</button></div>
+  <div class="controls"><button class="secondary" id="musicBtn">Music: Off</button><button class="secondary" id="sfxBtn">Sound FX: On</button></div>
+ </div></div>
+</div>
+<div class="controls">
+ <button id="pauseBtn" class="secondary">Pause</button>
+ <button id="restartBtn" class="secondary">Restart</button>
+ <button id="homeBtn" class="secondary">Home</button>
+ <button id="musicBtn2" class="secondary">Music: Off</button>
+ <button id="sfxBtn2" class="secondary">Sound FX: On</button>
+</div>
+<div id="note">Computer: move mouse to aim, click to fire · Mobile: tap the game area to aim and fire · P pauses/resumes, R restarts</div>
+</div>
+<script>
+(() => {
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const $=id=>document.getElementById(id);
+const W=960,H=540;
+let mode='home',score=0,timeLeft=30,streak=0,bestStreak=0,hits=0,misses=0,level=1;
+let bottles=[],effects=[],particles=[],aim={x:W/2,y:200},last=performance.now(),elapsed=0;
+let musicOn=false,sfxOn=true,audioCtx=null,musicTimer=null;
+const colors=['#ff4d6d','#35d9ff','#ffd166','#a7ff5a','#d59cff','#ff8c42'];
+function audio(){if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx}
+function tone(freq,dur,type='sine',vol=.06){if(!sfxOn)return;try{let a=audio(),o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(vol,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+dur);o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+dur)}catch(e){}}
+function toggleMusic(){musicOn=!musicOn;if(musicOn){audio();musicTimer=setInterval(()=>{if(musicOn&&mode==='playing'){tone(90,.8,'sine',.018);setTimeout(()=>tone(135,.6,'triangle',.012),300)}},1100)}else{clearInterval(musicTimer);musicTimer=null}updateAudioButtons()}
+function updateAudioButtons(){['musicBtn','musicBtn2'].forEach(id=>$(id).textContent='Music: '+(musicOn?'On':'Off'));['sfxBtn','sfxBtn2'].forEach(id=>$(id).textContent='Sound FX: '+(sfxOn?'On':'Off'))}
+function makeBottle(i){let x=90+Math.random()*780,y=130+Math.random()*270;for(let tries=0;tries<20&&bottles.some(b=>Math.hypot(b.x-x,b.y-y)<80);tries++){x=90+Math.random()*780;y=130+Math.random()*270}return {x,y,r:24,color:colors[Math.floor(Math.random()*colors.length)],vx:(Math.random()<.5?-1:1)*(18+level*22+Math.random()*level*16),moving:Math.random()<(.35+level*.2),phase:Math.random()*6.28,bonus:Math.random()<.22,alive:true}}
+function initRound(){score=0;timeLeft=30;streak=0;bestStreak=0;hits=0;misses=0;level=1;elapsed=0;effects=[];particles=[];bottles=Array.from({length:4},(_,i)=>makeBottle(i));mode='playing';$('overlay').classList.add('hidden');updateHud();last=performance.now();audio();if(musicOn&&!musicTimer)toggleMusic()}
+function updateHud(){$('score').textContent=score;$('time').textContent=Math.ceil(timeLeft);$('streak').textContent=streak;level=score>=100?3:score>=50?2:1;$('level').textContent=level+' · '+(['','Beginner','Intermediate','Advanced'][level])}
+function showOverlay(title,text,button,fn){$('overlayTitle').textContent=title;$('overlayText').textContent=text;$('mainBtn').textContent=button;$('overlay').classList.remove('hidden');mainAction=fn}
+let mainAction=initRound;
+$('mainBtn').onclick=()=>mainAction();
+$('pauseBtn').onclick=()=>{if(mode==='playing'){mode='paused';showOverlay('Paused','The timer, bottles, gun effects, and scoring are frozen.','Resume',()=>{mode='playing';$('overlay').classList.add('hidden');last=performance.now()})}else if(mode==='paused'){mode='playing';$('overlay').classList.add('hidden');last=performance.now()}};
+$('restartBtn').onclick=()=>initRound();
+$('homeBtn').onclick=()=>{mode='home';showOverlay('Shooting Bottles','A spooky forest. Four bottles. Thirty seconds. Reach 200 points to win.','Start Game',initRound)};
+['musicBtn','musicBtn2'].forEach(id=>$(id).onclick=toggleMusic);
+['sfxBtn','sfxBtn2'].forEach(id=>$(id).onclick=()=>{sfxOn=!sfxOn;updateAudioButtons()});
+window.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='p'){if(mode==='playing')$('pauseBtn').click();else if(mode==='paused')$('pauseBtn').click()}if(e.key.toLowerCase()==='r'&&mode==='playing')initRound()});
+function pointerPos(e){let r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}}
+canvas.addEventListener('pointermove',e=>{aim=pointerPos(e)});
+canvas.addEventListener('pointerdown',e=>{e.preventDefault();if(mode!=='playing')return;aim=pointerPos(e);shoot(aim.x,aim.y)});
+function shoot(tx,ty){if(mode!=='playing')return;const gx=W/2,gy=H-40,ang=Math.atan2(ty-gy,tx-gx);effects.push({type:'shot',x:gx+Math.cos(ang)*40,y:gy+Math.sin(ang)*40,life:.16,angle:ang});tone(95,.12,'sawtooth',.08);
+let target=null,best=Infinity;
+for(const b of bottles){let dx=b.x-gx,dy=b.y-gy,along=dx*Math.cos(ang)+dy*Math.sin(ang);if(along<0)continue;let perp=Math.abs(dx*Math.sin(ang)-dy*Math.cos(ang));if(perp<b.r+7&&along<best){best=along;target=b}}
+if(target){hits++;streak++;bestStreak=Math.max(bestStreak,streak);score+=10;if(streak%5===0)score+=10;if(target.bonus)score+=10;for(let i=0;i<13;i++)particles.push({x:target.x,y:target.y,vx:(Math.random()-.5)*220,vy:(Math.random()-.7)*220,life:.5+Math.random()*.35,color:target.color});tone(520,.16,'triangle',.08);tone(760,.22,'sine',.05);bottles[bottles.indexOf(target)]=makeBottle();}else{misses++;streak=0;score=Math.max(0,score-5)}updateHud()}
+function drawBackground(t){let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#081526');g.addColorStop(.58,'#172337');g.addColorStop(1,'#10100f');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ctx.fillStyle='#e8e5c5';ctx.beginPath();ctx.arc(760,90,43,0,Math.PI*2);ctx.fill();ctx.fillStyle='#081526';ctx.beginPath();ctx.arc(778,77,39,0,Math.PI*2);ctx.fill();
+for(let i=0;i<18;i++){let x=i*62-20;let h=130+(i*47%130);ctx.fillStyle=i%2?'#080f19':'#0b121d';ctx.beginPath();ctx.moveTo(x-35,H-h);ctx.lineTo(x,H-h-85);ctx.lineTo(x+36,H-h);ctx.lineTo(x+14,H-h+10);ctx.lineTo(x+17,H);ctx.lineTo(x-17,H);ctx.lineTo(x-14,H-h+10);ctx.fill()}
+for(let i=0;i<5;i++){let x=((t*10+i*230)%(W+300))-150;ctx.fillStyle='rgba(174,195,211,.055)';ctx.beginPath();ctx.ellipse(x,350+i*28,190,15,0,0,Math.PI*2);ctx.fill()}
+ctx.fillStyle='#171d25';ctx.fillRect(0,H-68,W,68);ctx.strokeStyle='#4d535a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,H-68);ctx.lineTo(W,H-68);ctx.stroke();
+}
+function drawBottle(b,t){let bob=b.moving?Math.sin(t*2+b.phase)*7:0,x=b.x,y=b.y+bob;ctx.save();ctx.translate(x,y);if(b.bonus){ctx.shadowColor='#ffe66d';ctx.shadowBlur=22;ctx.strokeStyle='#fff2a8';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,33+Math.sin(t*5)*2,0,Math.PI*2);ctx.stroke()}ctx.fillStyle=b.color;ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-15,25);ctx.lineTo(-18,9);ctx.lineTo(-13,-4);ctx.lineTo(-9,-10);ctx.lineTo(-8,-25);ctx.lineTo(8,-25);ctx.lineTo(9,-10);ctx.lineTo(14,-3);ctx.lineTo(18,9);ctx.lineTo(15,25);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='rgba(255,255,255,.65)';ctx.fillRect(-7,-20,4,36);ctx.restore()}
+function drawGun(){let gx=W/2,gy=H-37,ang=Math.atan2(aim.y-gy,aim.x-gx);ctx.save();ctx.translate(gx,gy);ctx.rotate(ang);ctx.fillStyle='#687486';ctx.strokeStyle='#d7e0ec';ctx.lineWidth=2;ctx.fillRect(-8,-11,48,22);ctx.fillStyle='#313b4a';ctx.fillRect(4,8,16,25);ctx.fillStyle='#aab7c8';ctx.fillRect(31,-7,20,14);ctx.restore();ctx.fillStyle='#d7e0ec';ctx.beginPath();ctx.arc(gx,gy,7,0,Math.PI*2);ctx.fill()}
+function render(t){drawBackground(t);bottles.forEach(b=>drawBottle(b,t));drawGun();effects.forEach(e=>{if(e.type==='shot'){ctx.save();ctx.translate(e.x,e.y);ctx.rotate(e.angle);ctx.globalAlpha=Math.max(0,e.life/.16);ctx.fillStyle='#ffe6a0';ctx.beginPath();ctx.moveTo(0,-5);ctx.lineTo(28,0);ctx.lineTo(0,5);ctx.fill();ctx.restore()}});particles.forEach(p=>{ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,5,5)});ctx.globalAlpha=1}
+function frame(now){let dt=Math.min((now-last)/1000,.04);last=now;if(mode==='playing'){timeLeft-=dt;elapsed+=dt;for(const b of bottles){if(b.moving){b.x+=b.vx*dt;if(b.x<40+b.r){b.x=40+b.r;b.vx=Math.abs(b.vx)}if(b.x>W-40-b.r){b.x=W-40-b.r;b.vx=-Math.abs(b.vx)}}b.y+=Math.sin(elapsed*1.4+b.phase)*dt*2.2}effects.forEach(e=>e.life-=dt);effects=effects.filter(e=>e.life>0);particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;p.vy+=160*dt});particles=particles.filter(p=>p.life>0);if(timeLeft<=0){timeLeft=0;mode='result';updateHud();showOverlay(score>=200?'🎉 You Win!':'Game Over',`Final score: ${score} · Bottles hit: ${hits} · Missed shots: ${misses} · Best streak: ${bestStreak}. ${score>=200?'You reached 200 points!':'Try again to reach 200 points.'}`,'Restart',initRound)}updateHud()}render(elapsed);requestAnimationFrame(frame)}
+requestAnimationFrame(frame);updateAudioButtons();
+})();
+</script>
+</body>
+</html>
