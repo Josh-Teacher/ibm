@@ -1,0 +1,1063 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14231f">
+<meta name="description" content="Legend Shot — a wind-and-control axe-throwing challenge.">
+<title>Legend Shot — Axe Throwing Challenge</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --ink: #f7f0dc;
+    --muted: #c5c8b5;
+    --gold: #f1c875;
+    --gold-deep: #9b6a2d;
+    --panel: rgba(12, 24, 22, .84);
+    --line: rgba(244, 218, 157, .24);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #14231f; }
+  body { font-family: ui-rounded, "Trebuchet MS", system-ui, -apple-system, Segoe UI, sans-serif; color: var(--ink); user-select: none; -webkit-user-select: none; }
+  button { font: inherit; }
+  #game { position: fixed; inset: 0; isolation: isolate; overflow: hidden; background: #14231f; }
+  #scene { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+  .hud { position: absolute; inset: 0; pointer-events: none; }
+  .hud button { pointer-events: auto; }
+  .panel {
+    background: linear-gradient(145deg, rgba(20, 37, 32, .9), rgba(9, 19, 18, .78));
+    border: 1px solid var(--line); border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.035);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .stats { position: absolute; top: max(12px, env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left)); padding: 11px 15px 12px; min-width: 188px; }
+  .eyebrow { margin: 0; font-size: 10px; line-height: 1.35; letter-spacing: .16em; text-transform: uppercase; font-weight: 800; color: #c5b586; }
+  .score-value { margin-top: 1px; font-size: clamp(25px, 3.8vw, 36px); line-height: 1.05; font-weight: 900; letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
+  .stats-row { display: flex; gap: 17px; margin-top: 9px; }
+  .stat-mini { min-width: 0; }
+  .stat-mini strong { display: block; font-size: 16px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .stat-mini span { display: block; font-size: 10px; color: var(--muted); letter-spacing: .035em; margin-top: 3px; }
+  .wind { position: absolute; top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); padding: 10px 13px; min-width: 145px; text-align: center; }
+  .wind-line { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .wind-arrow { color: var(--gold); font-size: 28px; width: 31px; line-height: 1; font-weight: 900; text-shadow: 0 0 13px rgba(241,200,117,.35); }
+  .wind-number { font-size: 23px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .wind-caption { font-size: 10px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; margin-top: 3px; }
+  .streak { position: absolute; top: 128px; right: max(12px, env(safe-area-inset-right)); padding: 10px 13px; text-align: center; min-width: 145px; }
+  .streak-number { font-size: 21px; font-weight: 900; color: var(--gold); line-height: 1.15; }
+  .streak-caption { color: var(--muted); font-size: 10px; letter-spacing: .09em; text-transform: uppercase; margin-top: 3px; }
+  .utility { position: absolute; right: max(12px, env(safe-area-inset-right)); top: 205px; display: flex; gap: 7px; flex-direction: column; align-items: stretch; width: 145px; }
+  .btn {
+    border: 1px solid rgba(241,200,117,.35); border-radius: 10px; padding: 10px 14px;
+    color: var(--ink); background: linear-gradient(180deg, rgba(74,94,70,.93), rgba(37,57,47,.96));
+    cursor: pointer; font-weight: 800; letter-spacing: .02em; transition: transform .12s ease, filter .12s ease, border-color .12s ease;
+    box-shadow: inset 0 1px rgba(255,255,255,.08), 0 4px 12px rgba(0,0,0,.18); min-height: 42px;
+  }
+  .btn:hover { filter: brightness(1.12); border-color: rgba(241,200,117,.7); }
+  .btn:active { transform: translateY(1px) scale(.99); }
+  .btn:focus-visible { outline: 3px solid #f1c875; outline-offset: 3px; }
+  .btn.primary { color: #241d12; background: linear-gradient(180deg, #f7d991, #d9a94f); border-color: #ffdf9c; }
+  .btn.subtle { background: rgba(13,25,22,.78); border-color: rgba(232,228,202,.19); }
+  .btn.small { padding: 7px 10px; min-height: 34px; font-size: 12px; }
+  .power-wrap { position: absolute; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(430px, calc(100% - 30px)); padding: 12px 15px 13px; }
+  .power-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .power-percent { font-size: 22px; font-weight: 900; font-variant-numeric: tabular-nums; color: var(--gold); }
+  .power-track { height: 10px; margin-top: 8px; border-radius: 99px; overflow: hidden; background: rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.1); }
+  .power-fill { height: 100%; width: 0%; border-radius: inherit; background: linear-gradient(90deg, #7eb77b, #e9cb70 65%, #e8784d); box-shadow: 0 0 13px rgba(241,200,117,.3); transition: width .04s linear; }
+  .power-hint { margin-top: 7px; color: #d6d4bf; font-size: 11px; text-align: center; letter-spacing: .015em; }
+  .screen { position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; padding: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom)); background: radial-gradient(ellipse at center, rgba(4,12,10,.38), rgba(3,9,8,.72)); }
+  .screen.hidden, .hidden { display: none !important; }
+  .dialog { width: min(630px, 100%); max-height: 94%; overflow: auto; padding: clamp(19px, 4vw, 31px); border-radius: 20px; border: 1px solid rgba(241,200,117,.38); background: linear-gradient(150deg, rgba(24,43,36,.97), rgba(8,17,16,.97)); box-shadow: 0 25px 85px rgba(0,0,0,.55), inset 0 1px rgba(255,255,255,.06); scrollbar-width: thin; scrollbar-color: #6d785e transparent; }
+  .brand-mark { color: var(--gold); text-transform: uppercase; letter-spacing: .24em; font-weight: 900; font-size: 11px; text-align: center; }
+  h1 { text-align: center; font-size: clamp(38px, 8.2vw, 70px); line-height: .96; letter-spacing: -.065em; margin: 10px 0 12px; color: #f9edcf; text-shadow: 0 3px 0 #835729, 0 8px 27px rgba(0,0,0,.48); }
+  h2 { text-align: center; font-size: clamp(28px, 5vw, 42px); line-height: 1; margin: 4px 0 12px; letter-spacing: -.04em; }
+  .subtitle { text-align: center; max-width: 465px; margin: 0 auto 19px; color: #d0d3bd; line-height: 1.55; font-size: 14px; }
+  .menu-highscore { text-align: center; margin: 0 auto 19px; color: #e4d9b8; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
+  .menu-highscore strong { color: var(--gold); font-size: 19px; letter-spacing: 0; margin-left: 5px; font-variant-numeric: tabular-nums; }
+  .actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
+  .actions .btn { min-width: 135px; }
+  .rule-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 9px; margin-top: 19px; }
+  .rule { border: 1px solid rgba(241,200,117,.13); background: rgba(255,255,255,.035); border-radius: 11px; padding: 10px 12px; }
+  .rule strong { display: block; font-size: 12px; color: var(--gold); margin-bottom: 4px; letter-spacing: .02em; }
+  .rule span { display: block; font-size: 11px; color: #c8cebc; line-height: 1.45; }
+  .instructions { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 15px; }
+  .instructions h3 { color: var(--gold); text-transform: uppercase; font-size: 11px; letter-spacing: .12em; margin: 0 0 7px; }
+  .instructions p, .instructions li { color: #cbd0c0; font-size: 12px; line-height: 1.55; }
+  .instructions p { margin: 5px 0; }
+  .instructions ul { margin: 5px 0 0; padding-left: 17px; }
+  .scoring { margin-top: 15px; width: 100%; border-collapse: collapse; font-size: 12px; }
+  .scoring td { padding: 7px 8px; border-bottom: 1px solid rgba(255,255,255,.08); color: #d3d6c8; }
+  .scoring td:last-child { text-align: right; color: var(--gold); font-weight: 800; }
+  .final-score { text-align: center; font-size: clamp(42px, 9vw, 64px); letter-spacing: -.05em; font-weight: 950; color: var(--gold); line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .final-label { text-align: center; font-size: 11px; color: #c4cbb8; text-transform: uppercase; letter-spacing: .18em; margin: 5px 0 16px; }
+  .final-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0 19px; }
+  .final-stat { text-align: center; border-radius: 11px; padding: 12px 7px; background: rgba(255,255,255,.04); border: 1px solid rgba(241,200,117,.14); }
+  .final-stat strong { display: block; font-size: 21px; color: #f2e8cc; font-variant-numeric: tabular-nums; }
+  .final-stat span { display: block; color: #c3cbb8; font-size: 10px; line-height: 1.3; margin-top: 4px; }
+  .tiny-note { color: #9fae9b; font-size: 10px; text-align: center; line-height: 1.45; margin: 12px 0 0; }
+  .toast { position: absolute; z-index: 2; left: 50%; top: 28%; transform: translate(-50%, -50%); color: #ffe6a0; text-shadow: 0 3px 15px #000; font-size: clamp(16px, 2.5vw, 25px); letter-spacing: .1em; font-weight: 950; opacity: 0; pointer-events: none; white-space: nowrap; }
+  @media (max-width: 620px) {
+    .stats { min-width: 0; padding: 9px 10px; top: max(8px, env(safe-area-inset-top)); left: max(8px, env(safe-area-inset-left)); }
+    .score-value { font-size: 26px; }
+    .stats-row { gap: 10px; margin-top: 7px; }
+    .stat-mini strong { font-size: 14px; }
+    .stat-mini span { font-size: 9px; }
+    .wind { min-width: 100px; padding: 8px 9px; top: max(8px, env(safe-area-inset-top)); right: max(8px, env(safe-area-inset-right)); }
+    .wind-arrow { font-size: 24px; width: 25px; }
+    .wind-number { font-size: 19px; }
+    .wind-caption { font-size: 8px; letter-spacing: .08em; }
+    .streak { top: 105px; right: max(8px, env(safe-area-inset-right)); min-width: 100px; padding: 8px 9px; }
+    .streak-number { font-size: 18px; }
+    .streak-caption { font-size: 8px; }
+    .utility { top: 168px; right: max(8px, env(safe-area-inset-right)); width: 100px; gap: 5px; }
+    .utility .btn { font-size: 11px; min-height: 35px; padding: 7px 6px; }
+    .power-wrap { bottom: max(9px, env(safe-area-inset-bottom)); padding: 9px 11px; width: min(330px, calc(100% - 20px)); }
+    .power-top .eyebrow { font-size: 9px; }
+    .power-percent { font-size: 19px; }
+    .power-track { margin-top: 5px; height: 8px; }
+    .power-hint { font-size: 9px; margin-top: 5px; }
+    .rule-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+    .rule { padding: 8px 9px; }
+    .rule span { font-size: 10px; }
+    .instructions { grid-template-columns: 1fr; gap: 7px; }
+    .instructions p, .instructions li { font-size: 11px; }
+    .dialog { padding: 20px 16px; }
+  }
+  @media (max-width: 360px) {
+    .stats-row { gap: 7px; }
+    .stats { max-width: 155px; }
+    .score-value { font-size: 23px; }
+    .wind { min-width: 88px; }
+    .streak, .utility { min-width: 88px; width: 88px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+</style>
+</head>
+<body>
+<div id="game">
+  <canvas id="scene" aria-label="Legend Shot axe throwing game. Move the reticle, hold to charge, and release to throw." tabindex="0"></canvas>
+
+  <div id="hud" class="hud hidden" aria-live="off">
+    <section class="stats panel" aria-label="Run statistics">
+      <p class="eyebrow">Current score</p>
+      <div class="score-value" id="scoreValue">0</div>
+      <div class="stats-row">
+        <div class="stat-mini"><strong id="bestValue">0</strong><span>BEST</span></div>
+        <div class="stat-mini"><strong id="perfectValue">0</strong><span>PERFECTS</span></div>
+      </div>
+    </section>
+    <section class="wind panel" aria-label="Wind conditions">
+      <p class="eyebrow">Wind · pushes axe</p>
+      <div class="wind-line"><span class="wind-arrow" id="windArrow">↗</span><span class="wind-number" id="windValue">12%</span></div>
+      <div class="wind-caption" id="windDirection">NORTH-EAST</div>
+    </section>
+    <section class="streak panel" aria-label="Perfect-hit streak">
+      <div class="streak-number" id="streakValue">0 × 1.00</div>
+      <div class="streak-caption">Perfect streak · multiplier</div>
+    </section>
+    <nav class="utility" aria-label="Game controls">
+      <button class="btn small" id="pauseButton" type="button">Ⅱ Pause</button>
+      <button class="btn small subtle" id="restartButton" type="button">↻ Restart</button>
+      <button class="btn small subtle" id="helpButton" type="button">? How to play</button>
+      <button class="btn small subtle" id="hudSoundButton" type="button" aria-pressed="true">♫ Sound On</button>
+    </nav>
+    <section class="power-wrap panel" aria-label="Throw power">
+      <div class="power-top"><p class="eyebrow">Charge · risk versus reward</p><span class="power-percent" id="powerValue">0%</span></div>
+      <div class="power-track" role="progressbar" aria-label="Charge power" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="powerTrack"><div class="power-fill" id="powerFill"></div></div>
+      <div class="power-hint" id="powerHint">Aim at the target, then hold to charge</div>
+    </section>
+  </div>
+
+  <div id="menuScreen" class="screen">
+    <main class="dialog">
+      <div class="brand-mark">Forest Trials · Skill Challenge</div>
+      <h1>LEGEND<br>SHOT</h1>
+      <p class="subtitle">A single throw separates a legend from the forest. Read the wind, balance power with control, and land perfect bullseyes to shrink the target.</p>
+      <div class="menu-highscore">Personal best <strong id="menuBest">0</strong></div>
+      <div class="actions"><button class="btn primary" id="startButton" type="button">Start the Trial</button><button class="btn subtle" id="menuHelpButton" type="button">How to Play</button><button class="btn subtle" id="menuSoundButton" type="button" aria-pressed="true">♫ Sound On</button></div>
+      <div class="rule-grid">
+        <div class="rule"><strong>01 · Aim</strong><span>Point anywhere in the arena. Compensate against the wind arrow.</span></div>
+        <div class="rule"><strong>02 · Charge</strong><span>Hold up to 1.8 seconds. More power means more points and less control.</span></div>
+        <div class="rule"><strong>03 · Bullseye</strong><span>Only a perfect center hit shrinks the target and builds your streak.</span></div>
+        <div class="rule"><strong>04 · Survive</strong><span>Any ring scores. A complete miss ends the run. How high can you go?</span></div>
+      </div>
+      <p class="tiny-note">Mouse: move, hold, release · Keyboard: arrows + hold Space · Touch: touch, drag, lift<br>Original canvas artwork · No account, downloads, or external assets required</p>
+    </main>
+  </div>
+
+  <div id="pauseScreen" class="screen hidden">
+    <main class="dialog">
+      <div class="brand-mark">Take a breath</div><h2>PAUSED</h2>
+      <p class="subtitle">The wind and your throw are on hold. Your next move can wait.</p>
+      <div class="actions"><button id="resumeButton" class="btn primary" type="button">Resume</button><button id="pauseRestartButton" class="btn" type="button">Restart Run</button><button id="pauseMenuButton" class="btn subtle" type="button">Main Menu</button></div>
+      <p class="tiny-note">P or Escape also pauses and resumes the game.</p>
+    </main>
+  </div>
+
+  <div id="helpScreen" class="screen hidden">
+    <main class="dialog">
+      <div class="brand-mark">Field guide</div><h2>HOW TO PLAY</h2>
+      <p class="subtitle">Aim first. Charge while you fine-tune your aim. Release to let the axe fly.</p>
+      <div class="instructions">
+        <section><h3>Controls</h3><p><strong>Mouse:</strong> Move to aim; hold the left button to charge and release to throw. Keep moving while charging.</p><p><strong>Keyboard:</strong> Arrow keys aim; hold Space to charge and release Space to throw. P or Escape pauses. R restarts the run.</p><p><strong>Touch:</strong> Touch the arena to begin charging, drag to adjust aim, then lift to throw.</p></section>
+        <section><h3>Wind & power</h3><p>The arrow shows where wind pushes the axe. Aim against it. Wind stays steady through a throw and can strengthen as your score rises.</p><p>Charge tops out after 1.8 seconds. Power multiplies points from 1.0× to 2.0×, but control error also grows with charge.</p><p>The dotted circle shows possible control error; it is uncertainty, not a guaranteed landing zone.</p></section>
+      </div>
+      <table class="scoring" aria-label="Target scoring rings"><tbody>
+        <tr><td>Perfect bullseye · center 10%</td><td>100 points</td></tr>
+        <tr><td>Inner ring · next 20%</td><td>60 points</td></tr>
+        <tr><td>Middle ring · next 25%</td><td>35 points</td></tr>
+        <tr><td>Outer ring · next 25%</td><td>20 points</td></tr>
+        <tr><td>Edge ring · final 20%</td><td>10 points</td></tr>
+      </tbody></table>
+      <p class="tiny-note">Consecutive bullseyes raise the multiplier to a maximum of 2.00×. A non-perfect hit resets the streak but keeps total perfect hits. Only bullseyes shrink the target, down to 55% of its starting size. A complete miss ends the run.</p>
+      <div class="actions"><button class="btn primary" id="backFromHelpButton" type="button">Back to Game</button></div>
+    </main>
+  </div>
+
+  <div id="gameOverScreen" class="screen hidden">
+    <main class="dialog">
+      <div class="brand-mark">The trial is complete</div><h2>GAME OVER</h2>
+      <p class="subtitle" id="gameOverMessage">The axe missed the target. Every legend gets another attempt.</p>
+      <div class="final-score" id="finalScore">0</div><div class="final-label">Final score</div>
+      <div class="final-grid">
+        <div class="final-stat"><strong id="finalBest">0</strong><span>Personal best</span></div>
+        <div class="final-stat"><strong id="finalPerfects">0</strong><span>Total bullseyes</span></div>
+        <div class="final-stat"><strong id="finalStreak">0</strong><span>Best streak</span></div>
+      </div>
+      <div class="actions"><button class="btn primary" id="playAgainButton" type="button">Play Again</button><button class="btn subtle" id="gameOverMenuButton" type="button">Main Menu</button></div>
+    </main>
+  </div>
+  <div id="toast" class="toast" aria-hidden="true"></div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const canvas = document.getElementById('scene');
+  const ctx = canvas.getContext('2d', { alpha: false });
+  if (!ctx) {
+    document.body.innerHTML = '<p style="color:white;padding:2rem">Sorry, this browser does not support the canvas needed to run Legend Shot.</p>';
+    return;
+  }
+
+  const $ = (id) => document.getElementById(id);
+  const screens = {
+    menu: $('menuScreen'), pause: $('pauseScreen'), help: $('helpScreen'), over: $('gameOverScreen')
+  };
+  const hud = $('hud');
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+  const rand = (min, max) => min + Math.random() * (max - min);
+  const fmt = (n) => Math.round(n).toLocaleString('en-US');
+  const TAU = Math.PI * 2;
+  const CHARGE_MS = 1800;
+
+  const state = {
+    mode: 'menu', returnMode: 'menu', helpReturnMode: 'menu', width: 1, height: 1, dpr: 1,
+    target: { x: 0, y: 0, baseR: 100, r0: 100, r: 100, drawR: 100 },
+    origin: { x: 0, y: 0 }, aim: { x: 0, y: 0 },
+    score: 0, best: loadBest(), totalPerfects: 0, streak: 0, bestStreak: 0,
+    charge: 0, chargeStarted: 0, chargeSource: '',
+    wind: { dx: 1, dy: 0, name: 'EAST', glyph: '→', strength: .1 },
+    flight: null, particles: [], rings: [], trees: [],
+    soundOn: true, audio: null, keys: { left: false, right: false, up: false, down: false },
+    toast: '', toastStart: 0, toastUntil: 0,
+    newBestThisRun: false, completedThrows: 0, lastFrame: 0,
+    currentBaseR: 100, pointerDown: false, activePointerId: null,
+    runActive: false, lastResult: null
+  };
+
+  const directions = [
+    { dx: 0, dy: -1, name: 'NORTH', glyph: '↑' },
+    { dx: Math.SQRT1_2, dy: -Math.SQRT1_2, name: 'NORTH-EAST', glyph: '↗' },
+    { dx: 1, dy: 0, name: 'EAST', glyph: '→' },
+    { dx: Math.SQRT1_2, dy: Math.SQRT1_2, name: 'SOUTH-EAST', glyph: '↘' },
+    { dx: 0, dy: 1, name: 'SOUTH', glyph: '↓' },
+    { dx: -Math.SQRT1_2, dy: Math.SQRT1_2, name: 'SOUTH-WEST', glyph: '↙' },
+    { dx: -1, dy: 0, name: 'WEST', glyph: '←' },
+    { dx: -Math.SQRT1_2, dy: -Math.SQRT1_2, name: 'NORTH-WEST', glyph: '↖' }
+  ];
+
+  function loadBest() {
+    try {
+      const value = Number(window.localStorage.getItem('legendShotBestScore'));
+      return Number.isFinite(value) && value >= 0 ? Math.floor(value) : 0;
+    } catch (_) { return 0; }
+  }
+  function saveBest() {
+    try { window.localStorage.setItem('legendShotBestScore', String(state.best)); } catch (_) { /* Storage can be disabled; the run remains playable. */ }
+  }
+
+  function getBaseRadius(w, h) {
+    const portrait = w < h * 0.82;
+    return portrait ? Math.max(48, Math.min(w * 0.235, h * 0.112)) : Math.max(58, Math.min(w * 0.14, h * 0.245));
+  }
+
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    const w = Math.max(1, rect.width);
+    const h = Math.max(1, rect.height);
+    const dpr = Math.min(2.5, Math.max(1, window.devicePixelRatio || 1));
+    const sx = w / state.width;
+    const sy = h / state.height;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    state.dpr = dpr;
+    state.width = w;
+    state.height = h;
+
+    const portrait = w < h * 0.82;
+    const oldBase = state.currentBaseR || getBaseRadius(w, h);
+    const newBase = getBaseRadius(w, h);
+    if (state.runActive && oldBase > 0 && Math.abs(newBase - oldBase) > .1) {
+      const scale = newBase / oldBase;
+      state.target.r0 *= scale;
+      state.target.r *= scale;
+      state.target.drawR *= scale;
+      state.target.r = Math.max(.55 * state.target.r0, state.target.r);
+    }
+    state.currentBaseR = newBase;
+    state.target.baseR = newBase;
+    if (!state.runActive) {
+      state.target.r0 = newBase;
+      state.target.r = newBase;
+      state.target.drawR = newBase;
+    }
+
+    state.target.x = portrait ? w * .68 : w * .755;
+    state.target.y = portrait ? h * .385 : h * .485;
+    state.origin.x = portrait ? w * .15 : w * .14;
+    state.origin.y = portrait ? h * .72 : h * .705;
+    if (!state.runActive || !Number.isFinite(state.aim.x) || !Number.isFinite(state.aim.y)) {
+      state.aim.x = state.target.x;
+      state.aim.y = state.target.y;
+    } else {
+      state.aim.x *= sx || 1;
+      state.aim.y *= sy || 1;
+      clampAim();
+    }
+    if (state.flight) {
+      state.flight.from = { ...state.origin };
+      state.flight.to = clampPoint(state.flight.actualImpact.x, state.flight.actualImpact.y, 12);
+    }
+    makeTreeLayout();
+  }
+
+  function makeTreeLayout() {
+    const w = state.width, h = state.height;
+    const trees = [];
+    for (let i = 0; i < 20; i++) {
+      const x = (i / 19) * w + ((i % 3) - 1) * 12;
+      const seed = (i * 37 + 17) % 23;
+      trees.push({ x, h: h * (.23 + seed / 100), width: 32 + seed * 1.35, layer: i % 3, lean: ((i % 5) - 2) * 5 });
+    }
+    state.trees = trees;
+  }
+
+  function clampAim() {
+    state.aim.x = clamp(state.aim.x, 14, state.width - 14);
+    state.aim.y = clamp(state.aim.y, 14, state.height - 14);
+  }
+  function clampPoint(x, y, margin = 10) {
+    return { x: clamp(x, margin, state.width - margin), y: clamp(y, margin, state.height - margin) };
+  }
+  function pointerPosition(e) {
+    const rect = canvas.getBoundingClientRect();
+    return { x: clamp(e.clientX - rect.left, 8, state.width - 8), y: clamp(e.clientY - rect.top, 8, state.height - 8) };
+  }
+
+  function maxWind(score) {
+    if (score < 500) return .35;
+    if (score < 1000) return .50;
+    if (score < 1500) return .65;
+    if (score < 2000) return .80;
+    return 1;
+  }
+  function rollWind() {
+    const d = directions[Math.floor(Math.random() * directions.length)];
+    state.wind = { ...d, strength: Math.random() * maxWind(state.score) };
+    updateHUD();
+  }
+  function streakMultiplier(streak) {
+    if (streak <= 0) return 1;
+    return Math.min(2, 1 + (streak - 1) * .25);
+  }
+
+  function ensureAudio() {
+    if (!state.soundOn) return null;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      if (!state.audio) state.audio = new AC();
+      if (state.audio.state === 'suspended') state.audio.resume().catch(() => {});
+      return state.audio;
+    } catch (_) { return null; }
+  }
+  function playSfx(kind) {
+    const ac = ensureAudio();
+    if (!ac || !state.soundOn) return;
+    const now = ac.currentTime;
+    const specs = {
+      charge: [{ f: 220, end: 310, dur: .10, type: 'sine', vol: .055 }],
+      throw: [{ f: 300, end: 115, dur: .18, type: 'triangle', vol: .07 }],
+      hit: [{ f: 420, end: 250, dur: .16, type: 'triangle', vol: .075 }],
+      perfect: [{ f: 560, end: 880, dur: .22, type: 'sine', vol: .08 }, { f: 840, end: 1120, dur: .28, type: 'triangle', vol: .035, delay: .04 }],
+      miss: [{ f: 190, end: 75, dur: .35, type: 'sawtooth', vol: .045 }],
+      best: [{ f: 660, end: 990, dur: .3, type: 'sine', vol: .055 }]
+    }[kind] || [];
+    for (const spec of specs) {
+      try {
+        const osc = ac.createOscillator();
+        const gain = ac.createGain();
+        osc.type = spec.type;
+        osc.frequency.setValueAtTime(spec.f, now + (spec.delay || 0));
+        osc.frequency.exponentialRampToValueAtTime(Math.max(30, spec.end), now + (spec.delay || 0) + spec.dur);
+        gain.gain.setValueAtTime(.0001, now + (spec.delay || 0));
+        gain.gain.exponentialRampToValueAtTime(spec.vol, now + (spec.delay || 0) + .018);
+        gain.gain.exponentialRampToValueAtTime(.0001, now + (spec.delay || 0) + spec.dur);
+        osc.connect(gain); gain.connect(ac.destination);
+        osc.start(now + (spec.delay || 0)); osc.stop(now + (spec.delay || 0) + spec.dur + .025);
+      } catch (_) { /* Audio is optional and must never block play. */ }
+    }
+  }
+
+  function toggleSound() {
+    state.soundOn = !state.soundOn;
+    if (state.soundOn) { ensureAudio(); playSfx('hit'); }
+    updateHUD();
+    updateSoundButtons();
+  }
+  function updateSoundButtons() {
+    const label = state.soundOn ? '♫ Sound On' : '♫ Sound Off';
+    for (const id of ['menuSoundButton', 'hudSoundButton']) {
+      const b = $(id);
+      b.textContent = label;
+      b.setAttribute('aria-pressed', state.soundOn ? 'true' : 'false');
+    }
+  }
+
+  function setMode(mode) {
+    state.mode = mode;
+    screens.menu.classList.toggle('hidden', mode !== 'menu');
+    screens.pause.classList.toggle('hidden', mode !== 'paused');
+    screens.help.classList.toggle('hidden', mode !== 'help');
+    screens.over.classList.toggle('hidden', mode !== 'over');
+    hud.classList.toggle('hidden', mode === 'menu' || mode === 'help');
+    canvas.style.cursor = (mode === 'ready' || mode === 'charging') ? 'crosshair' : 'default';
+    updateHUD();
+  }
+
+  function startRun() {
+    ensureAudio();
+    state.runActive = true;
+    state.score = 0;
+    state.totalPerfects = 0;
+    state.streak = 0;
+    state.bestStreak = 0;
+    state.charge = 0;
+    state.chargeSource = '';
+    state.flight = null;
+    state.particles.length = 0;
+    state.rings.length = 0;
+    state.completedThrows = 0;
+    state.newBestThisRun = false;
+    state.lastResult = null;
+    const r = getBaseRadius(state.width, state.height);
+    state.target.baseR = r;
+    state.target.r0 = r;
+    state.target.r = r;
+    state.target.drawR = r;
+    state.aim.x = state.target.x;
+    state.aim.y = state.target.y;
+    state.keys.left = state.keys.right = state.keys.up = state.keys.down = false;
+    rollWind();
+    setMode('ready');
+    updateHUD();
+  }
+
+  function returnToMenu() {
+    state.runActive = false;
+    state.flight = null;
+    state.charge = 0;
+    state.chargeSource = '';
+    state.pointerDown = false;
+    state.activePointerId = null;
+    state.aim.x = state.target.x;
+    state.aim.y = state.target.y;
+    state.target.r0 = state.target.baseR;
+    state.target.r = state.target.baseR;
+    state.target.drawR = state.target.baseR;
+    $('menuBest').textContent = fmt(state.best);
+    setMode('menu');
+  }
+
+  function restartRun() { startRun(); }
+
+  function pauseGame() {
+    if (state.mode === 'paused') { resumeGame(); return; }
+    if (state.mode !== 'ready' && state.mode !== 'charging' && state.mode !== 'flight') return;
+    if (state.mode === 'charging') {
+      state.charge = 0;
+      state.chargeSource = '';
+      state.pointerDown = false;
+      state.mode = 'ready';
+    }
+    state.returnMode = state.mode;
+    state.keys.left = state.keys.right = state.keys.up = state.keys.down = false;
+    state.pointerDown = false;
+    state.activePointerId = null;
+    setMode('paused');
+  }
+  function resumeGame() {
+    if (state.mode !== 'paused') return;
+    const next = state.returnMode === 'flight' && state.flight ? 'flight' : 'ready';
+    setMode(next);
+  }
+  function openHelp() {
+    if (state.mode === 'help') return;
+    if (!['menu', 'ready', 'charging', 'flight', 'paused'].includes(state.mode)) return;
+    let returnMode = state.mode;
+    if (state.mode === 'charging') {
+      state.charge = 0;
+      state.chargeSource = '';
+      returnMode = 'ready';
+    }
+    state.helpReturnMode = returnMode;
+    state.keys.left = state.keys.right = state.keys.up = state.keys.down = false;
+    state.pointerDown = false;
+    setMode('help');
+  }
+  function closeHelp() {
+    if (state.mode !== 'help') return;
+    const next = state.helpReturnMode;
+    if (next === 'menu') setMode('menu');
+    else if (next === 'paused') setMode('paused');
+    else if (next === 'flight' && state.flight) setMode('flight');
+    else setMode('ready');
+  }
+
+  function startCharge(source) {
+    if (state.mode !== 'ready') return;
+    ensureAudio();
+    state.mode = 'charging';
+    state.charge = 0;
+    state.chargeStarted = performance.now();
+    state.chargeSource = source;
+    playSfx('charge');
+    updateHUD();
+  }
+
+  // Calculate impact from aim + wind drift + an unpredictable, power-scaled control error.
+  // R0 stays fixed for the run (except responsive scaling); the live target radius is used for collision.
+  function throwAxe() {
+    if (state.mode !== 'charging' || state.flight) return;
+    // Sample power at release so a quick tap still receives its true elapsed charge.
+    state.charge = clamp((performance.now() - state.chargeStarted) / CHARGE_MS, 0, 1);
+    const p = clamp(state.charge, 0, 1);
+    const windScale = state.wind.strength * (.10 + .25 * p) * state.target.r0;
+    const windX = state.wind.dx * windScale;
+    const windY = state.wind.dy * windScale;
+    const maxError = .32 * p * state.target.r0;
+    const angle = Math.random() * TAU;
+    const errorDistance = Math.random() * maxError;
+    const errorX = Math.cos(angle) * errorDistance;
+    const errorY = Math.sin(angle) * errorDistance;
+    const impact = { x: state.aim.x + windX + errorX, y: state.aim.y + windY + errorY };
+    const dx = impact.x - state.target.x, dy = impact.y - state.target.y;
+    const dist = Math.hypot(dx, dy);
+    const shotTarget = { x: state.target.x, y: state.target.y, r: state.target.r };
+    const ring = classifyLanding(impact.x, impact.y, shotTarget);
+    const safeTo = clampPoint(impact.x, impact.y, 14);
+    state.flight = {
+      elapsed: 0, duration: clamp(480 + Math.hypot(safeTo.x - state.origin.x, safeTo.y - state.origin.y) * .36, 550, 900),
+      from: { ...state.origin }, to: safeTo, actualImpact: impact,
+      targetAtThrow: shotTarget, resultRing: ring, distAtThrow: dist, power: p,
+      windX, windY, errorX, errorY, resolved: false
+    };
+    state.chargeSource = '';
+    state.pointerDown = false;
+    playSfx('throw');
+    setMode('flight');
+  }
+
+  function classifyLanding(x, y, target) {
+    const dist = Math.hypot(x - target.x, y - target.y);
+    const ratio = dist / target.r;
+    if (ratio > 1) return { hit: false, perfect: false, base: 0, ring: 'MISS', ratio };
+    if (ratio <= .10) return { hit: true, perfect: true, base: 100, ring: 'PERFECT', ratio };
+    if (ratio <= .30) return { hit: true, perfect: false, base: 60, ring: 'INNER', ratio };
+    if (ratio <= .55) return { hit: true, perfect: false, base: 35, ring: 'MIDDLE', ratio };
+    if (ratio <= .80) return { hit: true, perfect: false, base: 20, ring: 'OUTER', ratio };
+    return { hit: true, perfect: false, base: 10, ring: 'EDGE', ratio };
+  }
+
+  function resolveFlight() {
+    const f = state.flight;
+    if (!f || f.resolved) return;
+    f.resolved = true;
+    state.completedThrows++;
+    const result = f.resultRing;
+    state.lastResult = result;
+    const where = clampPoint(f.actualImpact.x, f.actualImpact.y, 10);
+    if (!result.hit) {
+      spawnParticles(where.x, where.y, 'miss', 22);
+      playSfx('miss');
+      showToast('MISS · TRIAL OVER', 1050);
+      state.flight = null;
+      state.charge = 0;
+      $('finalScore').textContent = fmt(state.score);
+      $('finalBest').textContent = fmt(state.best);
+      $('finalPerfects').textContent = fmt(state.totalPerfects);
+      $('finalStreak').textContent = fmt(state.bestStreak);
+      $('gameOverMessage').textContent = state.newBestThisRun ? 'A new personal best! The final throw missed, but the record stands.' : 'The axe missed the target. Study the wind and come back stronger.';
+      setMode('over');
+      return;
+    }
+
+    let usedStreak = 1;
+    if (result.perfect) {
+      state.totalPerfects++;
+      state.streak++;
+      state.bestStreak = Math.max(state.bestStreak, state.streak);
+      usedStreak = streakMultiplier(state.streak);
+    } else {
+      state.streak = 0;
+      usedStreak = 1;
+    }
+    const powerMultiplier = 1 + f.power;
+    const earned = Math.round(result.base * powerMultiplier * usedStreak);
+    state.score += earned;
+    let bestJustSet = false;
+    if (state.score > state.best) {
+      state.best = state.score;
+      state.newBestThisRun = true;
+      bestJustSet = true;
+      saveBest();
+    }
+
+    if (result.perfect) {
+      // Target only shrinks on a bullseye and can never go below 55% of R0.
+      state.target.r = Math.max(.55 * state.target.r0, .94 * state.target.r);
+      spawnParticles(where.x, where.y, 'perfect', 35);
+      state.rings.push({ x: f.targetAtThrow.x, y: f.targetAtThrow.y, r: f.targetAtThrow.r * .10, age: 0, life: .38, color: '#ffe5a0' });
+      playSfx('perfect');
+      showToast(`BULLSEYE · +${fmt(earned)} · ${usedStreak.toFixed(2)}×`, 900);
+    } else {
+      spawnParticles(where.x, where.y, 'hit', 18);
+      state.rings.push({ x: where.x, y: where.y, r: 12, age: 0, life: .25, color: '#f6cf7b' });
+      playSfx('hit');
+      showToast(`${result.ring} RING · +${fmt(earned)}`, 800);
+    }
+    if (bestJustSet) {
+      playSfx('best');
+      spawnParticles(state.target.x, state.target.y, 'perfect', 20);
+    }
+
+    state.flight = null;
+    state.charge = 0;
+    state.chargeSource = '';
+    rollWind();
+    setMode('ready');
+    updateHUD();
+  }
+
+  function showToast(message, duration) {
+    state.toast = message;
+    state.toastStart = performance.now();
+    state.toastUntil = state.toastStart + duration;
+    $('toast').textContent = message;
+  }
+
+  function spawnParticles(x, y, type, count) {
+    const palette = type === 'perfect' ? ['#fff0b5', '#f3c96b', '#fff9e4', '#8fc18a'] :
+      type === 'miss' ? ['#b6b9ac', '#6c8177', '#d5d1b7'] : ['#f6d88b', '#d9a75a', '#f2e4ba', '#b4c28e'];
+    for (let i = 0; i < count; i++) {
+      const a = Math.random() * TAU;
+      const speed = type === 'perfect' ? rand(45, 230) : rand(35, 160);
+      state.particles.push({ x, y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed - (type === 'perfect' ? 25 : 5), size: rand(1.8, type === 'perfect' ? 5 : 3.7), age: 0, life: rand(.32, type === 'perfect' ? .9 : .62), color: palette[Math.floor(Math.random() * palette.length)] });
+    }
+  }
+
+  function updateHUD() {
+    $('scoreValue').textContent = fmt(state.score);
+    $('bestValue').textContent = fmt(state.best);
+    $('perfectValue').textContent = fmt(state.totalPerfects);
+    $('menuBest').textContent = fmt(state.best);
+    $('windArrow').textContent = state.wind.glyph;
+    $('windValue').textContent = `${Math.round(state.wind.strength * 100)}%`;
+    $('windDirection').textContent = state.wind.name;
+    $('streakValue').textContent = `${state.streak} × ${streakMultiplier(state.streak).toFixed(2)}`;
+    const pct = Math.round(state.charge * 100);
+    $('powerValue').textContent = `${pct}%`;
+    $('powerFill').style.width = `${pct}%`;
+    $('powerTrack').setAttribute('aria-valuenow', String(pct));
+    const hint = state.mode === 'charging' ? (pct >= 100 ? 'MAX POWER · maximum risk' : 'Keep aiming · more power, less control') :
+      state.mode === 'flight' ? 'Axe in flight…' : 'Aim at the target, then hold to charge';
+    $('powerHint').textContent = hint;
+    $('pauseButton').textContent = state.mode === 'paused' ? '▶ Resume' : 'Ⅱ Pause';
+    updateSoundButtons();
+  }
+
+  function update(dt, now) {
+    if (state.mode === 'charging') {
+      state.charge = clamp((now - state.chargeStarted) / CHARGE_MS, 0, 1);
+      updateHUD();
+    }
+    if (state.mode === 'flight' && state.flight) {
+      state.flight.elapsed += dt * 1000;
+      if (state.flight.elapsed >= state.flight.duration) resolveFlight();
+    }
+    if (state.target.drawR !== state.target.r) {
+      state.target.drawR += (state.target.r - state.target.drawR) * Math.min(1, dt * 13);
+      if (Math.abs(state.target.drawR - state.target.r) < .3) state.target.drawR = state.target.r;
+    }
+    if (state.mode === 'ready' || state.mode === 'charging') {
+      const speed = 310 * dt;
+      if (state.keys.left) state.aim.x -= speed;
+      if (state.keys.right) state.aim.x += speed;
+      if (state.keys.up) state.aim.y -= speed;
+      if (state.keys.down) state.aim.y += speed;
+      clampAim();
+    }
+    for (let i = state.particles.length - 1; i >= 0; i--) {
+      const p = state.particles[i];
+      p.age += dt;
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      p.vx *= Math.pow(.22, dt); p.vy = p.vy * Math.pow(.25, dt) + 80 * dt;
+      if (p.age >= p.life) state.particles.splice(i, 1);
+    }
+    for (let i = state.rings.length - 1; i >= 0; i--) {
+      state.rings[i].age += dt;
+      if (state.rings[i].age >= state.rings[i].life) state.rings.splice(i, 1);
+    }
+    if (now > state.toastUntil) $('toast').style.opacity = '0';
+    else {
+      const elapsed = now - state.toastStart;
+      const remain = state.toastUntil - now;
+      const fade = Math.min(1, elapsed / 100, remain / 180);
+      $('toast').style.opacity = String(clamp(fade, 0, 1));
+    }
+  }
+
+  function drawBackground() {
+    const w = state.width, h = state.height;
+    const bg = ctx.createLinearGradient(0, 0, 0, h);
+    bg.addColorStop(0, '#172b28'); bg.addColorStop(.42, '#2b493d'); bg.addColorStop(.73, '#53664a'); bg.addColorStop(1, '#17251d');
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+    const glow = ctx.createRadialGradient(state.target.x, state.target.y - state.target.r * .2, 5, state.target.x, state.target.y, Math.max(w, h) * .58);
+    glow.addColorStop(0, 'rgba(224,194,122,.17)'); glow.addColorStop(.36, 'rgba(144,166,115,.08)'); glow.addColorStop(1, 'rgba(0,0,0,.2)');
+    ctx.fillStyle = glow; ctx.fillRect(0, 0, w, h);
+
+    ctx.fillStyle = '#24392f';
+    ctx.beginPath(); ctx.moveTo(0, h * .59);
+    for (let x = 0; x <= w + 60; x += 60) ctx.lineTo(x, h * (.55 + .045 * Math.sin(x * .012) + .02 * Math.sin(x * .035)));
+    ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fill();
+
+    for (const t of state.trees) {
+      const base = h * (.78 + t.layer * .018);
+      const hh = t.h * (t.layer === 0 ? .76 : t.layer === 1 ? 1 : 1.13);
+      const col = t.layer === 0 ? '#21392e' : t.layer === 1 ? '#1a3028' : '#142820';
+      ctx.fillStyle = col;
+      ctx.beginPath();
+      ctx.moveTo(t.x + t.lean, base - hh);
+      ctx.lineTo(t.x - t.width * .47, base - hh * .24);
+      ctx.lineTo(t.x - t.width * .17, base - hh * .27);
+      ctx.lineTo(t.x - t.width * .60, base - hh * .03);
+      ctx.lineTo(t.x + t.width * .60, base - hh * .03);
+      ctx.lineTo(t.x + t.width * .18, base - hh * .28);
+      ctx.lineTo(t.x + t.width * .48, base - hh * .25);
+      ctx.closePath(); ctx.fill();
+      ctx.fillRect(t.x - 3, base - hh * .07, 6, hh * .22);
+    }
+
+    const groundY = h * .79;
+    const ground = ctx.createLinearGradient(0, groundY, 0, h);
+    ground.addColorStop(0, '#40563a'); ground.addColorStop(.28, '#293f2d'); ground.addColorStop(1, '#101d17');
+    ctx.fillStyle = ground; ctx.fillRect(0, groundY, w, h - groundY);
+    ctx.strokeStyle = 'rgba(178,186,117,.11)'; ctx.lineWidth = 1;
+    for (let i = 0; i < 26; i++) {
+      const x = ((i * 83) % Math.max(1, w));
+      const y = groundY + ((i * 47) % Math.max(1, h - groundY));
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 8 + (i % 7), y - 2 - (i % 4)); ctx.stroke();
+    }
+    const vignette = ctx.createRadialGradient(w * .5, h * .46, Math.min(w, h) * .16, w * .5, h * .5, Math.max(w, h) * .78);
+    vignette.addColorStop(.55, 'rgba(0,0,0,0)'); vignette.addColorStop(1, 'rgba(0,0,0,.48)');
+    ctx.fillStyle = vignette; ctx.fillRect(0, 0, w, h);
+  }
+
+  function drawTarget() {
+    const { x, y } = state.target;
+    const r = Math.max(10, state.target.drawR);
+    ctx.save();
+    // Shadow and the wooden target frame.
+    ctx.fillStyle = 'rgba(0,0,0,.26)';
+    ctx.beginPath(); ctx.ellipse(x + r * .12, y + r * 1.19, r * 1.05, r * .20, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#523a24'; ctx.fillRect(x - r * .075, y + r * .55, r * .15, r * 1.23);
+    ctx.fillStyle = '#8f6439'; ctx.fillRect(x - r * .055, y + r * .63, r * .11, r * 1.10);
+    ctx.fillStyle = '#382b20'; ctx.fillRect(x - r * .82, y + r * .68, r * 1.64, r * .13);
+
+    ctx.shadowColor = 'rgba(0,0,0,.46)'; ctx.shadowBlur = 15; ctx.shadowOffsetX = 5; ctx.shadowOffsetY = 8;
+    const rim = ctx.createRadialGradient(x - r * .28, y - r * .36, r * .08, x, y, r * 1.03);
+    rim.addColorStop(0, '#d1a566'); rim.addColorStop(.65, '#8c5c33'); rim.addColorStop(1, '#35271c');
+    ctx.fillStyle = rim; ctx.beginPath(); ctx.arc(x, y, r * 1.04, 0, TAU); ctx.fill();
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
+
+    const rings = [
+      { r: 1, color: '#d6bd8b' },
+      { r: .80, color: '#a44836' },
+      { r: .55, color: '#e6d0a0' },
+      { r: .30, color: '#b74735' },
+      { r: .10, color: '#f4d36e' }
+    ];
+    for (const ring of rings) {
+      ctx.beginPath(); ctx.arc(x, y, r * ring.r, 0, TAU);
+      const g = ctx.createRadialGradient(x - r * ring.r * .28, y - r * ring.r * .35, 1, x, y, r * ring.r * 1.2);
+      if (ring.color === '#d6bd8b') { g.addColorStop(0, '#e8d5ad'); g.addColorStop(1, '#ac8d5c'); }
+      else if (ring.color === '#a44836') { g.addColorStop(0, '#bc5b43'); g.addColorStop(1, '#853426'); }
+      else if (ring.color === '#e6d0a0') { g.addColorStop(0, '#f1e2bb'); g.addColorStop(1, '#cbb17c'); }
+      else if (ring.color === '#b74735') { g.addColorStop(0, '#d05e46'); g.addColorStop(1, '#9d3327'); }
+      else { g.addColorStop(0, '#ffe998'); g.addColorStop(1, '#d59a37'); }
+      ctx.fillStyle = g; ctx.fill();
+      ctx.strokeStyle = 'rgba(53,35,21,.58)'; ctx.lineWidth = Math.max(1, r * .012); ctx.stroke();
+    }
+
+    // Wood grain arcs on the outer board, clipped to the rim.
+    ctx.save(); ctx.beginPath(); ctx.arc(x, y, r * .99, 0, TAU); ctx.clip();
+    ctx.strokeStyle = 'rgba(91,60,33,.22)'; ctx.lineWidth = Math.max(.7, r * .006);
+    for (let i = 0; i < 9; i++) {
+      const gy = y - r * .82 + i * r * .20;
+      ctx.beginPath(); ctx.moveTo(x - r, gy); ctx.bezierCurveTo(x - r * .3, gy - 3, x + r * .3, gy + 4, x + r, gy - 1); ctx.stroke();
+    }
+    ctx.restore();
+
+    // Four dark pegs around the face.
+    for (let i = 0; i < 4; i++) {
+      const a = Math.PI * .25 + i * Math.PI * .5;
+      const nx = x + Math.cos(a) * r * .91, ny = y + Math.sin(a) * r * .91;
+      ctx.fillStyle = '#3a2a1c'; ctx.beginPath(); ctx.arc(nx, ny, Math.max(2, r * .025), 0, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(255,220,154,.62)'; ctx.beginPath(); ctx.arc(nx - r * .008, ny - r * .008, Math.max(1, r * .009), 0, TAU); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawThrower() {
+    const { x, y } = state.origin;
+    const s = clamp(Math.min(state.width, state.height) / 560, .62, 1.05);
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,.24)'; ctx.beginPath(); ctx.ellipse(x - 3 * s, y + 35 * s, 34 * s, 9 * s, 0, 0, TAU); ctx.fill();
+    // Cloak and tunic silhouette.
+    ctx.fillStyle = '#17251f';
+    ctx.beginPath(); ctx.moveTo(x - 18 * s, y + 28 * s); ctx.lineTo(x - 20 * s, y - 18 * s); ctx.quadraticCurveTo(x - 18 * s, y - 33 * s, x, y - 32 * s); ctx.quadraticCurveTo(x + 20 * s, y - 26 * s, x + 18 * s, y + 1 * s); ctx.lineTo(x + 28 * s, y + 31 * s); ctx.lineTo(x - 18 * s, y + 28 * s); ctx.fill();
+    ctx.fillStyle = '#6f5033'; ctx.beginPath(); ctx.ellipse(x, y - 42 * s, 11 * s, 13 * s, -.2, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#d0ad72'; ctx.beginPath(); ctx.ellipse(x + 3 * s, y - 44 * s, 6.5 * s, 8 * s, -.2, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#2a392d'; ctx.beginPath(); ctx.moveTo(x - 13 * s, y - 50 * s); ctx.quadraticCurveTo(x - 2 * s, y - 66 * s, x + 13 * s, y - 52 * s); ctx.lineTo(x + 14 * s, y - 47 * s); ctx.lineTo(x - 12 * s, y - 47 * s); ctx.fill();
+    ctx.strokeStyle = '#c59a5a'; ctx.lineWidth = 5 * s; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x + 7 * s, y - 20 * s); ctx.lineTo(x + 27 * s, y - 37 * s); ctx.stroke();
+    ctx.fillStyle = '#c59a5a'; ctx.beginPath(); ctx.arc(x + 28 * s, y - 38 * s, 4.5 * s, 0, TAU); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawAxe(x, y, angle, scale = 1) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(angle); ctx.scale(scale, scale);
+    // Handle with warm wood and a thin highlight.
+    ctx.lineCap = 'round'; ctx.strokeStyle = '#402918'; ctx.lineWidth = 7.5; ctx.beginPath(); ctx.moveTo(0, -23); ctx.quadraticCurveTo(3, 0, 0, 24); ctx.stroke();
+    ctx.strokeStyle = '#a8733f'; ctx.lineWidth = 4.2; ctx.beginPath(); ctx.moveTo(0, -23); ctx.quadraticCurveTo(3, 0, 0, 24); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,220,157,.7)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-1.5, -17); ctx.quadraticCurveTo(1, 0, -1, 18); ctx.stroke();
+    // Original metal blade silhouette.
+    const blade = ctx.createLinearGradient(-19, -15, 3, 3);
+    blade.addColorStop(0, '#e5e8d9'); blade.addColorStop(.45, '#aab7b2'); blade.addColorStop(1, '#52645e');
+    ctx.fillStyle = blade; ctx.strokeStyle = '#303f3a'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(0, -15); ctx.lineTo(-9, -22); ctx.quadraticCurveTo(-31, -18, -27, 1); ctx.quadraticCurveTo(-24, 10, -8, 7); ctx.lineTo(0, 3); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(-8, -17); ctx.quadraticCurveTo(-22, -13, -22, -2); ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawAim() {
+    if (state.mode !== 'ready' && state.mode !== 'charging') return;
+    const p = state.charge;
+    const wx = state.wind.dx * state.wind.strength * (.10 + .25 * p) * state.target.r0;
+    const wy = state.wind.dy * state.wind.strength * (.10 + .25 * p) * state.target.r0;
+    const predicted = clampPoint(state.aim.x + wx, state.aim.y + wy, 8);
+    const uncertainty = Math.max(5, .32 * p * state.target.r0);
+    ctx.save();
+    // Expected landing marker: wind is estimable; random control error is not.
+    ctx.setLineDash([5, 5]); ctx.strokeStyle = 'rgba(238,225,178,.68)'; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.arc(predicted.x, predicted.y, uncertainty, 0, TAU); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.strokeStyle = 'rgba(241,200,117,.82)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(predicted.x, predicted.y, 7, 0, TAU); ctx.moveTo(predicted.x - 12, predicted.y); ctx.lineTo(predicted.x - 4, predicted.y); ctx.moveTo(predicted.x + 4, predicted.y); ctx.lineTo(predicted.x + 12, predicted.y); ctx.moveTo(predicted.x, predicted.y - 12); ctx.lineTo(predicted.x, predicted.y - 4); ctx.moveTo(predicted.x, predicted.y + 4); ctx.lineTo(predicted.x, predicted.y + 12); ctx.stroke();
+    // Actual reticle follows the chosen aim exactly; it never snaps to the target.
+    const color = state.mode === 'charging' ? '#fff1b5' : '#e4f0ce';
+    ctx.strokeStyle = color; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(state.aim.x, state.aim.y, 13, 0, TAU); ctx.moveTo(state.aim.x - 19, state.aim.y); ctx.lineTo(state.aim.x - 7, state.aim.y); ctx.moveTo(state.aim.x + 7, state.aim.y); ctx.lineTo(state.aim.x + 19, state.aim.y); ctx.moveTo(state.aim.x, state.aim.y - 19); ctx.lineTo(state.aim.x, state.aim.y - 7); ctx.moveTo(state.aim.x, state.aim.y + 7); ctx.lineTo(state.aim.x, state.aim.y + 19); ctx.stroke();
+    ctx.fillStyle = color; ctx.beginPath(); ctx.arc(state.aim.x, state.aim.y, 2, 0, TAU); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawFlightAxe() {
+    if (!state.flight) return;
+    const f = state.flight;
+    const t = clamp(f.elapsed / f.duration, 0, 1);
+    const eased = 1 - Math.pow(1 - t, 2.2);
+    const dx = f.to.x - f.from.x, dy = f.to.y - f.from.y;
+    const dist = Math.max(1, Math.hypot(dx, dy));
+    const bend = Math.min(86, dist * .13);
+    const px = -dy / dist, py = dx / dist;
+    const arc = Math.sin(eased * Math.PI) * bend;
+    const x = f.from.x + dx * eased - px * arc;
+    const y = f.from.y + dy * eased - py * arc;
+    drawAxe(x, y, eased * 12 + .7, clamp(Math.min(state.width, state.height) / 650, .62, 1));
+  }
+
+  function drawParticles() {
+    for (const p of state.particles) {
+      const alpha = clamp(1 - p.age / p.life, 0, 1);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = p.color;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (.45 + .55 * alpha), 0, TAU); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    for (const ring of state.rings) {
+      const t = ring.age / ring.life;
+      ctx.globalAlpha = 1 - t;
+      ctx.strokeStyle = ring.color; ctx.lineWidth = 2.5 * (1 - t) + .5;
+      ctx.beginPath(); ctx.arc(ring.x, ring.y, ring.r + t * 22, 0, TAU); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawScene() {
+    drawBackground();
+    drawTarget();
+    drawThrower();
+    drawAim();
+    if (state.flight) drawFlightAxe();
+    else if (state.mode === 'ready' || state.mode === 'charging') {
+      const angle = Math.atan2(state.aim.y - state.origin.y, state.aim.x - state.origin.x) - .8;
+      drawAxe(state.origin.x + 27, state.origin.y - 31, angle, clamp(Math.min(state.width, state.height) / 650, .62, 1));
+    }
+    drawParticles();
+    // A compact canvas hint stays out of the way of the HUD and target.
+    if (state.mode === 'ready' && state.width > 520) {
+      ctx.save(); ctx.fillStyle = 'rgba(242,236,211,.72)'; ctx.font = '700 11px system-ui, sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('AIM  ·  HOLD TO CHARGE  ·  RELEASE TO THROW', 18, state.height - 18);
+      ctx.restore();
+    }
+  }
+
+  function frame(now) {
+    const dt = Math.min(.05, Math.max(0, (now - (state.lastFrame || now)) / 1000));
+    state.lastFrame = now;
+    update(dt, now);
+    drawScene();
+    requestAnimationFrame(frame);
+  }
+
+  function handlePointerDown(e) {
+    if (state.mode !== 'ready' || e.button !== undefined && e.button !== 0) return;
+    e.preventDefault();
+    ensureAudio();
+    const pos = pointerPosition(e);
+    state.aim = pos;
+    clampAim();
+    state.pointerDown = true;
+    state.activePointerId = e.pointerId;
+    try { canvas.setPointerCapture(e.pointerId); } catch (_) { /* Capture is not available in every browser. */ }
+    startCharge('pointer');
+  }
+  function handlePointerMove(e) {
+    const pos = pointerPosition(e);
+    if (state.mode === 'ready') {
+      state.aim = pos; clampAim();
+    } else if (state.mode === 'charging' && state.chargeSource === 'pointer' && (state.activePointerId === null || e.pointerId === state.activePointerId)) {
+      state.aim = pos; clampAim();
+    }
+  }
+  function handlePointerUp(e) {
+    if (state.mode !== 'charging' || state.chargeSource !== 'pointer') return;
+    if (state.activePointerId !== null && e.pointerId !== state.activePointerId) return;
+    e.preventDefault();
+    state.pointerDown = false;
+    state.activePointerId = null;
+    throwAxe();
+  }
+  function cancelPointerCharge() {
+    if (state.mode === 'charging' && state.chargeSource === 'pointer') {
+      state.mode = 'ready'; state.charge = 0; state.chargeSource = '';
+      state.pointerDown = false; state.activePointerId = null;
+      updateHUD();
+    }
+  }
+
+  canvas.addEventListener('pointerdown', handlePointerDown);
+  canvas.addEventListener('pointermove', handlePointerMove);
+  canvas.addEventListener('pointerup', handlePointerUp);
+  canvas.addEventListener('pointercancel', cancelPointerCharge);
+  canvas.addEventListener('lostpointercapture', cancelPointerCharge);
+  canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+  function isGameplayMode() { return ['ready', 'charging', 'flight', 'paused', 'help'].includes(state.mode); }
+  window.addEventListener('keydown', (e) => {
+    const key = e.key;
+    if ((key === ' ' || key.startsWith('Arrow')) && isGameplayMode()) e.preventDefault();
+    if (key === 'p' || key === 'P' || key === 'Escape') {
+      if (state.mode === 'help') { closeHelp(); return; }
+      if (state.mode === 'menu' || state.mode === 'over') return;
+      if (state.mode === 'paused') resumeGame(); else pauseGame();
+      return;
+    }
+    if (key === 'r' || key === 'R') {
+      if (state.runActive && state.mode !== 'help') { restartRun(); }
+      return;
+    }
+    if (state.mode !== 'ready' && state.mode !== 'charging') return;
+    if (key === 'ArrowLeft') state.keys.left = true;
+    if (key === 'ArrowRight') state.keys.right = true;
+    if (key === 'ArrowUp') state.keys.up = true;
+    if (key === 'ArrowDown') state.keys.down = true;
+    if (key === ' ' && !e.repeat && state.mode === 'ready') startCharge('keyboard');
+  }, { passive: false });
+  window.addEventListener('keyup', (e) => {
+    const key = e.key;
+    if (key === 'ArrowLeft') state.keys.left = false;
+    if (key === 'ArrowRight') state.keys.right = false;
+    if (key === 'ArrowUp') state.keys.up = false;
+    if (key === 'ArrowDown') state.keys.down = false;
+    if (key === ' ' && state.mode === 'charging' && state.chargeSource === 'keyboard') {
+      e.preventDefault(); throwAxe();
+    }
+  });
+  window.addEventListener('blur', () => {
+    state.keys.left = state.keys.right = state.keys.up = state.keys.down = false;
+    if (state.mode === 'charging') { state.mode = 'ready'; state.charge = 0; state.chargeSource = ''; }
+    if (state.mode === 'ready' || state.mode === 'flight') pauseGame();
+  });
+  window.addEventListener('resize', resize, { passive: true });
+
+  $('startButton').addEventListener('click', startRun);
+  $('playAgainButton').addEventListener('click', restartRun);
+  $('restartButton').addEventListener('click', restartRun);
+  $('pauseRestartButton').addEventListener('click', restartRun);
+  $('resumeButton').addEventListener('click', resumeGame);
+  $('pauseButton').addEventListener('click', () => { if (state.mode === 'paused') resumeGame(); else pauseGame(); });
+  $('helpButton').addEventListener('click', openHelp);
+  $('menuHelpButton').addEventListener('click', () => { state.helpReturnMode = 'menu'; setMode('help'); });
+  $('backFromHelpButton').addEventListener('click', closeHelp);
+  $('pauseMenuButton').addEventListener('click', returnToMenu);
+  $('gameOverMenuButton').addEventListener('click', returnToMenu);
+  $('menuSoundButton').addEventListener('click', toggleSound);
+  $('hudSoundButton').addEventListener('click', toggleSound);
+
+  // Keep the page still on touch devices; the canvas uses pointer capture for drag-aiming.
+  document.addEventListener('touchmove', (e) => { if (e.target === canvas) e.preventDefault(); }, { passive: false });
+  document.addEventListener('selectstart', (e) => { if (e.target === canvas) e.preventDefault(); });
+
+  resize();
+  state.aim.x = state.target.x;
+  state.aim.y = state.target.y;
+  updateHUD();
+  updateSoundButtons();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
