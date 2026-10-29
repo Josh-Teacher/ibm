@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Amisha’s Cafe Rush</title>
+<style>
+:root{--ink:#263247;--cream:#fff8ed;--pink:#ff8f9c;--orange:#ffb45c;--green:#4aa783;--blue:#76b9d7;--line:#e9dfd2}
+*{box-sizing:border-box}body{margin:0;background:#f4eee6;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}button,select{font:inherit}button{border:0;border-radius:12px;padding:10px 13px;background:#29374b;color:white;font-weight:750;cursor:pointer;box-shadow:0 3px 0 #182233;transition:transform .08s}button:active{transform:translateY(2px);box-shadow:0 1px 0 #182233}button:disabled{opacity:.45;cursor:not-allowed}button.secondary{background:#fff;color:var(--ink);border:1px solid var(--line);box-shadow:0 3px 0 #e4d8c8}button.green{background:var(--green);box-shadow:0 3px 0 #267b5b}button.orange{background:#ffb45c;color:#412c17;box-shadow:0 3px 0 #d98b37}button.red{background:#d95d68;box-shadow:0 3px 0 #a83b48}.app{max-width:1400px;margin:auto;padding:12px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}.brand{display:flex;align-items:center;gap:10px}.logo{font-size:35px;background:#ffdfb7;border-radius:15px;padding:4px 10px}.brand h1{font-size:clamp(19px,3vw,29px);margin:0}.sub{font-size:12px;color:#687487}.stats{display:flex;gap:7px;flex-wrap:wrap}.stat{background:white;border:1px solid var(--line);padding:8px 12px;border-radius:13px;min-width:90px}.stat small{display:block;color:#758094;font-size:11px}.stat strong{font-size:16px}.layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(320px,1fr);gap:12px}.panel{background:white;border:1px solid var(--line);border-radius:18px;padding:13px;box-shadow:0 5px 0 #e8dfd4;min-width:0}.panel h2{font-size:17px;margin:0 0 10px}.scene{min-height:320px;position:relative;overflow:hidden;border-radius:15px;background:linear-gradient(#bce7f4 0 48%,#f5d8a7 48% 100%);border:3px solid #fff}.awning{position:absolute;top:0;left:0;right:0;height:42px;background:repeating-linear-gradient(90deg,#ef7786 0 38px,#fff1d7 38px 76px);border-bottom:5px solid #fff}.window{position:absolute;top:55px;left:5%;width:26%;height:90px;border:8px solid #fff8e8;border-radius:10px;background:linear-gradient(#8ad4e9 0 60%,#b3d8a1 60%);box-shadow:0 5px 0 #d7c3a6}.shelf{position:absolute;top:66px;right:5%;width:28%;height:16px;background:#b87948;border-radius:4px;box-shadow:0 20px 0 #b87948,0 40px 0 #b87948}.jar{position:absolute;right:7%;top:42px;font-size:21px;letter-spacing:10px}.floor{position:absolute;bottom:0;height:42%;left:0;right:0;background:repeating-linear-gradient(90deg,#edc891 0 55px,#f4d9ac 55px 110px)}.counter{position:absolute;bottom:26%;left:3%;width:32%;height:70px;background:#b66f45;border:8px solid #e9a56c;border-radius:12px;box-shadow:0 8px 0 #875038}.counter:after{content:"☕  🥪";position:absolute;inset:5px;text-align:center;font-size:24px}.station-row{position:absolute;bottom:14%;left:3%;width:32%;display:flex;gap:4px}.station{flex:1;padding:6px 2px;border-radius:8px;background:#fffdf8;border:2px solid #c9b6a0;text-align:center;font-size:12px;cursor:pointer;box-shadow:0 3px 0 #c7b39a}.station.active{outline:3px solid #ffb45c;background:#fff0d7}.station.busy{background:#ffe0a5}.tables{position:absolute;right:3%;bottom:13%;width:58%;display:flex;flex-wrap:wrap;justify-content:space-around;gap:14px}.table{position:relative;width:92px;height:62px;background:#c47c4d;border:6px solid #e8a66c;border-radius:13px;box-shadow:0 6px 0 #9b603c}.table:before,.table:after{content:"";position:absolute;top:-12px;width:22px;height:22px;border-radius:50%;background:#ffdfb7;border:3px solid white}.table:before{left:-17px}.table:after{right:-17px}.customer{position:absolute;top:-25px;left:15px;font-size:24px;filter:drop-shadow(0 2px 0 #9b603c)}.bubble{position:absolute;top:-47px;right:-10px;background:white;border-radius:10px;padding:3px 5px;font-size:12px;border:1px solid #e6d8c7;white-space:nowrap}.scene-label{position:absolute;left:10px;top:48px;background:#ffffffd9;border-radius:9px;padding:6px 9px;font-weight:800;font-size:12px}.scene-tip{position:absolute;bottom:5px;left:8px;font-size:11px;background:#fff9e8cc;padding:4px 7px;border-radius:8px}.below{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.orders{display:grid;gap:8px;max-height:360px;overflow:auto}.order{border:1px solid var(--line);border-radius:13px;padding:10px;background:#fffdf9}.order.selected{border:2px solid var(--orange);background:#fff5e5}.order-head{display:flex;justify-content:space-between;gap:8px;align-items:center}.order h3{margin:0;font-size:14px}.pill{font-size:11px;background:#eef3f8;border-radius:99px;padding:4px 7px;font-weight:750}.bar{height:9px;background:#eee5dc;border-radius:9px;overflow:hidden;margin:7px 0}.bar span{display:block;height:100%;background:#55b88e;border-radius:9px}.bar.low span{background:#e45f69}.order-actions{display:flex;gap:6px;flex-wrap:wrap}.order-actions button{padding:7px 9px;font-size:12px}.stock-grid,.upgrade-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.stock,.upgrade{border:1px solid var(--line);border-radius:12px;padding:9px;background:#fffdf9}.stock strong,.upgrade strong{display:block;font-size:13px}.stock small,.upgrade small{display:block;color:#6d7889;font-size:11px;margin:3px 0 7px}.stock-controls{display:flex;align-items:center;gap:5px}.stock-controls button{padding:5px 9px}.stock-controls b{min-width:20px;text-align:center}.progress-wrap{margin:8px 0}.progress-label{display:flex;justify-content:space-between;font-size:12px;font-weight:700}.progress{height:12px;background:#eee4d9;border-radius:99px;overflow:hidden}.progress span{display:block;height:100%;background:var(--green);width:0}.station-status{display:grid;gap:7px}.cookline{border:1px solid var(--line);padding:9px;border-radius:12px;display:flex;gap:8px;align-items:center}.cook-icon{font-size:25px}.cook-info{flex:1;min-width:0}.cook-info strong{display:block;font-size:13px}.cook-info small{color:#778092;font-size:11px}.cookline button{padding:7px 9px;font-size:12px}.section-title{display:flex;align-items:center;justify-content:space-between;gap:8px}.section-title span{font-size:11px;color:#778092}.bottom-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.bottom-actions button{flex:1}.notice{min-height:24px;margin:8px 0;color:#39765c;font-weight:750;font-size:13px}.notice.bad{color:#c24854}.modal-back{position:fixed;inset:0;background:#192638b8;display:flex;align-items:center;justify-content:center;padding:15px;z-index:10}.modal{width:min(720px,100%);max-height:90vh;overflow:auto;background:#fff9f0;border-radius:22px;padding:22px;box-shadow:0 15px 0 #152033}.modal h2{margin-top:0}.modal p{line-height:1.5}.modal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.modal-card{background:white;border:1px solid var(--line);border-radius:12px;padding:12px}.modal-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.hidden{display:none!important}.tag{display:inline-block;background:#e2f5e9;padding:3px 7px;border-radius:8px;font-size:11px;font-weight:800}.footer-note{font-size:11px;color:#788294;margin-top:8px}.sound{padding:8px 10px}.toast{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);background:#243247;color:white;padding:10px 15px;border-radius:12px;z-index:20;box-shadow:0 4px 0 #111a28;font-size:13px;max-width:90vw;text-align:center}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.scene{min-height:310px}.stats{width:100%}.stat{flex:1;min-width:75px}.below{grid-template-columns:1fr}.app{padding:8px}.panel{padding:10px}}
+@media(max-width:480px){.scene{min-height:285px}.window{height:65px}.shelf{top:70px}.tables{width:58%;gap:10px;right:2%}.table{width:72px;height:53px}.counter{width:35%;height:58px}.station-row{width:35%}.station{font-size:10px}.modal-grid{grid-template-columns:1fr}.brand h1{font-size:20px}.stat{padding:7px}.stat strong{font-size:14px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><div class="brand"><div class="logo">☕</div><div><h1>Amisha’s Cafe Rush</h1><div class="sub">From tiny cafe to Grand Restaurant ✨</div></div></div><div class="stats">
+<div class="stat"><small>💰 AVAILABLE MONEY</small><strong id="money">₩50,000</strong></div><div class="stat"><small>📅 DAY</small><strong id="day">1 / 7</strong></div><div class="stat"><small>⭐ REPUTATION</small><strong id="rep">70 / 100</strong></div><div class="stat"><small>📈 DAY PROFIT</small><strong id="profit">₩0</strong></div><button class="secondary sound" id="pauseBtn">⏸ Pause</button><button class="secondary sound" id="soundBtn">🔊 Sound</button></div></header>
+<div class="layout">
+<section class="panel"><div class="section-title"><h2>🏡 Your Cafe</h2><span id="phase">PREPARE PHASE</span></div>
+<div class="scene"><div class="awning"></div><div class="window"></div><div class="shelf"></div><div class="jar">🪴 🫙</div><div class="floor"></div><div class="scene-label" id="sceneLabel">Opening soon · Day 1</div><div class="counter"></div><div class="station-row" id="sceneStations"></div><div class="tables" id="tables"></div><div class="scene-tip" id="sceneTip">Tap a station, select an order, and cook!</div></div>
+<div class="below"><div><div class="section-title"><h2>👩‍🍳 Cooking Stations</h2><span>Tap to select</span></div><div class="station-status" id="stations"></div><div class="notice" id="notice">Welcome! Buy ingredients, then start the day.</div></div>
+<div><div class="section-title"><h2>🧾 Customer Orders</h2><span id="orderCount">0 waiting</span></div><div class="orders" id="orders"><p class="sub">Start the day to welcome your first customers.</p></div></div></div>
+<div class="bottom-actions"><button class="green" id="startDay">▶ Start Service</button><button class="orange" id="shopBtn">🛒 Stock & Upgrades</button><button class="secondary" id="reviewBtn">📊 Day Review</button></div>
+</section>
+<aside class="panel"><div class="section-title"><h2>📋 Daily Business</h2><span id="goalLabel">Goal: ₩15,000</span></div>
+<div class="progress-wrap"><div class="progress-label"><span>Operating profit</span><span id="profitLabel">₩0 / ₩15,000</span></div><div class="progress"><span id="profitBar"></span></div></div>
+<div class="progress-wrap"><div class="progress-label"><span>Customer happiness</span><span id="happyLabel">—</span></div><div class="progress"><span id="happyBar"></span></div></div>
+<div class="progress-wrap"><div class="progress-label"><span>Service time</span><span id="timerLabel">Not started</span></div><div class="progress"><span id="timerBar"></span></div></div>
+<div class="modal-card" style="margin:10px 0"><div class="section-title"><strong>🥚 Ingredient stock</strong><span>Buy during prep</span></div><div class="stock-grid" id="stock"></div></div>
+<div class="modal-card"><div class="section-title"><strong>🏆 Daily score</strong><span id="starLabel">☆☆☆</span></div><p class="sub" id="challenge">Day 1: Learn the cooking stations.</p><div style="display:flex;justify-content:space-between;gap:8px;font-size:12px"><span>Served: <b id="served">0</b></span><span>Left: <b id="left">0</b></span><span>Tips: <b id="tips">₩0</b></span></div></div>
+<div class="modal-card" style="margin-top:10px"><div class="section-title"><strong>🧠 Quick guide</strong></div><ol style="font-size:12px;line-height:1.6;padding-left:19px"><li>Select an order card.</li><li>Choose its station and press Cook.</li><li>When ready, press Serve on the order.</li><li>Fast service earns tips; patience reaching zero loses reputation.</li><li>Use preparation time to buy stock and upgrades.</li></ol></div>
+<div class="bottom-actions"><button class="secondary" id="backupOut">⬇ Export Backup</button><button class="secondary" id="backupIn">⬆ Import Backup</button><input id="fileInput" type="file" accept="application/json,.json" class="hidden"><button class="secondary" id="newGame">↻ New Game</button></div><div class="footer-note">Auto-save is stored in this browser on this device. Use a backup to move progress.</div>
+</aside></div></div>
+<div id="modalRoot"></div><div id="toast" class="toast hidden"></div>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id), fmt=n=>'₩'+Math.round(n).toLocaleString('en-US');
+const initialStock={bread:10,egg:8,coffee:8,flour:6};
+const ingredientInfo={bread:{name:'Bread',icon:'🍞',cost:300},egg:{name:'Egg',icon:'🥚',cost:250},coffee:{name:'Coffee',icon:'☕',cost:400},flour:{name:'Flour',icon:'🌾',cost:350},milk:{name:'Milk',icon:'🥛',cost:350},fruit:{name:'Fruit',icon:'🍓',cost:500},meat:{name:'Meat',icon:'🥩',cost:900}};
+const recipes={
+coffee:{name:'Coffee',icon:'☕',price:2500,time:4,station:'coffee',need:{coffee:1},unlocked:true},
+toast:{name:'Toast',icon:'🍞',price:2000,time:5,station:'toaster',need:{bread:1},unlocked:true},
+sandwich:{name:'Egg sandwich',icon:'🥪',price:4500,time:8,station:'prep',need:{bread:1,egg:1},unlocked:true},
+pancakes:{name:'Pancakes',icon:'🥞',price:5000,time:10,station:'grill',need:{flour:1,egg:1},unlocked:true},
+iced:{name:'Iced coffee',icon:'🧋',price:3800,time:6,station:'coffee',need:{coffee:1,milk:1},unlocked:false,day:3},
+juice:{name:'Fruit juice',icon:'🧃',price:3200,time:5,station:'prep',need:{fruit:1},unlocked:false,day:4},
+burger:{name:'Cafe burger',icon:'🍔',price:7500,time:12,station:'grill',need:{bread:1,meat:1},unlocked:false,day:5}
+};
+const stationInfo={coffee:{name:'Coffee Machine',icon:'☕'},toaster:{name:'Toaster',icon:'🍞'},grill:{name:'Grill',icon:'🍳'},prep:{name:'Preparation Counter',icon:'🔪'},extra:{name:'Second Cooking Station',icon:'👩‍🍳'},kitchen:{name:'Kitchen Expansion',icon:'🍲'}};
+const goals=[15000,20000,25000,30000,35000,40000,50000], challenges=['Learn the cooking stations.','Serve more customers.','Manage limited ingredients.','Handle a busier cafe.','Unlock and use new recipes.','Manage a major rush.','Complete the final restaurant challenge.'];
+const fresh=()=>({day:1,completed:0,money:50000,stock:{...initialStock},reputation:70,unlocked:['coffee','toast','sandwich','pancakes'],upgrades:[],sound:true,grand:false,phase:'prep',daily:null,orders:[],cooks:[],selectedOrder:null,selectedStation:'coffee',nextOrderId:1,startedAt:0,remaining:100,paused:false,served:0,left:0,sales:0,tips:0,consumed:0,purchaseCost:0,dayStart:null,dayStartStock:null,dayStartMoney:50000,customerHappy:0,arrivals:0,serviceEnded:false});
+let s=fresh(), timer=null, toastTimer=null, audioCtx=null;
+function toast(msg,bad=false){$('toast').textContent=msg;$('toast').classList.remove('hidden');$('toast').style.background=bad?'#a83b48':'#243247';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.add('hidden'),2400)}
+function save(){try{localStorage.setItem('amishaCafeRushSave',JSON.stringify(s));}catch(e){}}
+function load(){try{let d=JSON.parse(localStorage.getItem('amishaCafeRushSave'));if(d&&d.day>=1&&d.day<=7&&typeof d.money==='number'&&d.stock){s={...fresh(),...d,paused:false};if(s.phase==='service'){s.phase='prep';s.orders=[];s.cooks=[];s.daily=null;}}}catch(e){s=fresh()}}
+function sound(freq=600,duration=.08){if(!s.sound)return;try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=freq;g.gain.value=.035;o.start();o.stop(audioCtx.currentTime+duration)}catch(e){}}
+function notice(msg,bad=false){$('notice').textContent=msg;$('notice').classList.toggle('bad',bad)}
+function openModal(content){$('modalRoot').innerHTML=`<div class="modal-back" id="modalBack"><div class="modal">${content}</div></div>`;$('modalBack').addEventListener('click',e=>{if(e.target.id==='modalBack')closeModal()})}
+function closeModal(){$('modalRoot').innerHTML='';}
+function totalNeed(recipe){return Object.entries(recipe.need).map(([k,v])=>`${v} ${ingredientInfo[k].name}`).join(', ')}
+function hasIngredients(r){return Object.entries(r.need).every(([k,v])=>(s.stock[k]||0)>=v)}
+function costNeed(r){return Object.entries(r.need).reduce((a,[k,v])=>a+ingredientInfo[k].cost*v,0)}
+function stationUnlocked(key){return key==='extra'?s.upgrades.includes('second'):key==='kitchen'?s.upgrades.includes('kitchen'):true}
+function stationBusy(key){return s.cooks.some(c=>c.station===key&&!c.done)}
+function cookingTime(r){let t=r.time;if(r.station==='coffee'&&s.upgrades.includes('fastCoffee'))t*=.75;return Math.max(2,Math.round(t))}
+function availableRecipes(){return s.unlocked.map(k=>[k,recipes[k]]).filter(([k,r])=>r)}
+function stars(){return (s.daily?Number(s.daily.profit>=goals[s.day-1])+Number((s.daily.happyPct||0)>=60)+Number(s.daily.left<=3):0)}
+function calcProfit(){return s.sales+s.tips-s.consumed}
+function update(){
+$('money').textContent=fmt(s.money);$('day').textContent=`${s.day} / 7`;$('rep').textContent=`${s.reputation} / 100`;$('profit').textContent=fmt(s.daily?calcProfit():0);$('phase').textContent=s.phase==='prep'?'PREPARE PHASE':s.phase==='service'?(s.paused?'PAUSED':'SERVICE LIVE'):s.phase.toUpperCase();
+$('goalLabel').textContent='Goal: '+fmt(goals[s.day-1]);$('profitLabel').textContent=`${fmt(s.daily?calcProfit():0)} / ${fmt(goals[s.day-1])}`;$('profitBar').style.width=Math.min(100,Math.max(0,(s.daily?calcProfit():0)/goals[s.day-1]*100))+'%';
+let happy=s.daily&&s.daily.total?Math.round(s.daily.happyPct||0):0;$('happyLabel').textContent=s.daily&&s.daily.total?`${happy}% (${s.customerHappy}/${s.served})`:'—';$('happyBar').style.width=happy+'%';
+$('timerLabel').textContent=s.phase==='service'?`${Math.max(0,Math.ceil(s.remaining))} sec`:'Not started';$('timerBar').style.width=s.phase==='service'?Math.max(0,s.remaining/100*100)+'%':'0%';
+$('served').textContent=s.served;$('left').textContent=s.left;$('tips').textContent=fmt(s.tips);$('starLabel').textContent='★'.repeat(stars())+'☆'.repeat(3-stars());$('challenge').textContent=`Day ${s.day}: ${challenges[s.day-1]}`;
+renderStock();renderStations();renderOrders();renderScene();
+$('startDay').textContent=s.phase==='service'?(s.paused?'▶ Resume Service':'⏸ Pause Service'):(s.phase==='review'?'✓ Day Complete':'▶ Start Service');$('startDay').disabled=s.phase==='review'||s.phase==='failed'||s.phase==='won';
+$('shopBtn').disabled=s.phase==='service'&&!s.paused;
+}
+function renderStock(){ $('stock').innerHTML=Object.keys(ingredientInfo).filter(k=>s.stock[k]!==undefined||['milk','fruit','meat'].some(x=>x===k&&s.unlocked.some(r=>recipes[r]?.need[x]))).map(k=>{let count=s.stock[k]||0,inf=ingredientInfo[k];return `<div class="stock"><strong>${inf.icon} ${inf.name}</strong><small>${fmt(inf.cost)} / portion</small><div class="stock-controls"><b>${count}</b><button class="secondary" data-buy="${k}" data-n="1" ${s.phase==='service'?'disabled':''}>+1</button><button class="secondary" data-buy="${k}" data-n="5" ${s.phase==='service'?'disabled':''}>+5</button></div></div>`}).join('');
+$('stock').querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>buyStock(b.dataset.buy,+b.dataset.n));}
+function renderStations(){
+const keys=['coffee','toaster','grill','prep'];if(s.upgrades.includes('second'))keys.push('extra');if(s.upgrades.includes('kitchen'))keys.push('kitchen');
+$('stations').innerHTML=keys.map(k=>{let inf=stationInfo[k],c=s.cooks.find(x=>x.station===k&&!x.done);return `<div class="cookline"><div class="cook-icon">${inf.icon}</div><div class="cook-info"><strong>${inf.name}</strong><small>${c?(c.done?'Ready to serve!':`${c.recipeName} · ${Math.ceil(c.left)}s left`):'Ready for an order'}</small>${c&&!c.done?`<div class="bar"><span style="width:${Math.max(0,100-c.left/c.total*100)}%"></span></div>`:''}</div><button class="${s.selectedStation===k?'orange':'secondary'}" data-station="${k}">${s.selectedStation===k?'Selected':'Select'}</button>${c&&c.done?`<button class="green" data-finish="${c.orderId}">Serve</button>`:''}</div>`}).join('');
+$('stations').querySelectorAll('[data-station]').forEach(b=>b.onclick=()=>{s.selectedStation=b.dataset.station;renderStations();notice(`${stationInfo[s.selectedStation].name} selected.`)});
+$('stations').querySelectorAll('[data-finish]').forEach(b=>b.onclick=()=>serve(+b.dataset.finish));
+$('sceneStations').innerHTML=keys.slice(0,4).map(k=>`<div class="station ${s.selectedStation===k?'active':''} ${stationBusy(k)?'busy':''}" data-scene-station="${k}">${stationInfo[k].icon}<br>${stationInfo[k].name.split(' ')[0]}</div>`).join('');
+$('sceneStations').querySelectorAll('[data-scene-station]').forEach(b=>b.onclick=()=>{s.selectedStation=b.dataset.sceneStation;update();notice(`${stationInfo[s.selectedStation].name} selected.`)});
+}
+function renderOrders(){
+$('orderCount').textContent=`${s.orders.filter(o=>o.status!=='served'&&o.status!=='left').length} active`;
+let arr=s.orders.filter(o=>!['served','left'].includes(o.status));
+$('orders').innerHTML=arr.length?arr.map(o=>{let pct=Math.max(0,o.patience/35*100),r=recipes[o.recipe];return `<div class="order ${s.selectedOrder===o.id?'selected':''}"><div class="order-head"><h3>${o.emoji} ${o.customer} · ${r.name}</h3><span class="pill">${o.status==='ready'?'READY':o.status==='cooking'?'COOKING':'WAITING'}</span></div><div class="sub">Order ${o.id} · Pay ${fmt(r.price)} · Needs ${totalNeed(r)}</div><div class="bar ${pct<30?'low':''}"><span style="width:${pct}%"></span></div><div class="order-head"><small>${o.status==='ready'?'✨ Food is ready':o.status==='cooking'?'🍳 Being prepared':`Patience ${Math.ceil(o.patience)}s`}</small><div class="order-actions"><button class="secondary" data-select="${o.id}">Select</button>${o.status==='ready'?`<button class="green" data-serve="${o.id}">Serve +</button>`:`<button class="orange" data-cook="${o.id}" ${s.phase!=='service'||s.paused||o.status==='cooking'?'disabled':''}>Cook</button>`}</div></div></div>`}).join(''):'<p class="sub">No active orders. Customers will arrive during service.</p>';
+$('orders').querySelectorAll('[data-select]').forEach(b=>b.onclick=()=>{s.selectedOrder=+b.dataset.select;update()});
+$('orders').querySelectorAll('[data-cook]').forEach(b=>b.onclick=()=>cook(+b.dataset.cook));
+$('orders').querySelectorAll('[data-serve]').forEach(b=>b.onclick=()=>serve(+b.dataset.serve));
+}
+function renderScene(){
+$('sceneLabel').textContent=s.phase==='service'?'Service is open! · '+Math.max(0,Math.ceil(s.remaining))+' sec':s.phase==='review'?'Day review · '+(s.day===7?'Final challenge':'Next day awaits'):`Opening soon · Day ${s.day}`;
+$('sceneTip').textContent=s.phase==='service'?'Prioritize customers with low patience!':'Tap a station, select an order, and cook!';
+let active=s.orders.filter(o=>!['served','left'].includes(o.status));let seats=s.upgrades.includes('seating')?6:4;let n=Math.min(seats,Math.max(2,active.length));$('tables').innerHTML=Array.from({length:n},(_,i)=>{let o=active[i];return `<div class="table">${o?`<span class="customer">${o.status==='ready'?'😋':o.patience<12?'😠':['🧑🏻','👩🏽','🧑🏾','👩🏻','🧑🏼'][i%5]}</span><span class="bubble">${o.emoji}</span>`:''}</div>`}).join('');
+}
+function buyStock(k,n){if(s.phase==='service'){toast('Pause or finish service before shopping.',true);return}let cost=ingredientInfo[k].cost*n;if(s.money<cost){toast('Not enough money for that stock purchase.',true);return}s.money-=cost;s.stock[k]=(s.stock[k]||0)+n;s.purchaseCost+=cost;save();sound(520);update();notice(`Bought ${n} ${ingredientInfo[k].name} portion${n>1?'s':''} for ${fmt(cost)}.`)}
+function openShop(){if(s.phase==='service'&&!s.paused){toast('Pause service before opening the shop.',true);return}
+let upgrades=[
+['fastCoffee','Faster coffee machine','₩12,000','Coffee drinks cook 25% faster.','one'],
+['second','Second cooking station','₩15,000','A second item can cook at once.','one'],
+['seating','Extra seating','₩10,000','Seats 2 more customers.','one'],
+['kitchen','Kitchen expansion','₩20,000','Adds an extra cooking station for flexible service.','one'],
+['helper','Helpful cafe assistant','₩25,000','Automatically finishes one eligible cooking task at a time.','one'],
+['marketing','Marketing campaign','₩8,000','Next day brings more customers (and more pressure).','one'],
+['recipebook','Recipe book','₩6,000','Unlocks the next recipe available for your day.','one'],
+['grand','Grand Restaurant upgrade','₩60,000','Final transformation. Requires Day 7 and reputation 80+.','grand']
+];
+openModal(`<h2>🛒 Stock & Upgrade Shop</h2><p>Spend carefully: ingredients are needed to earn sales, while upgrades improve future service. Your current balance is <b>${fmt(s.money)}</b>.</p><div class="modal-grid">${upgrades.map(([id,name,cost,desc])=>{let owned=id==='grand'?s.grand:s.upgrades.includes(id),disabled=owned||s.money<Number(cost.replace(/[₩,]/g,''))||(id==='grand'&&(s.day<7||s.reputation<80));return `<div class="modal-card"><strong>${name} ${owned?'✓':''}</strong><p class="sub">${desc}</p><div class="section-title"><b>${cost}</b><button data-upgrade="${id}" ${disabled?'disabled':''}>${owned?'Owned':'Buy'}</button></div></div>`}).join('')}</div><p class="footer-note">Recipe unlocks: ${Object.keys(recipes).filter(k=>!s.unlocked.includes(k)).map(k=>`${recipes[k].name} (Day ${recipes[k].day})`).join(' · ')||'All recipes unlocked'}</p><div class="modal-actions"><button class="secondary" id="closeShop">Close</button></div>`);
+$('closeShop').onclick=closeModal;$('modalRoot').querySelectorAll('[data-upgrade]').forEach(b=>b.onclick=()=>buyUpgrade(b.dataset.upgrade));
+}
+function buyUpgrade(id){const prices={fastCoffee:12000,second:15000,seating:10000,kitchen:20000,helper:25000,marketing:8000,recipebook:6000,grand:60000};if(s.upgrades.includes(id)||id==='grand'&&s.grand)return;
+if(s.money<prices[id])return toast('Not enough money for this upgrade.',true);
+if(id==='grand'&&(s.day<7||s.reputation<80))return toast('Grand Restaurant requires Day 7 and reputation 80+.',true);
+if(id==='recipebook'){let key=Object.keys(recipes).find(k=>!s.unlocked.includes(k)&&recipes[k].day<=s.day);if(!key)return toast('No new recipe is available yet.',true);s.unlocked.push(key);s.money-=prices[id];s.upgrades.push(id);toast(`Unlocked ${recipes[key].name}!`)}
+else if(id==='grand'){s.money-=prices[id];s.grand=true;toast('Your cafe is now a Grand Restaurant! 🎉')}
+else {s.money-=prices[id];s.upgrades.push(id);toast('Upgrade purchased: '+idName(id));}
+s.purchaseCost+=prices[id];save();sound(780);update();openShop();}
+function idName(id){return ({fastCoffee:'Faster coffee machine',second:'Second cooking station',seating:'Extra seating',kitchen:'Kitchen expansion',helper:'Cafe assistant',marketing:'Marketing campaign'})[id]||id}
+function startDay(){
+if(s.phase==='service'){s.paused=!s.paused;update();return}
+if(s.phase==='review'||s.phase==='failed'||s.phase==='won')return;
+s.phase='service';s.paused=false;s.remaining=100;s.orders=[];s.cooks=[];s.selectedOrder=null;s.served=0;s.left=0;s.sales=0;s.tips=0;s.consumed=0;s.customerHappy=0;s.arrivals=0;s.purchaseCost=0;s.serviceEnded=false;s.startedAt=Date.now();s.dayStartMoney=s.money;s.dayStartStock={...s.stock};s.daily={};if(s.upgrades.includes('marketing'))s.marketingBoost=true;
+notice('Service started! Watch patience and stock.');sound(680);spawnOrder();update();save();
+}
+function spawnOrder(){
+if(s.phase!=='service'||s.paused||s.remaining<=0)return;
+let available=availableRecipes().filter(([k,r])=>hasIngredients(r));if(!available.length){notice('You are out of ingredients for available recipes. Buy stock next day or serve existing orders.',true);return}
+let weights=available.map(([k,r])=>[k,r]);let [key,r]=weights[Math.floor(Math.random()*weights.length)];
+let id=s.nextOrderId++,names=['Mina','Jisoo','Noah','Yuna','Alex','Sora','Jun','Hana','Milo','Ara'];
+let o={id,recipe:key,customer:names[Math.floor(Math.random()*names.length)],emoji:['🧑🏻','👩🏽','🧑🏾','👩🏻','🧑🏼'][Math.floor(Math.random()*5)],patience:35+Math.random()*7,status:'waiting',created:s.remaining};
+s.orders.push(o);s.arrivals++;s.selectedOrder=s.selectedOrder||id;update();
+}
+function cook(id){
+if(s.phase!=='service'||s.paused)return toast('Start service first.',true);
+let o=s.orders.find(x=>x.id===id);if(!o||o.status==='cooking'||o.status==='ready')return;
+let r=recipes[o.recipe], station=s.selectedStation;
+if(station!==r.station&&station!=='extra'&&!(station==='kitchen'&&s.upgrades.includes('kitchen'))){notice(`${r.name} needs the ${stationInfo[r.station].name}.`,true);sound(190);return}
+if(stationBusy(station)){notice(`${stationInfo[station].name} is busy. Choose another station or wait.`,true);return}
+if(!hasIngredients(r)){notice(`Not enough ingredients: ${totalNeed(r)}.`,true);return}
+Object.entries(r.need).forEach(([k,v])=>s.stock[k]-=v);s.consumed+=costNeed(r);o.status='cooking';o.station=station;
+let time=cookingTime(r);s.cooks.push({orderId:id,station,recipeName:r.name,left:time,total:time,done:false});notice(`Cooking ${r.name} at ${stationInfo[station].name}…`);sound(500);update();save();
+}
+function serve(id){
+if(s.phase!=='service'||s.paused)return toast('Service is not running.',true);
+let o=s.orders.find(x=>x.id===id);if(!o)return;let c=s.cooks.find(x=>x.orderId===id);
+if(!c||!c.done){notice('That order is not ready yet.',true);return}
+let r=recipes[o.recipe],fast=o.patience>20,tip=fast?Math.round(r.price*.1):0;
+o.status='served';s.served++;s.sales+=r.price;s.tips+=tip;s.money+=r.price+tip;if(o.patience>0)s.customerHappy++;if(o.patience<10)s.reputation=Math.max(0,s.reputation-1);else s.reputation=Math.min(100,s.reputation+(fast?1:0));
+s.cooks=s.cooks.filter(x=>x.orderId!==id);s.selectedOrder=null;notice(`${r.name} served! +${fmt(r.price)}${tip?` and ${fmt(tip)} tip`:''}.`);sound(820);update();save();
+}
+function leaveOrder(o){if(['served','left'].includes(o.status))return;o.status='left';s.left++;s.reputation=Math.max(0,s.reputation-3);let c=s.cooks.find(x=>x.orderId===o.id);if(c){s.cooks=s.cooks.filter(x=>x.orderId!==o.id)}notice(`${o.customer} left impatiently. Reputation −3.`,true)}
+function endService(){
+if(s.phase!=='service')return;s.phase='review';s.paused=false;s.serviceEnded=true;
+s.orders.filter(o=>!['served','left'].includes(o.status)).forEach(o=>leaveOrder(o));
+let profit=calcProfit(),happyPct=s.served?Math.round(s.customerHappy/s.served*100):0;
+s.daily={profit,happyPct,total:s.served+s.left,left:s.left,served:s.served, sales:s.sales,tips:s.tips,consumed:s.consumed, stars:0};
+s.daily.stars=Number(profit>=goals[s.day-1])+Number(happyPct>=60)+Number(s.left<=3);
+let passed=profit>=goals[s.day-1]&&happyPct>=60&&s.left<=3;
+s.phase=passed?(s.day===7?'won':'review'):'failed';
+if(passed){s.completed=Math.max(s.completed,s.day);if(s.day<7){s.day++;Object.keys(recipes).forEach(k=>{if(recipes[k].day&&recipes[k].day<=s.day&&!s.unlocked.includes(k)){s.unlocked.push(k);toast(`New recipe unlocked: ${recipes[k].name}!`)}})}}
+save();update();showReview(passed);
+}
+function showReview(passed){
+let d=s.daily||{},final=s.phase==='won';
+openModal(`<h2>${final?'🏆 Grand Restaurant Victory!':passed?'🌟 Day Complete!':'💪 Day Needs a Retry'}</h2><p>${final?'You completed all seven days and built your cafe into a Grand Restaurant!':passed?`You passed the day. Day ${s.day} is now unlocked.`:'Review the results, adjust your stock or strategy, and try again.'}</p><div class="modal-grid"><div class="modal-card"><small>Operating profit</small><h2>${fmt(d.profit||0)}</h2><span class="tag">${(d.profit||0)>=goals[final?6:Math.max(0,s.day-(passed?1:0))]?'Goal reached':'Goal missed'}</span></div><div class="modal-card"><small>Customer happiness</small><h2>${d.happyPct||0}%</h2><span class="tag">${(d.happyPct||0)>=60?'Requirement met':'Need 60%+'}</span></div><div class="modal-card"><small>Served / left</small><h2>${d.served||0} / ${d.left||0}</h2><span class="tag">${(d.left||0)<=3?'Loss limit met':'Too many left'}</span></div><div class="modal-card"><small>Sales · Tips · Ingredient costs</small><p><b>${fmt(d.sales||0)}</b> · ${fmt(d.tips||0)} · ${fmt(d.consumed||0)}</p><small>Stars: ${'★'.repeat(d.stars||0)}${'☆'.repeat(3-(d.stars||0))} · Reputation ${s.reputation}/100</small></div></div>
+${final?`<p>Final business rating: <b>${s.reputation>=90?'Legendary':s.reputation>=80?'Excellent':'Grand opening complete'}</b>. Your cafe is now the talk of town! 🎉</p>`:''}
+<div class="modal-actions">${!final?`<button class="green" id="continueBtn">${passed?'Prepare Next Day':'Retry Day'}</button>`:''}<button class="secondary" id="reviewClose">Close Review</button><button class="secondary" id="menuBtn">Main Menu</button></div>`);
+$('reviewClose').onclick=closeModal;$('menuBtn').onclick=()=>{closeModal();showMenu()};
+if(!final)$('continueBtn').onclick=()=>{closeModal();if(passed){s.phase='prep';s.paused=false;notice(`Day ${s.day} unlocked! Buy supplies and prepare.`)}else{retryDay()}update();save()};
+}
+function retryDay(){
+s.money=s.dayStartMoney||s.money;s.stock={...(s.dayStartStock||s.stock)};s.phase='prep';s.orders=[];s.cooks=[];s.daily=null;s.remaining=100;s.served=0;s.left=0;s.sales=0;s.tips=0;s.consumed=0;s.customerHappy=0;s.arrivals=0;s.serviceEnded=false;s.paused=false;notice('Day reset to its starting money and stock. Try a new strategy!');save();update();
+}
+function review(){if(s.phase==='service'){toast('Finish service to review the day.',true);return}if(!s.daily){toast('Complete a service day first.',true);return}showReview(s.phase!=='failed')}
+function showMenu(){openModal(`<h2>☕ Welcome to Amisha’s Cafe Rush!</h2><p>Start with a small cafe, manage your stock, cook to order, and grow into a Grand Restaurant across seven days.</p><div class="modal-grid"><div class="modal-card"><b>🎯 Your goal</b><p class="sub">Reach the daily operating-profit target, keep at least 60% of served customers happy, and let no more than 3 customers leave.</p></div><div class="modal-card"><b>🍳 How to cook</b><p class="sub">Select a customer order, tap its correct station, then press Cook. When ready, press Serve.</p></div><div class="modal-card"><b>🛒 Plan ahead</b><p class="sub">Buy ingredients during prep. Stock costs money, but no stock means you cannot cook that recipe.</p></div><div class="modal-card"><b>💾 Progress</b><p class="sub">Auto-saves in this browser. Export a JSON backup to move your progress to another device.</p></div></div><div class="modal-actions"><button class="green" id="menuStart">Let's Play!</button><button class="secondary" id="menuShop">Stock & Upgrades</button><button class="secondary" id="menuClose">Close</button></div>`);$('menuStart').onclick=()=>{closeModal();update()};$('menuClose').onclick=closeModal;$('menuShop').onclick=()=>{closeModal();openShop()}}
+function togglePause(){if(s.phase!=='service')return;s.paused=!s.paused;update();notice(s.paused?'Service paused. Timers are stopped.':'Service resumed.')}
+function loop(){if(s.phase!=='service'||s.paused)return;
+s.remaining-=.25;
+s.cooks.forEach(c=>{if(!c.done){c.left-=.25;if(c.left<=0){c.left=0;c.done=true;let o=s.orders.find(x=>x.id===c.orderId);if(o)o.status='ready';notice(`${c.recipeName} is ready to serve!`);sound(700)}}});
+s.orders.forEach(o=>{if(!['served','left'].includes(o.status)&&o.status!=='ready'){o.patience-=.25;if(o.patience<=0)leaveOrder(o)}});
+if(s.upgrades.includes('helper')){let c=s.cooks.find(x=>!x.done);if(c){c.left-=.25;if(c.left<=0){c.left=0;c.done=true;let o=s.orders.find(x=>x.id===c.orderId);if(o)o.status='ready';notice('Your helper finished an order!')}}}
+if(Math.floor(s.remaining)%8===0&&Math.abs(s.remaining-Math.floor(s.remaining))<.26){let active=s.orders.filter(o=>!['served','left'].includes(o.status)).length;let max=s.upgrades.includes('seating')?6:4;let interval=s.day>=6?5:s.day>=3?7:10;if(active<max&&Math.random()<.75)spawnOrder();if(s.marketingBoost&&Math.random()<.7)spawnOrder()}
+if(s.remaining<=0){s.remaining=0;endService();return}
+update();
+}
+function exportBackup(){let blob=new Blob([JSON.stringify(s,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='amishas-cafe-rush-backup.json';a.click();URL.revokeObjectURL(url);toast('Backup exported. Keep the JSON file safe.')}
+function importBackup(file){let rd=new FileReader();rd.onload=()=>{try{let d=JSON.parse(rd.result);if(!d||!Number.isInteger(d.day)||d.day<1||d.day>7||typeof d.money!=='number'||!d.stock||typeof d.stock!=='object'||!Array.isArray(d.unlocked)||!Array.isArray(d.upgrades)||!Number.isFinite(d.reputation))throw Error('invalid');let clean={...fresh(),...d};clean.phase='prep';clean.paused=false;clean.orders=[];clean.cooks=[];clean.daily=null;clean.reputation=Math.max(0,Math.min(100,clean.reputation));Object.keys(ingredientInfo).forEach(k=>clean.stock[k]=Math.max(0,Math.floor(Number(clean.stock[k])||0)));s=clean;save();update();closeModal();toast('Backup restored successfully!')}catch(e){toast('That backup is invalid. Your current save was not changed.',true)}};rd.readAsText(file)}
+function newGame(){openModal(`<h2>Start a new game?</h2><p>This will replace the current saved cafe progress in this browser. Export a backup first if you want to keep it.</p><div class="modal-actions"><button class="red" id="confirmNew">Yes, start over</button><button class="secondary" id="cancelNew">Cancel</button></div>`);$('confirmNew').onclick=()=>{s=fresh();save();closeModal();update();showMenu()};$('cancelNew').onclick=closeModal}
+$('startDay').onclick=startDay;$('pauseBtn').onclick=togglePause;$('soundBtn').onclick=()=>{s.sound=!s.sound;$('soundBtn').textContent=s.sound?'🔊 Sound':'🔇 Muted';save();if(s.sound)sound()};$('shopBtn').onclick=openShop;$('reviewBtn').onclick=review;$('backupOut').onclick=exportBackup;$('backupIn').onclick=()=>$('fileInput').click();$('fileInput').onchange=e=>{if(e.target.files[0])importBackup(e.target.files[0]);e.target.value=''};$('newGame').onclick=newGame;
+load();update();if(!localStorage.getItem('amishaCafeRushIntro')){showMenu();localStorage.setItem('amishaCafeRushIntro','1')}
+timer=setInterval(loop,250);
+})();
+</script></body></html>
