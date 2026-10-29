@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#123f52" />
+<title>Tasty Fish — A Pond Adventure</title>
+<style>
+  :root{--ink:#123b4d;--deep:#092d41;--teal:#167a86;--mint:#c9f5dc;--cream:#fff8df;--gold:#ffcf5a;--coral:#ff806d;--panel:rgba(255,252,235,.95)}
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;font-family:ui-rounded,"Trebuchet MS",system-ui,-apple-system,sans-serif;color:var(--ink);background:#0b3548}
+  body{min-height:100dvh;display:flex;justify-content:center;align-items:center;padding:clamp(8px,2vw,22px);overflow-x:hidden}
+  button{font:inherit;cursor:pointer;touch-action:manipulation;border:0}
+  button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+  .game-shell{width:min(1180px,100%);background:#f5f4d9;border:5px solid #d8f5ce;border-radius:26px;overflow:hidden;box-shadow:0 24px 70px #001d2c90}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;background:linear-gradient(110deg,#0d4055,#176a73);color:white}
+  .brand{display:flex;align-items:center;gap:10px;min-width:0}.brand-mark{display:grid;place-items:center;width:42px;height:42px;border-radius:14px;background:#ffce57;color:#154657;font-size:25px;box-shadow:inset 0 -3px #d69e36}.brand h1{margin:0;font-size:clamp(20px,3.5vw,29px);letter-spacing:.2px;line-height:1.1}.brand small{display:block;font-size:11px;letter-spacing:1.7px;text-transform:uppercase;color:#bcebdc;margin-top:3px}
+  .top-actions{display:flex;align-items:center;gap:8px}.pill-btn{padding:10px 14px;border-radius:13px;background:#ffffff18;color:#fff;border:1px solid #ffffff45;font-weight:800}.pill-btn:hover{background:#ffffff2b}.pill-btn:disabled{opacity:.45;cursor:not-allowed}
+  .hud{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;padding:13px 16px;background:#e1f2d9;border-bottom:1px solid #c2dfc5}
+  .stat{min-width:0;background:#fffdf0;border:1px solid #d4e5ca;border-radius:14px;padding:8px 11px;box-shadow:0 2px 0 #bfd9c1}.stat-label{font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:#628176}.stat-value{font-size:clamp(15px,2vw,22px);font-weight:950;white-space:nowrap;margin-top:2px;color:#174657}.stat-value.warn{color:#c34d3e}.stat-sub{font-size:10px;color:#6b8a7c;margin-top:1px}
+  .pond-wrap{position:relative;background:#166f78;padding:10px}.pond-frame{position:relative;overflow:hidden;border-radius:19px;border:3px solid #a4e7c3;background:#58bfb0;box-shadow:inset 0 0 0 5px #2c9b99;isolation:isolate;touch-action:none;user-select:none;-webkit-user-select:none}.pond-frame canvas{display:block;width:100%;height:clamp(350px,56vh,580px);min-height:320px;touch-action:none;cursor:crosshair}
+  .pond-tip{position:absolute;left:14px;bottom:12px;z-index:2;padding:7px 10px;border-radius:10px;background:#073d4dbd;color:#f3ffe9;font-size:12px;font-weight:750;pointer-events:none;backdrop-filter:blur(5px)}
+  .legend{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;padding:12px 14px;background:#fff8df}.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:#335b5d}.legend-badge{width:26px;height:26px;display:grid;place-items:center;border-radius:9px;background:#e4f4d9;font-size:15px}.legend-item:last-child .legend-badge{background:#ffe0da}
+  .footer{display:flex;gap:12px;justify-content:space-between;align-items:center;padding:11px 17px;background:#d7edce;color:#477064;font-size:11px}.footer strong{color:#1d5860}.mobile-note{display:none}
+  .overlay{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:16px;background:linear-gradient(135deg,#063849a8,#092d41c7);backdrop-filter:blur(5px)}.overlay.hidden{display:none}.dialog{width:min(520px,100%);max-height:100%;overflow:auto;background:var(--panel);border:3px solid #e2f3d4;border-radius:24px;padding:clamp(18px,4vw,30px);text-align:center;box-shadow:0 18px 55px #03273570;animation:pop .22s ease-out}.dialog-emoji{font-size:48px;line-height:1.2}.eyebrow{font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:950;color:#34847e;margin:7px 0}.dialog h2{font-size:clamp(28px,5vw,42px);line-height:1.03;margin:7px 0 12px;color:#124354}.dialog p{line-height:1.5;margin:8px auto;color:#4d6b68;max-width:420px}.mission-chip{display:inline-flex;gap:8px;align-items:center;background:#e1f4d6;color:#25645e;border-radius:999px;padding:8px 13px;font-size:12px;font-weight:900;margin:6px 0 12px}.mission-details{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}.detail{background:#f0f5dc;border:1px solid #d9e9c9;border-radius:14px;padding:11px}.detail span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:900;color:#769087}.detail strong{display:block;font-size:22px;color:#174c5b;margin-top:3px}.primary{display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:14px 20px;margin-top:9px;border-radius:14px;background:#ffcb51;color:#173f4b;font-size:16px;font-weight:950;box-shadow:0 4px 0 #d99d32;transition:transform .12s,filter .12s}.primary:hover{filter:brightness(1.04);transform:translateY(-1px)}.primary:active{transform:translateY(2px);box-shadow:0 2px 0 #d99d32}.secondary{background:#dcefd3;box-shadow:0 4px 0 #b8d5b1;color:#23515c}.hint{font-size:12px!important;margin-top:13px!important}.outcome-number{font-size:28px;font-weight:1000;color:#238776}.mini-rules{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin:12px 0}.mini-rules span{background:#fff;border:1px solid #dfead3;padding:6px 9px;border-radius:8px;font-size:11px;font-weight:800;color:#55766b}
+  @keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @media(max-width:650px){body{padding:0;align-items:stretch}.game-shell{border:0;border-radius:0;width:100%;min-height:100dvh;display:flex;flex-direction:column}.topbar{padding:12px}.brand-mark{width:36px;height:36px;border-radius:11px}.brand small{font-size:9px}.pill-btn{padding:9px 10px;font-size:12px}.hud{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:9px}.stat{padding:7px 9px}.stat:nth-child(4),.stat:nth-child(5){grid-column:span 1}.pond-wrap{padding:6px;flex:1;display:flex;flex-direction:column}.pond-frame{flex:1;min-height:360px}.pond-frame canvas{height:min(58dvh,540px);min-height:360px}.pond-tip{font-size:10px;left:8px;bottom:8px}.legend{gap:6px;padding:10px 5px}.legend-item{font-size:10px;gap:4px}.legend-badge{width:22px;height:22px;font-size:13px}.footer{padding:10px;font-size:10px}.mobile-note{display:inline}.dialog{padding:20px 17px}.dialog-emoji{font-size:42px}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<main class="game-shell" aria-label="Tasty Fish game">
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark" aria-hidden="true">🐟</div><div><h1>Tasty Fish</h1><small>A pond adventure</small></div></div>
+    <div class="top-actions"><button id="soundBtn" class="pill-btn" type="button" aria-pressed="true" title="Toggle sound effects">🔊 Sound</button><button id="pauseBtn" class="pill-btn" type="button" disabled>Ⅱ Pause</button></div>
+  </header>
+  <section class="hud" aria-label="Mission information">
+    <div class="stat"><div class="stat-label">Mission</div><div id="missionStat" class="stat-value">1 / 5</div><div id="storyStat" class="stat-sub">Family dinner</div></div>
+    <div class="stat"><div class="stat-label">Time left</div><div id="timeStat" class="stat-value">45s</div><div class="stat-sub">Beat the clock</div></div>
+    <div class="stat"><div class="stat-label">Dinner catch</div><div id="catchStat" class="stat-value">0 / 4</div><div class="stat-sub">Safe fish only</div></div>
+    <div class="stat"><div class="stat-label">Run score</div><div id="scoreStat" class="stat-value">0</div><div id="missionScoreStat" class="stat-sub">This mission: 0 pts</div></div>
+    <div class="stat"><div class="stat-label">Arrows</div><div id="arrowsStat" class="stat-value">5 / 5</div><div id="reloadStat" class="stat-sub">Ready to shoot</div></div>
+  </section>
+  <section class="pond-wrap">
+    <div class="pond-frame" id="pondFrame">
+      <canvas id="pond" aria-label="Pond play area. Click or tap inside the pond to shoot an arrow. Fish move, so aim ahead of them."></canvas>
+      <div class="pond-tip">🎯 Aim ahead of moving fish · Click or tap to shoot</div>
+      <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+        <div class="dialog" id="dialog"></div>
+      </div>
+    </div>
+  </section>
+  <section class="legend" aria-label="Fish guide">
+    <div class="legend-item"><span class="legend-badge">🐠</span> Normal · 1 point</div>
+    <div class="legend-item"><span class="legend-badge">⚡</span> Fast · 1 point</div>
+    <div class="legend-item"><span class="legend-badge">⭐</span> Bonus · 3 points</div>
+    <div class="legend-item"><span class="legend-badge">⚠️</span> Dangerous · −5 seconds</div>
+  </section>
+  <footer class="footer"><span>Help catch dinner, one careful shot at a time.</span><span><strong>5 missions</strong> · <span class="mobile-note">Touch-ready · </span>Made for curious minds</span></footer>
+</main>
+<script>
+(() => {
+  'use strict';
+  const canvas = document.getElementById('pond');
+  const ctx = canvas.getContext('2d');
+  const frame = document.getElementById('pondFrame');
+  const overlay = document.getElementById('overlay');
+  const dialog = document.getElementById('dialog');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const soundBtn = document.getElementById('soundBtn');
+  const ui = {
+    mission: document.getElementById('missionStat'), story: document.getElementById('storyStat'),
+    time: document.getElementById('timeStat'), caught: document.getElementById('catchStat'),
+    score: document.getElementById('scoreStat'), missionScore: document.getElementById('missionScoreStat'), arrows: document.getElementById('arrowsStat'), reload: document.getElementById('reloadStat')
+  };
+
+  const missions = [
+    {seconds:45, targets:[4,5]}, {seconds:40, targets:[5,6]}, {seconds:35, targets:[6,7]},
+    {seconds:30, targets:[7,8]}, {seconds:25, targets:[8,9]}
+  ];
+  const stories = [
+    ['The family is waiting for a fresh fish dinner. Fill their plates before sunset!','A simple family dinner is planned. Pick your shots and bring home the catch.'],
+    ['Your cousins are visiting! Catch enough fish for everyone at the table.','Relatives are on their way. There is no time to waste in the pond!'],
+    ['It is a special celebration meal. Catch carefully and make it memorable!','The family has a reason to celebrate. A few bonus fish could help your score.'],
+    ['Unexpected guests have arrived. The dinner table needs more fish, quickly!','The guest list grew! Watch the fast fish and avoid the dangerous ones.'],
+    ['The grand family feast is tonight. This is your biggest fishing challenge!','Everyone is gathered for the final feast. Stay focused and aim wisely!']
+  ];
+  const FISH = {
+    normal: {speed:67, points:1, color:'#ffb85c', fin:'#ee8d42', radius:18},
+    fast: {speed:138, points:1, color:'#72e5f1', fin:'#2ca8c4', radius:17},
+    bonus: {speed:83, points:3, color:'#ffe36b', fin:'#efa92f', radius:19},
+    dangerous: {speed:96, points:0, color:'#f17e82', fin:'#be4259', radius:20}
+  };
+  let W=800,H=500,dpr=1, mode='briefing', missionIndex=0, target=4, timeLeft=45, caught=0, score=0, missionStartScore=0;
+  let missionStories=[], missionTargets=[], fish=[], arrows=[], effects=[], decorations=[];
+  let arrowCount=5, reloadLeft=0, spawnLeft=2, lastTime=0, raf=0, nextId=1, muted=false, lastSoundAt=0;
+
+  function random(a,b){return Math.random()*(b-a)+a}
+  function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
+  function randTarget(m){return pick(missions[m].targets)}
+  function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+  function fitCanvas(){
+    const rect=canvas.getBoundingClientRect(); if(!rect.width||!rect.height)return;
+    const oldW=W,oldH=H; W=rect.width;H=rect.height;dpr=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+    if(oldW>0&&oldH>0&&fish.length){const sx=W/oldW,sy=H/oldH;fish.forEach(f=>{f.x*=sx;f.y*=sy;f.vx*=sx;f.vy*=sy});arrows.forEach(a=>{a.x*=sx;a.y*=sy;a.sx*=sx;a.sy*=sy;a.tx*=sx;a.ty*=sy});effects.forEach(e=>{e.x*=sx;e.y*=sy})}
+    decorations=[];for(let i=0;i<13;i++)decorations.push({x:random(18,W-18),y:random(30,H-20),r:random(7,20),a:random(.14,.34),phase:random(0,6.28)});
+    draw();
+  }
+  function pondBounds(){return {left:10,right:W-10,top:10,bottom:H-10}}
+  function addFish(type){
+    const spec=FISH[type], margin=spec.radius+15;
+    const safeLeft=Math.min(W*.36,Math.max(80,W*.22));
+    let x,y,tries=0;
+    do {x=random(Math.max(margin,safeLeft),Math.max(safeLeft+1,W-margin));y=random(margin+10,H-margin-8);tries++}
+    while(tries<18&&(Math.hypot(x-W*.12,y-H*.79)<90||fish.some(f=>Math.hypot(x-f.x,y-f.y)<58)));
+    const angle=random(0,Math.PI*2), speed=spec.speed*random(.78,1.18);
+    fish.push({id:nextId++,type,x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,r:spec.radius,wiggle:random(0,6.28),turn:random(.65,1.7),alive:true});
+  }
+  function spawnType(){const r=Math.random();return r<.50?'normal':r<.75?'fast':r<.90?'bonus':'dangerous'}
+  function spawnPair(){if(fish.length+2>12)return;addFish(spawnType());addFish(spawnType())}
+  function initMission(){
+    fish=[];arrows=[];effects=[];arrowCount=5;reloadLeft=0;spawnLeft=2;timeLeft=missions[missionIndex].seconds;caught=0;missionStartScore=score;
+    target=missionTargets[missionIndex];
+    spawnPair();ui.story.textContent='Dinner mission '+(missionIndex+1);updateHUD();
+    mode='briefing';showBriefing();pauseBtn.disabled=true;pauseBtn.textContent='Ⅱ Pause';
+  }
+  function newRun(){
+    missionIndex=0;score=0;missionTargets=missions.map((_,i)=>randTarget(i));missionStories=missions.map((_,i)=>pick(stories[i]));
+    initMission();
+  }
+  function showBriefing(){
+    overlay.classList.remove('hidden');
+    const m=missions[missionIndex];
+    dialog.innerHTML=`<div class="dialog-emoji">${missionIndex===4?'🍲':'🐟'}</div><div class="eyebrow">Mission ${missionIndex+1} of 5</div><h2 id="dialogTitle">${missionIndex===0?'Let’s Catch!':`Ready for Mission ${missionIndex+1}?`}</h2><p>${esc(missionStories[missionIndex])}</p><div class="mission-chip">🍽️ Family dinner challenge</div><div class="mission-details"><div class="detail"><span>Fish to catch</span><strong>${target} safe fish</strong></div><div class="detail"><span>Time limit</span><strong>${m.seconds} seconds</strong></div></div><div class="mini-rules"><span>🏹 5 arrows</span><span>⏳ Reload: 3 sec</span><span>⚠️ Danger: −5 sec</span></div><button class="primary" id="startBtn" type="button">Let’s Catch <span>→</span></button><p class="hint">Aim a little ahead of moving fish. Bonus fish earn 3 points, but count as only 1 fish.</p>`;
+    document.getElementById('startBtn').addEventListener('click',startMission,{once:true});
+  }
+  function startMission(){if(mode!=='briefing')return;mode='playing';overlay.classList.add('hidden');pauseBtn.disabled=false;pauseBtn.textContent='Ⅱ Pause';lastTime=performance.now();updateHUD();if(!raf)raf=requestAnimationFrame(loop)}
+  function showPause(){if(mode!=='playing')return;mode='paused';pauseBtn.textContent='▶ Resume';overlay.classList.remove('hidden');dialog.innerHTML=`<div class="dialog-emoji">⏸️</div><div class="eyebrow">Mission paused</div><h2 id="dialogTitle">Take a breath</h2><p>The pond is frozen. Your timer, fish, arrows, and reload countdown are all paused.</p><div class="mission-chip">Caught ${caught} of ${target} · Score ${score}</div><button class="primary" id="resumeBtn" type="button">▶ Resume fishing</button><button class="primary secondary" id="restartPauseBtn" type="button">↻ Restart run</button>`;document.getElementById('resumeBtn').addEventListener('click',resumeGame,{once:true});document.getElementById('restartPauseBtn').addEventListener('click',newRun,{once:true});draw()}
+  function resumeGame(){if(mode!=='paused')return;mode='playing';overlay.classList.add('hidden');pauseBtn.textContent='Ⅱ Pause';lastTime=performance.now();if(!raf)raf=requestAnimationFrame(loop)}
+  function endMission(won){if(mode!=='playing')return;mode=won?'success':'lost';arrows=[];pauseBtn.disabled=true;pauseBtn.textContent='Ⅱ Pause';updateHUD();overlay.classList.remove('hidden');
+    if(won&&missionIndex===4){mode='victory';dialog.innerHTML=`<div class="dialog-emoji">🎉🍲🎉</div><div class="eyebrow">All 5 missions complete</div><h2 id="dialogTitle">You Win! Your Family Gets Dinner!</h2><p>You did it! The whole family can sit down to a tasty fish dinner.</p><div class="mission-details"><div class="detail"><span>Safe fish caught</span><strong>${caught} / ${target}</strong></div><div class="detail"><span>Final run score</span><strong>${score} pts</strong></div></div><div class="outcome-number">Dinner is served!</div><button class="primary" id="againBtn" type="button">↻ Play Again</button>`;document.getElementById('againBtn').addEventListener('click',newRun,{once:true});}
+    else if(won){dialog.innerHTML=`<div class="dialog-emoji">✅🐟</div><div class="eyebrow">Mission complete</div><h2 id="dialogTitle">Great catch!</h2><p>You caught enough safe fish. The family dinner is getting closer.</p><div class="mission-details"><div class="detail"><span>Mission catch</span><strong>${caught} / ${target}</strong></div><div class="detail"><span>Points this mission</span><strong>+${score-missionStartScore}</strong></div></div><div class="mission-chip">Total run score: ${score} points</div><button class="primary" id="continueBtn" type="button">Continue to Mission ${missionIndex+2} →</button>`;document.getElementById('continueBtn').addEventListener('click',()=>{if(mode!=='success')return;missionIndex++;initMission()}, {once:true});}
+    else{dialog.innerHTML=`<div class="dialog-emoji">🌙🐟</div><div class="eyebrow">Mission ${missionIndex+1} ended</div><h2 id="dialogTitle">You Lost! Your Family Goes to Sleep Hungry!</h2><p>The timer ran out before you caught enough safe fish. Take what you learned and try a fresh run.</p><div class="mission-details"><div class="detail"><span>Your catch</span><strong>${caught} / ${target}</strong></div><div class="detail"><span>Run score</span><strong>${score} pts</strong></div></div><button class="primary" id="tryAgainBtn" type="button">↻ Try Again</button>`;document.getElementById('tryAgainBtn').addEventListener('click',newRun,{once:true});}
+    draw();
+  }
+  function updateHUD(){ui.mission.textContent=`${missionIndex+1} / 5`;ui.story.textContent=['Family dinner','Guests arriving','Celebration meal','Extra guests','Grand family feast'][missionIndex];ui.time.textContent=`${Math.ceil(Math.max(0,timeLeft))}s`;ui.time.classList.toggle('warn',timeLeft<=8);ui.caught.textContent=`${caught} / ${target}`;ui.score.textContent=String(score);ui.missionScore.textContent=`This mission: ${score-missionStartScore} pts`;ui.arrows.textContent=`${arrowCount} / 5`;ui.reload.textContent=reloadLeft>0?`Reloading ${Math.ceil(reloadLeft)}s`:'Ready to shoot';}
+
+  function shoot(x,y){if(mode!=='playing'||arrowCount<=0||reloadLeft>0)return;const b=pondBounds();if(x<b.left||x>b.right||y<b.top||y>b.bottom)return;arrowCount--;const sx=W*.105,sy=H*.79;const dx=x-sx,dy=y-sy,dist=Math.hypot(dx,dy);const duration=Math.max(.25,Math.min(.75,dist/800));arrows.push({x:sx,y:sy,sx,sy,tx:x,ty:y,elapsed:0,duration,hit:false,trail:[]});if(arrowCount===0){reloadLeft=3}updateHUD();playTone(320,.035,'triangle')}
+  function update(dt){
+    if(mode!=='playing')return;
+    timeLeft=Math.max(0,timeLeft-dt);spawnLeft-=dt;
+    if(spawnLeft<=0){spawnPair();spawnLeft=2}
+    if(reloadLeft>0){reloadLeft=Math.max(0,reloadLeft-dt);if(reloadLeft===0)arrowCount=5}
+    const b=pondBounds();
+    for(const f of fish){
+      f.wiggle+=dt*3.2;f.turn-=dt;
+      if(f.turn<=0){const angle=Math.atan2(f.vy,f.vx)+random(-.55,.55);const speed=FISH[f.type].speed*random(.78,1.16);f.vx=Math.cos(angle)*speed;f.vy=Math.sin(angle)*speed;f.turn=random(.7,1.65)}
+      f.x+=f.vx*dt;f.y+=f.vy*dt;
+      if(f.x<f.r+b.left){f.x=f.r+b.left;f.vx=Math.abs(f.vx)}if(f.x>W-f.r-8){f.x=W-f.r-8;f.vx=-Math.abs(f.vx)}
+      if(f.y<f.r+b.top){f.y=f.r+b.top;f.vy=Math.abs(f.vy)}if(f.y>H-f.r-8){f.y=H-f.r-8;f.vy=-Math.abs(f.vy)}
+      f.x=Math.max(f.r+8,Math.min(W-f.r-8,f.x));f.y=Math.max(f.r+8,Math.min(H-f.r-8,f.y));
+    }
+    for(let i=arrows.length-1;i>=0;i--){const a=arrows[i];const px=a.x,py=a.y;a.elapsed+=dt;const t=Math.min(1,a.elapsed/a.duration);a.x=a.sx+(a.tx-a.sx)*t;a.y=a.sy+(a.ty-a.sy)*t;a.trail.push({x:a.x,y:a.y});if(a.trail.length>5)a.trail.shift();
+      let hitFish=null,best=Infinity;
+      for(const f of fish){if(!f.alive)continue;const d=pointSegmentDistance(f.x,f.y,px,py,a.x,a.y);if(d<f.r+4&&d<best){best=d;hitFish=f}}
+      if(hitFish){hitFish.alive=false;a.hit=true;const type=hitFish.type;effects.push({x:hitFish.x,y:hitFish.y,life:.75,max:.75,type,text:type==='dangerous'?'−5s':type==='bonus'?'+3 pts':'Caught!'});if(type==='dangerous'){timeLeft=Math.max(0,timeLeft-5);playTone(140,.18,'sawtooth')}else{caught++;score+=FISH[type].points;playTone(type==='bonus'?760:520,.07,'sine')}arrows.splice(i,1);if(timeLeft<=0){endMission(false);return}if(caught>=target){endMission(true);return}continue}
+      if(t>=1)arrows.splice(i,1);
+    }
+    fish=fish.filter(f=>f.alive);
+    for(let i=effects.length-1;i>=0;i--){effects[i].life-=dt;if(effects[i].life<=0)effects.splice(i,1)}
+    if(timeLeft<=0){timeLeft=0;endMission(false);return}updateHUD();
+  }
+  function pointSegmentDistance(px,py,x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1;if(!dx&&!dy)return Math.hypot(px-x1,py-y1);const t=Math.max(0,Math.min(1,((px-x1)*dx+(py-y1)*dy)/(dx*dx+dy*dy)));return Math.hypot(px-(x1+t*dx),py-(y1+t*dy))}
+  function loop(now){raf=0;if(mode!=='playing'){draw();return}const dt=Math.min(.04,Math.max(0,(now-lastTime)/1000||0));lastTime=now;update(dt);draw();if(mode==='playing')raf=requestAnimationFrame(loop)}
+
+  // Self-contained pond scenery: all artwork is drawn locally on the canvas.
+  function draw(){
+    ctx.clearRect(0,0,W,H);const grad=ctx.createLinearGradient(0,0,W,H);grad.addColorStop(0,'#85dec0');grad.addColorStop(.5,'#4eb9b1');grad.addColorStop(1,'#218b9a');ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+    // Soft underwater light bands
+    for(let i=0;i<6;i++){ctx.beginPath();ctx.moveTo((i*W/5)-50,0);ctx.lineTo((i*W/5)+70,0);ctx.lineTo((i*W/5)+W*.18,H);ctx.lineTo((i*W/5)+W*.02,H);ctx.closePath();ctx.fillStyle=`rgba(231,255,213,${.035+(i%2)*.02})`;ctx.fill()}
+    decorations.forEach((d,i)=>{ctx.save();ctx.globalAlpha=d.a;ctx.strokeStyle='#e4fff0';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(d.x,d.y,d.r*1.4,d.r*.45,Math.sin(d.phase)*.35,0,Math.PI*2);ctx.stroke();ctx.restore()});
+    // Pond bank accents
+    ctx.strokeStyle='#d3f4c7';ctx.lineWidth=5;ctx.beginPath();ctx.roundRect(4,4,W-8,H-8,15);ctx.stroke();ctx.strokeStyle='#1f8b83';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(11,11,W-22,H-22,12);ctx.stroke();
+    // Lily pads along edges
+    drawLily(W*.22,H*.13,.9);drawLily(W*.78,H*.87,.8);drawLily(W*.8,H*.19,.55);
+    // Bow stand and archer at lower-left, safely away from fish zone
+    drawBow(W*.105,H*.79);
+    fish.forEach(drawFish);arrows.forEach(drawArrow);effects.forEach(drawEffect);
+    if(mode==='briefing'||mode==='success'||mode==='lost'||mode==='victory'){ctx.fillStyle='#eaffef10';ctx.fillRect(0,0,W,H)}
+  }
+  function drawLily(x,y,s){ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.fillStyle='#237d69';ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,19,Math.PI*.13,Math.PI*1.88);ctx.lineTo(0,0);ctx.closePath();ctx.fill();ctx.strokeStyle='#7bd69d';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#f7d97a';ctx.beginPath();ctx.arc(3,-6,4,0,Math.PI*2);ctx.fill();ctx.restore()}
+  function drawBow(x,y){ctx.save();ctx.lineCap='round';ctx.strokeStyle='#8c4b2c';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(x+9,y-47);ctx.quadraticCurveTo(x+47,y,x+9,y+47);ctx.stroke();ctx.strokeStyle='#f8d79a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x+9,y-47);ctx.lineTo(x-4,y);ctx.lineTo(x+9,y+47);ctx.stroke();ctx.strokeStyle='#f9edc4';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x+9,y-47);ctx.lineTo(x+9,y+47);ctx.stroke();ctx.fillStyle='#f1ac51';ctx.beginPath();ctx.ellipse(x-7,y+34,14,8,-.5,0,Math.PI*2);ctx.fill();ctx.restore()}
+  function drawFish(f){
+    const spec=FISH[f.type],angle=Math.atan2(f.vy,f.vx);ctx.save();ctx.translate(f.x,f.y+Math.sin(f.wiggle)*1.5);ctx.rotate(angle);const r=f.r;
+    // Tail wiggles softly; fish are individually clickable targets.
+    const tailW=Math.sin(f.wiggle*2)*3;
+    ctx.fillStyle=spec.fin;ctx.beginPath();ctx.moveTo(-r*.63,0);ctx.lineTo(-r-7,-r*.65+tailW);ctx.lineTo(-r-7,r*.65+tailW);ctx.closePath();ctx.fill();
+    ctx.fillStyle=spec.color;ctx.beginPath();ctx.ellipse(0,0,r*1.02,r*.68,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=spec.fin;ctx.beginPath();ctx.moveTo(-r*.1,-r*.46);ctx.lineTo(r*.25,-r*.92);ctx.lineTo(r*.45,-r*.35);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(-r*.06,r*.4);ctx.lineTo(r*.25,r*.76);ctx.lineTo(r*.47,r*.35);ctx.closePath();ctx.fill();
+    // Type markings provide a distinction beyond color.
+    if(f.type==='fast'){ctx.strokeStyle='#147f9e';ctx.lineWidth=2.5;for(let k=0;k<2;k++){ctx.beginPath();ctx.moveTo(-r*.4+k*5,-r*.34);ctx.lineTo(-r*.05+k*5,r*.34);ctx.stroke()}}
+    if(f.type==='bonus'){ctx.fillStyle='#fff9ce';starPath(ctx,r*.05,0,r*.29,5);ctx.fill();ctx.strokeStyle='#d89c2c';ctx.lineWidth=1.2;ctx.stroke()}
+    if(f.type==='dangerous'){ctx.strokeStyle='#8f243e';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(-r*.27,-r*.3);ctx.lineTo(r*.25,r*.3);ctx.moveTo(r*.25,-r*.3);ctx.lineTo(-r*.27,r*.3);ctx.stroke();ctx.fillStyle='#fff1ed';ctx.beginPath();ctx.arc(r*.47,-r*.08,2.5,0,Math.PI*2);ctx.fill()}
+    ctx.fillStyle='#183f4b';ctx.beginPath();ctx.arc(r*.58,-r*.13,2.7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(r*.62,-r*.18,.9,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#194957';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(r*.7,r*.2);ctx.quadraticCurveTo(r*.83,r*.29,r*.92,r*.18);ctx.stroke();
+    if(f.type==='dangerous'){ctx.strokeStyle='#ffded8';ctx.lineWidth=2;for(let i=-1;i<=1;i++){ctx.beginPath();ctx.moveTo(-r*.28+i*6,-r*.5);ctx.lineTo(-r*.38+i*6,-r*.77);ctx.stroke()}}
+    ctx.restore();
+  }
+  function starPath(c,x,y,r,n){c.beginPath();for(let i=0;i<n*2;i++){const a=-Math.PI/2+i*Math.PI/n,rr=i%2===0?r:r*.43;const px=x+Math.cos(a)*rr,py=y+Math.sin(a)*rr;i?c.lineTo(px,py):c.moveTo(px,py)}c.closePath()}
+  function drawArrow(a){ctx.save();ctx.lineCap='round';for(let i=0;i<a.trail.length;i++){const p=a.trail[i];ctx.globalAlpha=(i+1)/a.trail.length*.22;ctx.fillStyle='#fff8b4';ctx.beginPath();ctx.arc(p.x,p.y,2+i*.4,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;const ang=Math.atan2(a.ty-a.sy,a.tx-a.sx);ctx.translate(a.x,a.y);ctx.rotate(ang);ctx.strokeStyle='#71452b';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-12,0);ctx.lineTo(9,0);ctx.stroke();ctx.fillStyle='#fff4c5';ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(6,-4);ctx.lineTo(7,4);ctx.closePath();ctx.fill();ctx.strokeStyle='#fff8e4';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-10,0);ctx.lineTo(-15,-4);ctx.moveTo(-10,0);ctx.lineTo(-15,4);ctx.stroke();ctx.restore()}
+  function drawEffect(e){const t=1-e.life/e.max;ctx.save();ctx.globalAlpha=Math.max(0,e.life/e.max);ctx.strokeStyle=e.type==='dangerous'?'#ff574e':e.type==='bonus'?'#fff6a1':'#f6fff1';ctx.lineWidth=3;ctx.beginPath();ctx.arc(e.x,e.y,7+t*23,0,Math.PI*2);ctx.stroke();ctx.fillStyle=e.type==='dangerous'?'#7e2438':'#fffbea';ctx.font='900 15px system-ui';ctx.textAlign='center';ctx.fillText(e.text,e.x,e.y-20-t*10);ctx.restore()}
+
+  function getPoint(evt){const rect=canvas.getBoundingClientRect();return {x:evt.clientX-rect.left,y:evt.clientY-rect.top}}
+  canvas.addEventListener('pointerdown',e=>{if(e.button!==undefined&&e.pointerType==='mouse'&&e.button!==0)return;e.preventDefault();const p=getPoint(e);shoot(p.x,p.y)});
+  pauseBtn.addEventListener('click',()=>{if(mode==='playing')showPause();else if(mode==='paused')resumeGame()});
+  soundBtn.addEventListener('click',()=>{muted=!muted;soundBtn.textContent=muted?'🔇 Sound':'🔊 Sound';soundBtn.setAttribute('aria-pressed',String(!muted))});
+  function playTone(freq,duration,wave){if(muted)return;try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;const ac=new AC(),o=ac.createOscillator(),g=ac.createGain();o.type=wave;o.frequency.value=freq;g.gain.setValueAtTime(.035,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+duration);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+duration);o.onended=()=>ac.close()}catch(_){}}
+  window.addEventListener('resize',fitCanvas);if('ResizeObserver'in window)new ResizeObserver(fitCanvas).observe(frame);
+  // A single animation loop is used only while play is active; reset/pause never adds another loop.
+  fitCanvas();newRun();
+})();
+</script>
+</body>
+</html>
