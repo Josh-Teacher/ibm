@@ -3,25 +3,25 @@
     "monday": {
       "name": "Monday Section 1",
       "strategies": [
-        {"file":"Catalyst F1 adaptive forgiver.py","name":"Catalyst"},
-        {"file":"Chanda & sishir F1 grim_trigger.py","name":"Chanda & Sishir"},
-        {"file":"Error404 F1 AdaptiveTrustShield.py","name":"Error 404"},
-        {"file":"GEN-Z F1 always_switch.py","name":"GEN-Z"},
-        {"file":"Pagal F1 Three strike Strategy .py","name":"Pagal"},
-        {"file":"SKY F1 Adaptive_Cooperation.py","name":"SKY"},
-        {"file":"Wij_and_Saba_F1_PavlovTrust.py","name":"Wij & Saba"},
-        {"file":"Tide Turners F1.py","name":"Tide Turners"}
+        {"file":"t1/MON_F1_catalyst.py","name":"Catalyst"},
+        {"file":"t1/MON_F1_Chanda_and_Sishir.py","name":"Chanda & Sishir"},
+        {"file":"t1/MON_F1_Error404.py","name":"Error 404"},
+        {"file":"t1/MON_F1_GEN-Z.py","name":"GEN-Z"},
+        {"file":"t1/MON_F1_Pagal.py","name":"Pagal"},
+        {"file":"t1/MON_F1_SKY.py","name":"SKY"},
+        {"file":"t1/MON_F1_TideTurners.py","name":"Tide Turners"},
+        {"file":"t1/MON_F1_wij_and_saba.py","name":"Wij & Saba"}
       ]
     },
     "wednesday": {
       "name": "Wednesday Section 2",
       "strategies": [
-        {"file":"WED Adham Savar F1 adaptive_trust.py","name":"Adham & Savar"},
-        {"file":"WED_butchers_F1_balanced_trust.py","name":"Butchers"},
-        {"file":"WED_Chains_F1_Resource-Aware Pattern_strategy.py","name":"Chains"},
-        {"file":"WED_Furious_F1_adaptive_galactic_strategy.py","name":"Furious"},
-        {"file":"WED_Ruth_and_Jemima_F1_la_strategie_de_ganar.py","name":"Ruth & Jemima"},
-        {"file":"WED_Ali_F1_AdaptiveReciprocity.py","name":"Ali & The Genie"}
+        {"file":"t1/.py","name":"Adham & Savar"},
+        {"file":"t1/.py","name":"Butchers"},
+        {"file":"t1/.py","name":"Chains"},
+        {"file":"t1/.py","name":"Furious"},
+        {"file":"t1/.py","name":"Ruth & Jemima"},
+        {"file":"t1/.py","name":"Ali & The Genie"}
       ]
     }
   }
