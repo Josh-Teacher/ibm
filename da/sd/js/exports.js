@@ -1,4 +1,4 @@
-import {VERSION,normalizeSettings,scoreRound,matchSeeds} from './rules.js';
+import {VERSION,LEGACY_VERSION,normalizeSettings,scoreRound,matchSeeds} from './rules.js';
 import {Tournament} from './tournament.js';
 function csvCell(value) {
   let text=String(value??'');if(typeof value==='string'&&/^[=+@\-\t\r]/.test(text))text="'"+text;
@@ -7,8 +7,8 @@ function csvCell(value) {
 export function csv(rows){return '\uFEFF'+rows.map(row=>row.map(csvCell).join(',')).join('\r\n')+'\r\n';}
 export function roundsCSV(tournament,partial=null){
   const s=tournament.settings;
-  const rows=[['rules_version','class_section','trial_match','master_seed','format','multiplier','history_limit','ending','continuation_percent','round_cap','match','repeat','match_status','credited','left_strategy','left_faction','left_sha256','right_strategy','right_faction','right_sha256','seed_left','seed_right','seed_ending','round','left_decision','right_decision','left_points','right_points','left_total','right_total','ended_by']];
-  for(const m of [...tournament.matches,...(partial&&!tournament.matches.includes(partial)?[partial]:[])])for(const r of m.rows)rows.push([VERSION,tournament.section.name,tournament.trial,s.seed,s.format,s.multiplier,s.historyLimit,s.ending,s.continuation,s.rounds,m.index,m.repeat,m.status,tournament.matches.includes(m),m.left.name,m.left.faction,m.left.hash,m.right.name,m.right.faction,m.right.hash,m.seeds.left,m.seeds.right,m.seeds.ending,r.round,r.left,r.right,r.pointsLeft,r.pointsRight,r.totalLeft,r.totalRight,m.endedBy]);
+  const rows=[['rules_version','class_section','trial_match','master_seed','format','multiplier','multiplier_mode','history_limit','ending','continuation_percent','round_cap','match','repeat','match_status','credited','left_strategy','left_faction','left_sha256','right_strategy','right_faction','right_sha256','seed_left','seed_right','seed_ending','round','left_decision','right_decision','left_points','right_points','left_total','right_total','ended_by']];
+  for(const m of [...tournament.matches,...(partial&&!tournament.matches.includes(partial)?[partial]:[])])for(const r of m.rows)rows.push([VERSION,tournament.section.name,tournament.trial,s.seed,s.format,s.multiplier,s.multiplierMode,s.historyLimit,s.ending,s.continuation,s.rounds,m.index,m.repeat,m.status,tournament.matches.includes(m),m.left.name,m.left.faction,m.left.hash,m.right.name,m.right.faction,m.right.hash,m.seeds.left,m.seeds.right,m.seeds.ending,r.round,r.left,r.right,r.pointsLeft,r.pointsRight,r.totalLeft,r.totalRight,m.endedBy]);
   return csv(rows);
 }
 export function standingsCSV(tournament){
@@ -17,7 +17,7 @@ export function standingsCSV(tournament){
   for(const t of standings.teams)rows.push([t.rank,t.name,t.faction,t.points,t.averageMatch,t.averageRound,t.matches,t.rounds,t.rounds?t.shares/t.rounds*100:0,t.wins,t.ties,tournament.settings.format==='survival'?(tournament.alive.has(t.id)?'surviving':'eliminated'):'no elimination']);
   rows.push([]);rows.push(['faction','total_points','strategies','strategy_rounds','average_per_round','share_percent']);
   for(const [f,t]of Object.entries(standings.factions))rows.push([f,t.points,t.strategies,t.rounds,t.rounds?t.points/t.rounds:0,t.rounds?t.shares/t.rounds*100:0]);
-  return csv(rows.map((row,i)=>i===0||row[0]==='faction'?['class_section',...row]:row.length?[tournament.section.name,...row]:row));
+  return csv(rows.map((row,i)=>i===0||row[0]==='faction'?['class_section','multiplier','multiplier_mode',...row]:row.length?[tournament.section.name,tournament.settings.multiplier,tournament.settings.multiplierMode,...row]:row));
 }
 const metadata=s=>({id:s.id,name:s.name,faction:s.faction,filename:s.filename,hash:s.hash,demo:Boolean(s.demo)});
 export function replayJSON(tournament,partial=null,labels={}){
@@ -27,7 +27,9 @@ export function replayJSON(tournament,partial=null,labels={}){
     matches:tournament.matches.map(match),partial:partial&&!tournament.matches.includes(partial)?match(partial):null},null,2);
 }
 export function parseReplay(text){
-  const data=JSON.parse(text);if(data.version!==VERSION)throw Error('This replay uses an unsupported rules version.');
+  const data=JSON.parse(text);if(![VERSION,LEGACY_VERSION].includes(data.version))throw Error('This replay uses an unsupported rules version.');
+  if(data.version===LEGACY_VERSION&&data.settings?.multiplierMode!==undefined&&data.settings.multiplierMode!=='kk')throw Error('Older replays support only the KK multiplier rule.');
+  if(data.version===VERSION&&!Object.hasOwn(data.settings??{},'multiplierMode'))throw Error('This replay is missing its multiplier application mode.');
   if(!Array.isArray(data.roster)||data.roster.length>1000||!Array.isArray(data.matches)||data.matches.length>5000)throw Error('Invalid replay roster or match list.');
   const roster=data.roster.map(s=>{
     if(!s||typeof s.id!=='string'||typeof s.name!=='string'||!['f1','f2'].includes(s.faction)||typeof s.hash!=='string'||!/^[0-9a-f]{64}$/i.test(s.hash))throw Error('Invalid strategy metadata.');
@@ -44,7 +46,7 @@ export function parseReplay(text){
     if(complete&&settings.ending==='probability'&&!['cap','probability'].includes(m.endedBy))throw Error('Invalid probabilistic ending record.');
     if(complete&&m.endedBy==='cap'&&m.rows.length!==settings.rounds)throw Error('A capped match must reach the round cap.');
     let previous=null;
-    const rows=m.rows.map((r,i)=>{const checked=scoreRound(r.left,r.right,settings.multiplier,previous,i+1);for(const key of ['round','pointsLeft','pointsRight','totalLeft','totalRight'])if(!Number.isFinite(r[key])||Math.abs(r[key]-checked[key])>1e-8)throw Error('A replay score does not match its decisions and payoff matrix.');previous=checked;return checked;});
+    const rows=m.rows.map((r,i)=>{const checked=scoreRound(r.left,r.right,settings.multiplier,previous,i+1,settings.multiplierMode);for(const key of ['round','pointsLeft','pointsRight','totalLeft','totalRight'])if(!Number.isFinite(r[key])||Math.abs(r[key]-checked[key])>1e-8)throw Error('A replay score does not match its decisions and payoff matrix.');previous=checked;return checked;});
     return {...m,left,right,rows,seeds:matchSeeds(settings,{...m,left,right})};
   };
   for(const input of data.matches){
