@@ -3,14 +3,14 @@
     "monday": {
       "name": "Monday Section 1",
       "strategies": [
-        {"file":"t2/MON_F2_Black_Crown.py","name":"Black Crown"},
-        {"file":"t2/MON_F2_Clever_Cats.py","name":"Clever Cats"},
-        {"file":"t2/MON_F2_Diana_and_Haru.py","name":"Diana & Haru"},
-        {"file":"t2/MON_F2_Ehsan_and_Abu.py","name":"Ehsan and Abu"},
-        {"file":"t2/MON_F2_Fighting.py","name":"Fighting"},
-        {"file":"t2/MON_F2_jobless.py","name":"Jobless"},
-        {"file":"t2/MON_F2_Shreya_and_Asmita.py","name":"Shreya and Asmita"},
-        {"file":"t2/MON_F2_UZB.py","name":"UZB"}
+        {"file":"MON_F2_T2_Black_Crown.py","name":"Black Crown"},
+        {"file":"MON_F2_T2_Clever_Cats.py","name":"Clever Cats"},
+        {"file":"MON_F2_T2_Diana_and_Haru.py","name":"Diana & Haru"},
+        {"file":"MON_F2_T2_Ehsan_and_Abu.py","name":"Ehsan and Abu"},
+        {"file":"MON_F2_T2_Fighting.py","name":"Fighting"},
+        {"file":"MON_F2_T2_jobless.py","name":"Jobless"},
+        {"file":"MON_F2_T2_Shreya_and_Asmita.py","name":"Shreya and Asmita"},
+        {"file":"MON_F2_T2_UZB.py","name":"UZB"}
       ]
     },
     "wednesday": {
