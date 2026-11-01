@@ -3,25 +3,25 @@
     "monday": {
       "name": "Monday Section 1",
       "strategies": [
-        {"file":"Black Crown F2 sneaky.py","name":"Black Crown"},
-        {"file":"claver_cat_F2_adaptive_trust.py","name":"Claver Cats"},
-        {"file":"Diana&Haru F2 pavlov.py","name":"Diana & Haru"},
-        {"file":"Ehsan and Abu F2 forgiving_trader.py","name":"Ehsan and Abu"},
-        {"file":"Fighting F2 Sleeper Agent.py","name":"Fighting"},
-        {"file":"Jobless F2 always_cooperate.py","name":"Jobless"},
-        {"file":"Shreya and Asmita F2 quadruply.py","name":"Shreya and Asmita"},
-        {"file":"UZB F2 RECIPROCAL.py","name":"UZB"}
+        {"file":"t2/MON_F2_Black_Crown.py","name":"Black Crown"},
+        {"file":"t2/MON_F2_Clever_Cats.py","name":"Clever Cats"},
+        {"file":"t2/MON_F2_Diana_and_Haru.py","name":"Diana & Haru"},
+        {"file":"t2/MON_F2_Ehsan_and_Abu.py","name":"Ehsan and Abu"},
+        {"file":"t2/MON_F2_Fighting.py","name":"Fighting"},
+        {"file":"t2/MON_F2_jobless.py","name":"Jobless"},
+        {"file":"t2/MON_F2_Shreya_and_Asmita.py","name":"Shreya and Asmita"},
+        {"file":"t2/MON_F2_UZB.py","name":"UZB"}
       ]
     },
     "wednesday": {
       "name": "Wednesday Section 2",
       "strategies": [
-        {"file":"WED_Bubak_F2 _ledger_watch_ strategy.py","name":"Bubak"},
-        {"file":"WED_Devon_and_Lahiru_F2_DoubleShare_DoubleKeep.py","name":"Devon & Lahiru"},
-        {"file":"WED_Diana&Haru_F2_pavlov.py","name":"Diana & Haru"},
-        {"file":"WED_Khan_and_Wisal_F2_prober_strategy.py","name":"Khan & Wisal"},
-        {"file":"WED_Pratima_and_Prashna_F2_steady_cooperation_strategy.py","name":"Pratima & Prashna"},
-        {"file":"WED_Rakib_and_Zia_F2_pulse_reciprocity_strategy.py","name":"Rakib & Zia"}
+        {"file":"t2/.py","name":"Bubak"},
+        {"file":"t2/.py","name":"Devon & Lahiru"},
+        {"file":"t2/.py","name":"Diana & Haru"},
+        {"file":"t2/.py","name":"Khan & Wisal"},
+        {"file":"t2/.py","name":"Pratima & Prashna"},
+        {"file":"t2/.py","name":"Rakib & Zia"}
       ]
     }
   }
