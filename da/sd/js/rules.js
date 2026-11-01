@@ -1,7 +1,4 @@
 export const VERSION = 'space-dilemma-tournament-v2';
-export const LEGACY_VERSION = 'space-dilemma-tournament-v1';
-// Keep the existing random streams when only the scoring policy changes.
-export const SEED_VERSION = LEGACY_VERSION;
 export const MULTIPLIER_MODES = {
   kk: 'KK only', ss: 'SS only', 'any-k': 'Any K · SK, KS, KK',
   'any-s': 'Any S · SS, SK, KS', full: 'Full payoff matrix'
@@ -55,7 +52,7 @@ export function scoreRound(left, right, multiplier, previous, round, mode = 'kk'
 // Versioned FNV-1a + Mulberry32 streams. Termination never consumes a strategy's RNG.
 export function seed32(...parts) {
   let h = 2166136261;
-  const serialized = JSON.stringify([SEED_VERSION, ...parts]);
+  const serialized = JSON.stringify([VERSION, ...parts]);
   for (let i=0;i<serialized.length;i++) { h ^= serialized.charCodeAt(i); h = Math.imul(h, 16777619); }
   return h >>> 0;
 }

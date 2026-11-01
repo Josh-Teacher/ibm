@@ -1,5 +1,5 @@
-import {VERSION,LEGACY_VERSION,normalizeSettings,scoreRound,matchSeeds} from './rules.js';
-import {Tournament} from './tournament.js';
+import {VERSION,normalizeSettings,scoreRound,matchSeeds} from './rules.js?v=1.3.1';
+import {Tournament} from './tournament.js?v=1.3.1';
 function csvCell(value) {
   let text=String(value??'');if(typeof value==='string'&&/^[=+@\-\t\r]/.test(text))text="'"+text;
   return '"'+text.replaceAll('"','""')+'"';
@@ -27,9 +27,8 @@ export function replayJSON(tournament,partial=null,labels={}){
     matches:tournament.matches.map(match),partial:partial&&!tournament.matches.includes(partial)?match(partial):null},null,2);
 }
 export function parseReplay(text){
-  const data=JSON.parse(text);if(![VERSION,LEGACY_VERSION].includes(data.version))throw Error('This replay uses an unsupported rules version.');
-  if(data.version===LEGACY_VERSION&&data.settings?.multiplierMode!==undefined&&data.settings.multiplierMode!=='kk')throw Error('Older replays support only the KK multiplier rule.');
-  if(data.version===VERSION&&!Object.hasOwn(data.settings??{},'multiplierMode'))throw Error('This replay is missing its multiplier application mode.');
+  const data=JSON.parse(text);if(data.version!==VERSION)throw Error('This replay uses an unsupported rules version.');
+  if(!Object.hasOwn(data.settings??{},'multiplierMode'))throw Error('This replay is missing its multiplier application mode.');
   if(!Array.isArray(data.roster)||data.roster.length>1000||!Array.isArray(data.matches)||data.matches.length>5000)throw Error('Invalid replay roster or match list.');
   const roster=data.roster.map(s=>{
     if(!s||typeof s.id!=='string'||typeof s.name!=='string'||!['f1','f2'].includes(s.faction)||typeof s.hash!=='string'||!/^[0-9a-f]{64}$/i.test(s.hash))throw Error('Invalid strategy metadata.');

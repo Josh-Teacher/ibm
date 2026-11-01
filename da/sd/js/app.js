@@ -1,10 +1,10 @@
-import {FORMAT_NAMES,normalizeSettings,expectedRounds,points,payoff,MULTIPLIER_MODES} from './rules.js';
-import {Tournament,aggregate,normalizeOrder} from './tournament.js';
-import {loadRoster,loadClassCatalog} from './roster.js';
-import {MatchEngine} from './engine.js';
-import {Playback} from './playback.js';
-import {roundsCSV,standingsCSV,replayJSON,parseReplay,download} from './exports.js';
-import {registerViewerTools} from './webmcp.js';
+import {FORMAT_NAMES,normalizeSettings,expectedRounds,points,payoff,MULTIPLIER_MODES} from './rules.js?v=1.3.1';
+import {Tournament,aggregate,normalizeOrder} from './tournament.js?v=1.3.1';
+import {loadRoster,loadClassCatalog} from './roster.js?v=1.3.1';
+import {MatchEngine} from './engine.js?v=1.3.1';
+import {Playback} from './playback.js?v=1.3.1';
+import {roundsCSV,standingsCSV,replayJSON,parseReplay,download} from './exports.js?v=1.3.1';
+import {registerViewerTools} from './webmcp.js?v=1.3.1';
 
 const $=id=>document.getElementById(id);
 const state={roster:[],classes:[],section:{id:'all',name:'All strategies'},order:{f2:[],f1:[]},settings:normalizeSettings({}),queue:[],tournament:null,current:null,prepared:null,active:false,computing:false,loading:false,fastForward:false,fastTask:null,matchTask:null,replaying:false,imported:false,epoch:0,autoTimer:null};

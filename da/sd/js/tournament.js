@@ -1,4 +1,4 @@
-import {normalizeSettings} from './rules.js';
+import {normalizeSettings} from './rules.js?v=1.3.1';
 
 const pair = (left, right, repeat, index) => ({ left, right, repeat, index });
 export function normalizeOrder(roster, input = {}) {
