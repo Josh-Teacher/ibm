@@ -16,12 +16,12 @@
     "wednesday": {
       "name": "Wednesday Section 2",
       "strategies": [
-        {"file":"t1/.py","name":"Adham & Savar"},
-        {"file":"t1/.py","name":"Butchers"},
-        {"file":"t1/.py","name":"Chains"},
-        {"file":"t1/.py","name":"Furious"},
-        {"file":"t1/.py","name":"Ruth & Jemima"},
-        {"file":"t1/.py","name":"Ali & The Genie"}
+        {"file":"WED Adham Savar F1 adaptive_trust.py","name":"Adham & Savar"},
+        {"file":"WED_butchers_F1_balanced_trust.py","name":"Butchers"},
+        {"file":"WED_Chains_F1_Resource-Aware Pattern_strategy.py","name":"Chains"},
+        {"file":"WED_Furious_F1_adaptive_galactic_strategy.py","name":"Furious"},
+        {"file":"WED_Ruth_and_Jemima_F1_la_strategie_de_ganar.py","name":"Ruth & Jemima"},
+        {"file":"WED_Ali_F1_AdaptiveReciprocity.py","name":"Ali & The Genie"}
       ]
     }
   }
