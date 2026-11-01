@@ -1,14 +1,22 @@
-export const VERSION = 'space-dilemma-tournament-v1';
+export const VERSION = 'space-dilemma-tournament-v2';
+export const LEGACY_VERSION = 'space-dilemma-tournament-v1';
+// Keep the existing random streams when only the scoring policy changes.
+export const SEED_VERSION = LEGACY_VERSION;
+export const MULTIPLIER_MODES = {
+  kk: 'KK only', ss: 'SS only', 'any-k': 'Any K · SK, KS, KK',
+  'any-s': 'Any S · SS, SK, KS', full: 'Full payoff matrix'
+};
 export const MAX_ROUNDS = 5000;
 export const FORMAT_NAMES = {
   t1: 'Tournament 1 · cross-faction', cross: 'Cross-faction round robin',
   full: 'Full round robin', survival: 'Winner stays · elimination', duels: 'Selected matches · no elimination'
 };
 export function normalizeSettings(input) {
-  const s = { format: 't1', rounds: 100, multiplier: 1, ending: 'fixed', continuation: 95,
+  const s = { format: 't1', rounds: 100, multiplier: 1, multiplierMode: 'kk', ending: 'fixed', continuation: 95,
     historyLimit: 0, repeats: 1, selfPlay: false, seed: 'tournament-1', ...input };
   if (!Object.hasOwn(FORMAT_NAMES, s.format)) throw Error('Choose a valid tournament format.');
-  if (s.format === 't1') Object.assign(s, { rounds: 100, multiplier: 1, ending: 'fixed', historyLimit: 0, repeats: 1, selfPlay: false });
+  if (!Object.hasOwn(MULTIPLIER_MODES, s.multiplierMode)) throw Error('Choose a valid resource multiplier application.');
+  if (s.format === 't1') Object.assign(s, { rounds: 100, multiplier: 1, multiplierMode: 'kk', ending: 'fixed', historyLimit: 0, repeats: 1, selfPlay: false });
   for (const [key, min, max] of [['rounds', 1, MAX_ROUNDS], ['historyLimit', 0, MAX_ROUNDS], ['repeats', 1, 20]]) {
     s[key] = Number(s[key]);
     if (!Number.isInteger(s[key]) || s[key] < min || s[key] > max) throw Error(`${key}: enter an integer from ${min} to ${max}.`);
@@ -27,15 +35,19 @@ export function expectedRounds(percent, cap) {
   if (!Number.isFinite(p) || p < 0 || p > 1 || !Number.isInteger(cap) || cap < 1) return null;
   return { uncapped: p === 1 ? Infinity : 1 / (1 - p), capped: p === 1 ? cap : -Math.expm1(cap * Math.log(p)) / (1 - p) };
 }
-export function payoff(left, right, multiplier) {
+export function payoff(left, right, multiplier, mode = 'kk') {
   if (!['S','K'].includes(left) || !['S','K'].includes(right)) throw Error('Decisions must be S or K.');
-  if (left === 'S' && right === 'S') return [3,3];
-  if (left === 'S') return [1,5];
-  if (right === 'S') return [5,1];
-  return [2 * multiplier, 2 * multiplier];
+  if (!Object.hasOwn(MULTIPLIER_MODES, mode)) throw Error('Choose a valid resource multiplier application.');
+  if (!Number.isFinite(multiplier) || multiplier < .5 || multiplier > 1.5) throw Error('Multiplier must be 0.5–1.5.');
+  const pair = left + right;
+  const selected = mode === 'full' || mode === 'kk' && pair === 'KK' || mode === 'ss' && pair === 'SS'
+    || mode === 'any-k' && pair.includes('K') || mode === 'any-s' && pair.includes('S');
+  const factor = selected ? multiplier : 1;
+  const base = pair === 'SS' ? [3,3] : pair === 'SK' ? [1,5] : pair === 'KS' ? [5,1] : [2,2];
+  return base.map(value => value * factor);
 }
-export function scoreRound(left, right, multiplier, previous, round) {
-  const [pointsLeft, pointsRight] = payoff(left, right, multiplier);
+export function scoreRound(left, right, multiplier, previous, round, mode = 'kk') {
+  const [pointsLeft, pointsRight] = payoff(left, right, multiplier, mode);
   return { round, left, right, pointsLeft, pointsRight,
     totalLeft: (previous?.totalLeft ?? 0) + pointsLeft,
     totalRight: (previous?.totalRight ?? 0) + pointsRight };
@@ -43,7 +55,7 @@ export function scoreRound(left, right, multiplier, previous, round) {
 // Versioned FNV-1a + Mulberry32 streams. Termination never consumes a strategy's RNG.
 export function seed32(...parts) {
   let h = 2166136261;
-  const serialized = JSON.stringify([VERSION, ...parts]);
+  const serialized = JSON.stringify([SEED_VERSION, ...parts]);
   for (let i=0;i<serialized.length;i++) { h ^= serialized.charCodeAt(i); h = Math.imul(h, 16777619); }
   return h >>> 0;
 }
