@@ -1,8 +1,8 @@
-import {scoreRound,matchSeeds,randomStream} from './rules.js?v=1.3.1';
+import {scoreRound,matchSeeds,randomStream} from './rules.js?v=1.3.2';
 export class PythonClient {
   constructor(label,onStage = ()=>{}) {
     this.label=label; this.pending=new Map(); this.counter=0; this.closed=false;
-    this.worker=new Worker(new URL('./worker.js?v=1.3.1',import.meta.url));
+    this.worker=new Worker(new URL('./worker.js?v=1.3.2',import.meta.url));
     this.ready=new Promise((resolve,reject)=>{this.resolveReady=resolve;this.rejectReady=reject;});
     this.ready.catch(()=>{});
     this.loadTimer=setTimeout(()=>this.stop('Runtime loading timed out after 60 seconds. Check your connection and retry.'),60000);

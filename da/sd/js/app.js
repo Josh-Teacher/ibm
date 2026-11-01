@@ -1,10 +1,10 @@
-import {FORMAT_NAMES,normalizeSettings,expectedRounds,points,payoff,MULTIPLIER_MODES} from './rules.js?v=1.3.1';
-import {Tournament,aggregate,normalizeOrder} from './tournament.js?v=1.3.1';
-import {loadRoster,loadClassCatalog} from './roster.js?v=1.3.1';
-import {MatchEngine} from './engine.js?v=1.3.1';
-import {Playback} from './playback.js?v=1.3.1';
-import {roundsCSV,standingsCSV,replayJSON,parseReplay,download} from './exports.js?v=1.3.1';
-import {registerViewerTools} from './webmcp.js?v=1.3.1';
+import {FORMAT_NAMES,normalizeSettings,expectedRounds,points,payoff,MULTIPLIER_MODES} from './rules.js?v=1.3.2';
+import {Tournament,aggregate,normalizeOrder} from './tournament.js?v=1.3.2';
+import {loadRoster,loadClassCatalog} from './roster.js?v=1.3.2';
+import {MatchEngine} from './engine.js?v=1.3.2';
+import {Playback} from './playback.js?v=1.3.2';
+import {roundsCSV,standingsCSV,replayJSON,parseReplay,download} from './exports.js?v=1.3.2';
+import {registerViewerTools} from './webmcp.js?v=1.3.2';
 
 const $=id=>document.getElementById(id);
 const state={roster:[],classes:[],section:{id:'all',name:'All strategies'},order:{f2:[],f1:[]},settings:normalizeSettings({}),queue:[],tournament:null,current:null,prepared:null,active:false,computing:false,loading:false,fastForward:false,fastTask:null,matchTask:null,replaying:false,imported:false,epoch:0,autoTimer:null};
@@ -25,7 +25,7 @@ function applyPresentation(){const names=labels();for(const f of ['f1','f2'])$(`
 function inputSettings(){return normalizeSettings({format:$('format').value,rounds:$('rounds').value,multiplier:$('multiplier').value,multiplierMode:$('multiplier-mode').value,ending:$('ending').value,continuation:$('continuation').value,historyLimit:$('history-limit').value,repeats:$('repeats').value,selfPlay:$('self-play').checked,seed:$('seed').value});}
 function putSettings(s){for(const [id,key]of [['format','format'],['rounds','rounds'],['multiplier','multiplier'],['multiplier-mode','multiplierMode'],['ending','ending'],['continuation','continuation'],['history-limit','historyLimit'],['repeats','repeats'],['seed','seed']])$(id).value=s[key];$('self-play').checked=s.selfPlay;updateSettingsFields();}
 function renderPayoffMatrix(target,multiplier,mode){
-  const valid=Number.isFinite(multiplier)&&multiplier>=.5&&multiplier<=1.5&&Object.hasOwn(MULTIPLIER_MODES,mode);
+  const valid=Number.isFinite(multiplier)&&multiplier>=0&&multiplier<=2&&Object.hasOwn(MULTIPLIER_MODES,mode);
   for(const pair of ['SS','SK','KS','KK']){
     const id=target==='preview'?`${pair.toLowerCase()}-preview`:pair==='KK'?'reveal-pair':`reveal-${pair.toLowerCase()}`;
     $(id).textContent=valid?payoff(pair[0],pair[1],multiplier,mode).map(points).join(' / '):'— / —';
@@ -40,8 +40,8 @@ function updateSettingsFields(){
   $('self-play-label').hidden=format!=='full';$('queue-settings').hidden=format!=='duels';$('order-settings').hidden=format!=='survival';$('format-help').textContent=descriptions[format];
   const mean=expectedRounds(Number($('continuation').value),Number($('rounds').value));
   $('expected-rounds').textContent=mean?`Expected length: ${Number.isFinite(mean.uncapped)?points(mean.uncapped)+' rounds without a cap':'unlimited without a cap'}. With your ${$('rounds').value}-round cap: ${points(mean.capped)} rounds on average. Every match plays at least one round.`:'Enter a valid continuation percentage and round cap.';
-  renderPayoffMatrix('preview',Number($('multiplier').value),$('multiplier-mode').value);
-  $('multiplier-help').textContent=locked?'Tournament 1 fixes RM at 1.0. Select a custom format to choose its value and application.':'Both strategies’ payoffs are multiplied for each selected decision pair. The rule and full matrix are revealed on launch.';
+  renderPayoffMatrix('preview',$('multiplier').value===''?NaN:Number($('multiplier').value),$('multiplier-mode').value);
+  $('multiplier-help').textContent=locked?'Tournament 1 fixes RM at 1.0. Select a custom format to choose its value and application.':'Any S multiplies only the Share payoff; Any K multiplies only the Keep payoff. KK, SS and Full matrix apply to both payoffs in their selected pairs. The matrix is revealed on launch.';
 }
 function updateRuleTags(revealed=Boolean(state.tournament)){
   const s=state.tournament?.settings??state.settings;

@@ -1,4 +1,4 @@
-import {points} from './rules.js?v=1.3.1';
+import {points} from './rules.js?v=1.3.2';
 const $ = id => document.getElementById(id);
 function seatClass(el,faction) { el.classList.remove('faction-f1','faction-f2'); el.classList.add(`faction-${faction}`); }
 export class Playback {

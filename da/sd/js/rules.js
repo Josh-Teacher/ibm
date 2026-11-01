@@ -1,7 +1,7 @@
 export const VERSION = 'space-dilemma-tournament-v2';
 export const MULTIPLIER_MODES = {
-  kk: 'KK only', ss: 'SS only', 'any-k': 'Any K · SK, KS, KK',
-  'any-s': 'Any S · SS, SK, KS', full: 'Full payoff matrix'
+  kk: 'KK only', ss: 'SS only', 'any-k': 'Any K · Keep payoff only',
+  'any-s': 'Any S · Share payoff only', full: 'Full payoff matrix'
 };
 export const MAX_ROUNDS = 5000;
 export const FORMAT_NAMES = {
@@ -18,8 +18,9 @@ export function normalizeSettings(input) {
     s[key] = Number(s[key]);
     if (!Number.isInteger(s[key]) || s[key] < min || s[key] > max) throw Error(`${key}: enter an integer from ${min} to ${max}.`);
   }
+  if (typeof s.multiplier !== 'number' && (typeof s.multiplier !== 'string' || !s.multiplier.trim())) throw Error('Multiplier must be 0–2.');
   s.multiplier = Number(s.multiplier); s.continuation = Number(s.continuation);
-  if (!Number.isFinite(s.multiplier) || s.multiplier < .5 || s.multiplier > 1.5) throw Error('Multiplier must be 0.5–1.5.');
+  if (!Number.isFinite(s.multiplier) || s.multiplier < 0 || s.multiplier > 2) throw Error('Multiplier must be 0–2.');
   if (!['fixed', 'probability'].includes(s.ending)) throw Error('Choose a valid round ending rule.');
   if (!Number.isFinite(s.continuation) || s.continuation < 0 || s.continuation > 100) throw Error('Continuation must be 0–100%.');
   s.seed = String(s.seed).trim(); if (!s.seed || s.seed.length > 120) throw Error('Enter a seed of 1–120 characters.');
@@ -35,13 +36,15 @@ export function expectedRounds(percent, cap) {
 export function payoff(left, right, multiplier, mode = 'kk') {
   if (!['S','K'].includes(left) || !['S','K'].includes(right)) throw Error('Decisions must be S or K.');
   if (!Object.hasOwn(MULTIPLIER_MODES, mode)) throw Error('Choose a valid resource multiplier application.');
-  if (!Number.isFinite(multiplier) || multiplier < .5 || multiplier > 1.5) throw Error('Multiplier must be 0.5–1.5.');
+  if (!Number.isFinite(multiplier) || multiplier < 0 || multiplier > 2) throw Error('Multiplier must be 0–2.');
   const pair = left + right;
-  const selected = mode === 'full' || mode === 'kk' && pair === 'KK' || mode === 'ss' && pair === 'SS'
-    || mode === 'any-k' && pair.includes('K') || mode === 'any-s' && pair.includes('S');
-  const factor = selected ? multiplier : 1;
+  const multiplyBoth = mode === 'full' || mode === 'kk' && pair === 'KK' || mode === 'ss' && pair === 'SS';
   const base = pair === 'SS' ? [3,3] : pair === 'SK' ? [1,5] : pair === 'KS' ? [5,1] : [2,2];
-  return base.map(value => value * factor);
+  return base.map((value,index) => {
+    const decision = index === 0 ? left : right;
+    const selected = multiplyBoth || mode === 'any-k' && decision === 'K' || mode === 'any-s' && decision === 'S';
+    return selected ? value * multiplier : value;
+  });
 }
 export function scoreRound(left, right, multiplier, previous, round, mode = 'kk') {
   const [pointsLeft, pointsRight] = payoff(left, right, multiplier, mode);

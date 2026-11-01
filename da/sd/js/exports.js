@@ -1,5 +1,5 @@
-import {VERSION,normalizeSettings,scoreRound,matchSeeds} from './rules.js?v=1.3.1';
-import {Tournament} from './tournament.js?v=1.3.1';
+import {VERSION,normalizeSettings,scoreRound,matchSeeds} from './rules.js?v=1.3.2';
+import {Tournament} from './tournament.js?v=1.3.2';
 function csvCell(value) {
   let text=String(value??'');if(typeof value==='string'&&/^[=+@\-\t\r]/.test(text))text="'"+text;
   return '"'+text.replaceAll('"','""')+'"';
