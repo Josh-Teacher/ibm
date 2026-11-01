@@ -1,4 +1,4 @@
-import {FORMAT_NAMES,normalizeSettings,expectedRounds,points} from './rules.js';
+import {FORMAT_NAMES,normalizeSettings,expectedRounds,points,payoff,MULTIPLIER_MODES} from './rules.js';
 import {Tournament,aggregate,normalizeOrder} from './tournament.js';
 import {loadRoster,loadClassCatalog} from './roster.js';
 import {MatchEngine} from './engine.js';
@@ -22,18 +22,26 @@ function applyTheme(theme){
   try{window.localStorage.setItem('space-dilemma-theme',document.body.dataset.theme);}catch{}
 }
 function applyPresentation(){const names=labels();for(const f of ['f1','f2'])$(`${f}-title`).textContent=names[f];if(playback.match)for(const side of ['left','right']){const name=names[playback.match[side].faction].toUpperCase();$(`${side}-faction`).textContent=name;$(`cell-${side}`).querySelector('.cell-kicker').textContent=name;}document.body.dataset.profile=$('profile').value;applyTheme($('theme').value);const gentle=$('reduce-motion').checked;document.body.classList.toggle('gentle',gentle);playback.setGentle(gentle);}
-function inputSettings(){return normalizeSettings({format:$('format').value,rounds:$('rounds').value,multiplier:$('multiplier').value,ending:$('ending').value,continuation:$('continuation').value,historyLimit:$('history-limit').value,repeats:$('repeats').value,selfPlay:$('self-play').checked,seed:$('seed').value});}
-function putSettings(s){for(const [id,key]of [['format','format'],['rounds','rounds'],['multiplier','multiplier'],['ending','ending'],['continuation','continuation'],['history-limit','historyLimit'],['repeats','repeats'],['seed','seed']])$(id).value=s[key];$('self-play').checked=s.selfPlay;updateSettingsFields();}
+function inputSettings(){return normalizeSettings({format:$('format').value,rounds:$('rounds').value,multiplier:$('multiplier').value,multiplierMode:$('multiplier-mode').value,ending:$('ending').value,continuation:$('continuation').value,historyLimit:$('history-limit').value,repeats:$('repeats').value,selfPlay:$('self-play').checked,seed:$('seed').value});}
+function putSettings(s){for(const [id,key]of [['format','format'],['rounds','rounds'],['multiplier','multiplier'],['multiplier-mode','multiplierMode'],['ending','ending'],['continuation','continuation'],['history-limit','historyLimit'],['repeats','repeats'],['seed','seed']])$(id).value=s[key];$('self-play').checked=s.selfPlay;updateSettingsFields();}
+function renderPayoffMatrix(target,multiplier,mode){
+  const valid=Number.isFinite(multiplier)&&multiplier>=.5&&multiplier<=1.5&&Object.hasOwn(MULTIPLIER_MODES,mode);
+  for(const pair of ['SS','SK','KS','KK']){
+    const id=target==='preview'?`${pair.toLowerCase()}-preview`:pair==='KK'?'reveal-pair':`reveal-${pair.toLowerCase()}`;
+    $(id).textContent=valid?payoff(pair[0],pair[1],multiplier,mode).map(points).join(' / '):'— / —';
+  }
+}
 function updateSettingsFields(){
   const format=$('format').value,locked=format==='t1';
-  if(locked){$('rounds').value=100;$('multiplier').value=1;$('ending').value='fixed';$('history-limit').value=0;$('repeats').value=1;$('self-play').checked=false;}
-  for(const id of ['rounds','multiplier','ending','history-limit','repeats'])$(id).disabled=locked||(id==='repeats'&&format==='survival');
+  if(locked){$('rounds').value=100;$('multiplier').value=1;$('multiplier-mode').value='kk';$('ending').value='fixed';$('history-limit').value=0;$('repeats').value=1;$('self-play').checked=false;}
+  for(const id of ['rounds','multiplier','multiplier-mode','ending','history-limit','repeats'])$(id).disabled=locked||(id==='repeats'&&format==='survival');
   if(format==='survival')$('repeats').value=1;
   const probabilistic=$('ending').value==='probability';$('continuation-label').hidden=!probabilistic;$('expected-rounds').hidden=!probabilistic;$('rounds-label').textContent=probabilistic?'Maximum rounds (hard cap)':'Rounds per match';
   $('self-play-label').hidden=format!=='full';$('queue-settings').hidden=format!=='duels';$('order-settings').hidden=format!=='survival';$('format-help').textContent=descriptions[format];
   const mean=expectedRounds(Number($('continuation').value),Number($('rounds').value));
   $('expected-rounds').textContent=mean?`Expected length: ${Number.isFinite(mean.uncapped)?points(mean.uncapped)+' rounds without a cap':'unlimited without a cap'}. With your ${$('rounds').value}-round cap: ${points(mean.capped)} rounds on average. Every match plays at least one round.`:'Enter a valid continuation percentage and round cap.';
-  const kk=2*Number($('multiplier').value);$('kk-preview').textContent=`${points(kk)} / ${points(kk)}`;
+  renderPayoffMatrix('preview',Number($('multiplier').value),$('multiplier-mode').value);
+  $('multiplier-help').textContent=locked?'Tournament 1 fixes RM at 1.0. Select a custom format to choose its value and application.':'Both strategies’ payoffs are multiplied for each selected decision pair. The rule and full matrix are revealed on launch.';
 }
 function updateRuleTags(revealed=Boolean(state.tournament)){
   const s=state.tournament?.settings??state.settings;
@@ -41,7 +49,7 @@ function updateRuleTags(revealed=Boolean(state.tournament)){
   $('section-tag').textContent=(state.tournament?.section??state.section).name.toUpperCase();
   $('format-tag').textContent=s.format==='t1'||s.format==='cross'?'CROSS-FACTION':s.format==='full'?'FULL ROUND ROBIN':s.format==='survival'?'WINNER STAYS':'SELECTED MATCHES';
   $('round-tag').textContent=s.ending==='fixed'?`${s.rounds} ROUNDS`:`${s.continuation}% CONTINUE · CAP ${s.rounds}`;
-  $('multiplier-tag').textContent=revealed?`MULTIPLIER · ${points(s.multiplier)}×`:'MULTIPLIER · SEALED';$('seed-footer').textContent=`SEED · ${s.seed}`;
+  $('multiplier-tag').textContent=revealed?`RM · ${points(s.multiplier)}× · ${MULTIPLIER_MODES[s.multiplierMode].toUpperCase()}`:'MULTIPLIER · SEALED';$('seed-footer').textContent=`SEED · ${s.seed}`;
 }
 function setControls(){
   const busy=state.active||state.computing||state.loading;
@@ -158,7 +166,7 @@ function renderMap(){
 function renderAll(){applyPresentation();renderOrder();renderRosters();renderStandings();renderPairing();renderQueue();renderMap();setControls();}
 
 function stageTournament(){
-  try{if(state.imported)throw Error('Load your faction folders before starting a new tournament.');state.settings=inputSettings();state.prepared=new Tournament(state.roster,state.settings,state.queue,state.order);state.prepared.section={...state.section};$('reveal-value').textContent=Number(state.settings.multiplier).toFixed(2)+'×';$('reveal-kk').textContent=points(2*state.settings.multiplier);$('reveal-pair').textContent=`${points(2*state.settings.multiplier)} / ${points(2*state.settings.multiplier)}`;openDialog($('reveal-dialog'));}
+  try{if(state.imported)throw Error('Load your faction folders before starting a new tournament.');state.settings=inputSettings();state.prepared=new Tournament(state.roster,state.settings,state.queue,state.order);state.prepared.section={...state.section};$('reveal-value').textContent=Number(state.settings.multiplier).toFixed(2)+'×';$('reveal-mode').textContent=MULTIPLIER_MODES[state.settings.multiplierMode];renderPayoffMatrix('reveal',state.settings.multiplier,state.settings.multiplierMode);openDialog($('reveal-dialog'));}
   catch(error){say(error.message,'error');$('settings-message').textContent=error.message;openDialog($('settings-dialog'));}
 }
 async function launchTournament(){
@@ -234,7 +242,7 @@ function stopTournament(){state.active=false;state.fastForward=false;clearTimeou
 
 $('open-settings').onclick=()=>{setControls();openDialog($('settings-dialog'));};$('close-settings').onclick=()=>closeDialog($('settings-dialog'));
 $('settings-form').onsubmit=event=>{event.preventDefault();try{applyPresentation();if(!state.active&&!state.computing&&!state.imported){const next=inputSettings();if(JSON.stringify(next)!==JSON.stringify(state.settings)){state.settings=next;resetCompetition();}updateRuleTags();}renderAll();closeDialog($('settings-dialog'));$('settings-message').textContent='';}catch(error){$('settings-message').textContent=error.message;}};
-for(const id of ['format','ending','multiplier','rounds','continuation'])$(id).addEventListener('input',updateSettingsFields);
+for(const id of ['format','ending','multiplier','multiplier-mode','rounds','continuation'])$(id).addEventListener('input',updateSettingsFields);
 $('format').addEventListener('input',()=>{if($('format').value==='survival')$('auto-next').checked=false;});
 $('reload-roster').onclick=()=>fetchRoster(false);$('demo-roster').onclick=()=>fetchRoster(true);
 $('theme-toggle').onclick=()=>applyTheme(document.body.dataset.theme==='light'?'dark':'light');$('theme').onchange=()=>applyTheme($('theme').value);
