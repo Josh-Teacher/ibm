@@ -42,7 +42,7 @@ export class MatchEngine {
         if(this.cancelled)throw Error('Stopped by instructor.');
         const last=result.rows.at(-1);
         const [left,right]=await Promise.all(this.clients.map((c,i)=>c.call({type:'decide',round,previous:last?(i?[last.right,last.left]:[last.left,last.right]):null})));
-        result.rows.push(scoreRound(left,right,settings.multiplier,last,round));
+        result.rows.push(scoreRound(left,right,settings.multiplier,last,round,settings.multiplierMode));
         if(round%10===0||round===1)onProgress(round,settings.rounds);
         if(settings.ending==='probability'&&rng()>=settings.continuation/100){result.endedBy='probability';break;}
       }
