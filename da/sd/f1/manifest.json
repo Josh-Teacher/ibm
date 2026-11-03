@@ -16,7 +16,7 @@
     "wednesday": {
       "name": "Wednesday Section 2",
       "strategies": [
-        {"file":"WED_F1_T2_Adham_and_Sarvar.py","name":"Adham & Savar"},
+        {"file":"WED_F1_T2_Sarvar_and_Adham.py","name":"Adham & Savar"},
         {"file":"WED_F1_T2_Butchers.py","name":"Butchers"},
         {"file":"WED_F1_T2_Chains.py","name":"Chains"},
         {"file":"WED_F1_T2_Furious.py","name":"Furious"},
