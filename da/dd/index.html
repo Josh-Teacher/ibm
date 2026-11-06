@@ -416,8 +416,7 @@ function createDataDetectivesConnection(config) {
       channel = randomId();
     } catch (_) { return Promise.reject(connectionError('CONFIGURATION', 'Terminal connection is not configured. Please contact your instructor.')); }
     const frame = document.createElement('iframe');
-    if (new URLSearchParams(window.location.search).get('isolated') === '1') {
-      frame.setAttribute('credentialless', '');
+    frame.setAttribute('credentialless', '');
     }
     frame.hidden = true;
     frame.title = 'Data Detectives server connection';
