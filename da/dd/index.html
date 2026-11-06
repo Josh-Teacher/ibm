@@ -417,7 +417,6 @@ function createDataDetectivesConnection(config) {
     } catch (_) { return Promise.reject(connectionError('CONFIGURATION', 'Terminal connection is not configured. Please contact your instructor.')); }
     const frame = document.createElement('iframe');
     frame.setAttribute('credentialless', '');
-    }
     frame.hidden = true;
     frame.title = 'Data Detectives server connection';
     frame.tabIndex = -1;
